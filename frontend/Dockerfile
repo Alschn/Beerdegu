@@ -11,6 +11,7 @@ RUN apk add --no-cache --virtual .gyp \
         python \
         make \
         g++ \
+        bash \
     && npm install \
     && apk del .gyp
 
