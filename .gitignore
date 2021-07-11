@@ -132,3 +132,4 @@ yarn-error.log*
 .idea
 
 postgres-data
+redis-data

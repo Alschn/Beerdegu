@@ -22,3 +22,12 @@ DATABASES = {
         'PORT': 5432
     }
 }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis_db', 6379)],  # redis_db = service's name
+        },
+    },
+}
