@@ -17,12 +17,12 @@ const Room: FC = () => {
     readyState,
   } = useWebSocket(socketUrl, {
     onOpen: () => console.log('Websocket open'),
-    shouldReconnect: (closeEvent) => false,
+    shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
-      const parsed: WebsocketMessage = JSON.parse(event.data)
+      const parsed: WebsocketMessage = JSON.parse(event.data);
       switch (parsed.command) {
         case 'set_new_message':
-          setMessages(prevState => [...prevState, parsed.data])
+          setMessages(prevState => [...prevState, parsed.data]);
           break;
         default:
           break;

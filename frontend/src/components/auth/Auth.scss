@@ -1,0 +1,22 @@
+.auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  
+  .auth-icon {
+    margin: 8px;
+  }
+
+  .auth-alert {
+
+  }
+
+  .auth-form {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .auth-button {
+    margin: 24px 0 16px;
+  }
+}
