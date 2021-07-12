@@ -23,17 +23,18 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)  # parsed object
+        command = data.get('command')
 
-        print(f"Received:\n{data}")
+        print(f"Received:\n{data}\nFrom: {self.scope.get('user')}")
 
-        if not data.get('command'):
+        if not command:
             return
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                'type': self.commands.get(data.command, 'invalid_command'),
-                'message': data.message,
+                'type': self.commands.get(command, 'invalid_command'),
+                'message': data.get('message'),
             }
         )
 
