@@ -28,6 +28,9 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1"]
 
 # Application definition
 INSTALLED_APPS = [
+    # django channels
+    'channels',
+    # django packages
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,9 +43,17 @@ INSTALLED_APPS = [
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
+    # auth
+    'dj_rest_auth',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
     # apps
     'api',
     'users',
+    'rooms',
+    'beers',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +86,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

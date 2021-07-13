@@ -13,6 +13,8 @@ services:
       - db
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.dev
+    links:
+      - redis_db
 
   frontend:
     build: ./frontend
@@ -33,3 +35,11 @@ services:
     restart: always
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+
+  redis_db:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - ./redis-data:/data
+    ports:
+    - "6379:6379"

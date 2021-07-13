@@ -12,6 +12,7 @@ RUN  \
     apk add --no-cache bash && \
     apk add --no-cache postgresql-libs && \
     apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
+    apk add --no-cache libressl-dev musl-dev libffi-dev cargo && \
     pip3 install --upgrade pip -r requirements.txt && \
     apk --purge del .build-deps
 
