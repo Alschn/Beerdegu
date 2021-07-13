@@ -11,6 +11,10 @@ class Beer(models.Model):
     description = models.TextField(max_length=1000, null=True, blank=True)
     hops = models.ManyToManyField('Hop', blank=True)
 
+    def __str__(self) -> str:
+        return f"{self.name} {self.percentage}% {self.volume_ml}ml" \
+               + f", {self.brewery}" if self.brewery else ""
+
 
 class Brewery(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -22,13 +26,22 @@ class Brewery(models.Model):
     class Meta:
         verbose_name_plural = 'Breweries'
 
+    def __str__(self) -> str:
+        return f"Browar {self.name}"
+
 
 class BeerStyle(models.Model):
     name = models.CharField(max_length=60)
     description = models.TextField(max_length=1000, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
 
 
 class Hop(models.Model):
     name = models.CharField(max_length=30)
     description = models.TextField(max_length=1000, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
