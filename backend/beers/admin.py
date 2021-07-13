@@ -1,3 +1,4 @@
 from django.contrib import admin
+from .models import Beer, BeerStyle, Brewery, Hop
 
-# Register your models here.
+admin.site.register([Beer, BeerStyle, Brewery, Hop])
