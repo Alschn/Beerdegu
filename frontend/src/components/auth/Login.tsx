@@ -6,8 +6,11 @@ import TextField from "@material-ui/core/TextField";
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import "./Auth.scss";
 import {onLogin} from "../../api/auth";
+import {useHistory} from "react-router";
 
 const Login: FC = () => {
+  const history = useHistory();
+
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -19,6 +22,7 @@ const Login: FC = () => {
     }).then(({data}) => {
       const {key} = data;
       localStorage.setItem('token', key);
+      history.push("/");
     }).catch(err => console.log(err));
   };
 

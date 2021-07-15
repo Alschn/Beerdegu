@@ -12,6 +12,7 @@ import "./Auth.scss";
 import {Collapse} from '@material-ui/core';
 import {Alert} from '@material-ui/lab';
 import {onRegister} from "../../api/auth";
+import {useHistory} from "react-router";
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,25 +20,14 @@ const validateEmail = (email: string): boolean => {
 };
 
 const Register: FC = () => {
+  const history = useHistory();
+
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password1, setPassword1] = useState<string>("");
   const [password2, setPassword2] = useState<string>("");
 
   const [errorMessage, setErrorMessage] = useState<string>("");
-
-  const [btnDisabled, setBtnDisabled] = useState<boolean>(true);
-
-  const isFormFilled = useCallback(() => {
-    return username.length !== 0
-      && validateEmail(email)
-      && password1.length !== 0
-      && password1 === password2;
-  }, [username, password1, password2, email])
-
-  useEffect(() => {
-    isFormFilled() && setBtnDisabled(false);
-  }, [isFormFilled])
 
   const handleSubmit = (e: React.BaseSyntheticEvent): void => {
     e.preventDefault();
@@ -46,8 +36,8 @@ const Register: FC = () => {
       email: email,
       password1: password1,
       password2: password2,
-    }).then(res => {
-      console.log(res);
+    }).then(() => {
+      history.push("/login");
     }).catch(err => console.log(err))
   }
 
@@ -149,7 +139,6 @@ const Register: FC = () => {
             variant="contained"
             color="primary"
             className="auth-button"
-            disabled={btnDisabled}
           >
             Sign Up
           </Button>
