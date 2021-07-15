@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from beers.models import Beer, Hop, BeerStyle, Brewery
 from beers.serializers import BeerSerializer, StyleSerializer, BrewerySerializer, HopSerializer
@@ -16,6 +17,7 @@ class BeerViewSet(viewsets.ModelViewSet):
     queryset = Beer.objects.all()
     serializer_class = BeerSerializer
     lookup_field = 'id'
+    # permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class HopViewSet(viewsets.ModelViewSet):
@@ -30,6 +32,7 @@ class HopViewSet(viewsets.ModelViewSet):
     queryset = Hop.objects.all()
     serializer_class = HopSerializer
     lookup_field = 'id'
+    # permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class BeerStyleViewSet(viewsets.ModelViewSet):
@@ -44,6 +47,7 @@ class BeerStyleViewSet(viewsets.ModelViewSet):
     queryset = BeerStyle.objects.all()
     serializer_class = StyleSerializer
     lookup_field = 'id'
+    # permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class BreweryViewSet(viewsets.ModelViewSet):
@@ -58,3 +62,4 @@ class BreweryViewSet(viewsets.ModelViewSet):
     queryset = Brewery.objects.all()
     serializer_class = BrewerySerializer
     lookup_field = 'id'
+    # permission_classes = [IsAuthenticatedOrReadOnly]

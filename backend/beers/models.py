@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -5,15 +8,19 @@ class Beer(models.Model):
     name = models.CharField(max_length=60)
     brewery = models.ForeignKey('Brewery', on_delete=models.SET_NULL, null=True, blank=True)
     style = models.ForeignKey('BeerStyle', on_delete=models.SET_NULL, null=True, blank=True)
-    percentage = models.DecimalField(max_digits=4, decimal_places=2)
+    percentage = models.DecimalField(
+        max_digits=4, decimal_places=2, validators=[MinValueValidator(Decimal('0'))]
+    )
     volume_ml = models.PositiveIntegerField()
     image = models.URLField(null=True, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
     hops = models.ManyToManyField('Hop', blank=True)
 
     def __str__(self) -> str:
-        return f"{self.name} {self.percentage}% {self.volume_ml}ml" \
-               + f", {self.brewery}" if self.brewery else ""
+        to_str = f"{self.name} {self.percentage}% {self.volume_ml}ml"
+        if self.brewery:
+            to_str += f", {self.brewery}"
+        return to_str
 
 
 class Brewery(models.Model):

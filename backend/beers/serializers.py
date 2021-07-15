@@ -55,7 +55,8 @@ class BeerSerializer(ModelSerializer):
         GET request uses DetailedBeerSerializer to display detailed data.
         POST/PUT/PATCH requests are handled by BeerSerializer (this includes api forms).
         """
-        if self.context['request'].method == 'GET':
+        request = self.context.get('request')
+        if request and request.method == 'GET':
             serializer = DetailedBeerSerializer(instance)
             return serializer.data
         return super().to_representation(instance)
