@@ -39,28 +39,15 @@ class EmbeddedBrewerySerializer(ModelSerializer):
         fields = ['id', 'name']
 
 
-class DetailedBeerSerializer(ModelSerializer):
+class BeerSerializer(ModelSerializer):
+    class Meta:
+        model = Beer
+        fields = '__all__'
+
+
+class DetailedBeerSerializer(BeerSerializer):
+    """BeerSerializer with serialized relationships fields.
+    Used when handling GET method (list/retrieve action)."""
     hops = EmbeddedHopsSerializer(many=True, read_only=True)
     style = EmbeddedStyleSerializer(read_only=True)
     brewery = EmbeddedBrewerySerializer(read_only=True)
-
-    class Meta:
-        model = Beer
-        fields = '__all__'
-
-
-class BeerSerializer(ModelSerializer):
-    def to_representation(self, instance):
-        """
-        GET request uses DetailedBeerSerializer to display detailed data.
-        POST/PUT/PATCH requests are handled by BeerSerializer (this includes api forms).
-        """
-        request = self.context.get('request')
-        if request and request.method == 'GET':
-            serializer = DetailedBeerSerializer(instance)
-            return serializer.data
-        return super().to_representation(instance)
-
-    class Meta:
-        model = Beer
-        fields = '__all__'

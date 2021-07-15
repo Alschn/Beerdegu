@@ -2,7 +2,10 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from beers.models import Beer, Hop, BeerStyle, Brewery
-from beers.serializers import BeerSerializer, StyleSerializer, BrewerySerializer, HopSerializer
+from beers.serializers import (
+    BeerSerializer, DetailedBeerSerializer,
+    StyleSerializer, BrewerySerializer, HopSerializer,
+)
 
 
 class BeerViewSet(viewsets.ModelViewSet):
@@ -17,7 +20,13 @@ class BeerViewSet(viewsets.ModelViewSet):
     queryset = Beer.objects.all()
     serializer_class = BeerSerializer
     lookup_field = 'id'
+
     # permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
+            return DetailedBeerSerializer
+        return super().get_serializer_class()
 
 
 class HopViewSet(viewsets.ModelViewSet):
