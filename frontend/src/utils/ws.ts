@@ -1,4 +1,5 @@
-import {ReadyState} from "react-use-websocket/dist";
+import {ReadyState} from "react-use-websocket";
+
 
 export const WebsocketConnectionState = {
   [ReadyState.CONNECTING]: 'Connecting',
@@ -8,12 +9,17 @@ export const WebsocketConnectionState = {
   [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
 };
 
+export interface UserObject {
+  id: string | number,
+  username: string,
+}
+
 export interface WebsocketMessage {
-  data: any,
+  data: any | UserObject[],
   command: CommandType,
 }
 
 export type CommandType =
-  'set_new_message' |
+  'set_new_message' | 'set_users' |
   ''
   ;

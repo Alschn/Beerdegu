@@ -1,5 +1,8 @@
 import json
+
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+from rooms.async_db import get_users_in_room, leave_room
 
 
 class RoomConsumer(AsyncWebsocketConsumer):
@@ -8,6 +11,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
     commands = {
         'get_new_message': 'get_new_message',
+        'get_users': 'get_users',
     }
 
     async def connect(self):
@@ -47,19 +51,47 @@ class RoomConsumer(AsyncWebsocketConsumer):
     """
     Event handlers:
     - get_new_message
+    
+    - get_users
+    
     - invalid_command
     """
 
     async def get_new_message(self, event):
         """
-        Receive message -> Broadcast it to others and update client
-        'get_new_message' -> 'set_new_message'
+        Receive message => Broadcast it to others and update client
+        'get_new_message' => 'set_new_message'
         """
         str_message: str = event['message']
 
         await self.send(text_data=json.dumps({
             'data': str_message,
             'command': 'set_new_message'
+        }))
+
+    async def get_users(self, event):
+        """
+        Receive get_users command => Broadcast list of users and update client
+        'get_users' => 'set_users'
+        """
+        users = await get_users_in_room(room_name=self.room_name)
+        await self.send(text_data=json.dumps({
+            'data': users,
+            'command': 'set_users',
+        }))
+
+    async def user_leave_room(self, event):
+        # check if it works later
+        user = self.scope['user']
+        await leave_room(
+            room_name=self.room_name,
+            user=user
+        )
+        users = await get_users_in_room(room_name=self.room_name)
+        await self.send(text_data=json.dumps({
+            'data': users,
+            'message': f'{user.username} has left the room',
+            'command': 'set_users',
         }))
 
     async def invalid_command(self, event):

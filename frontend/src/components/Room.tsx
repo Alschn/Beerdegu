@@ -1,13 +1,16 @@
-import React, {FC, useCallback, useState} from "react";
+import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import axiosClient from "../api/axiosClient";
-import {WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
+import {UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import "./Room.scss";
+import Participants from "./room/Participants";
 
 interface RoomParamsProps {
   code: string;
 }
+
+const USERS_FETCH_INTERVAL_MS = 10_000;
 
 const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
@@ -36,6 +39,9 @@ const Room: FC = () => {
         case 'set_new_message':
           setMessages(prevState => [...prevState, parsed.data]);
           break;
+        case 'set_users':
+          setUsers([...parsed.data]);
+          break;
         default:
           break;
       }
@@ -47,6 +53,8 @@ const Room: FC = () => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<string[]>([]);
 
+  const [users, setUsers] = useState<UserObject[]>([]);
+
   const handleChange = (e: React.BaseSyntheticEvent): void => setMessage(e.target.value);
 
   const handleSend = (): void => {
@@ -55,6 +63,19 @@ const Room: FC = () => {
       command: 'get_new_message',
     });
   };
+
+  const getUsers = useCallback((): void => {
+    sendJsonMessage({
+      command: 'get_users'
+    })
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getUsers();
+    }, USERS_FETCH_INTERVAL_MS)
+    return () => clearInterval(interval);
+  }, [getUsers])
 
   const handlePressEnter = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -81,6 +102,8 @@ const Room: FC = () => {
             <li key={"message" + idx}>{m}</li>
           ))}
         </ol>
+
+        <Participants users={users}/>
       </div>
     </div>
   );

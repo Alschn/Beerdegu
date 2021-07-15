@@ -1,4 +1,5 @@
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 
@@ -13,3 +14,9 @@ class RegisterUserSerializer(RegisterSerializer):
         write_only=True,
         style={'input_type': 'password'}
     )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
