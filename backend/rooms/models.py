@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -26,6 +28,9 @@ class Room(models.Model):
     users = models.ManyToManyField(User, through='UserInRoom', blank=True)
     beers = models.ManyToManyField(Beer, through='BeerInRoom', blank=True)
 
+    def __str__(self):
+        return f"'{self.name}' {self.users.all().count()}/{self.slots} - {self.state.lower()}"
+
 
 class Rating(models.Model):
     color = models.TextField(max_length=300, blank=True, null=True)
@@ -39,15 +44,26 @@ class Rating(models.Model):
     ])
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
+    # noinspection PyUnresolvedReferences
+    def __str__(self) -> str:
+        to_str = f"{self.note} by {self.added_by}"
+        rating_for: Optional[BeerInRoom] = self.belongs_to.all().first()
+        if rating_for:
+            return f"{rating_for} - {to_str}"
+        return to_str
+
 
 class BeerInRoom(models.Model):
     """ManyToMany Through Rooms and Beers."""
     beer = models.ForeignKey(Beer, on_delete=models.CASCADE)
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
-    ratings = models.ManyToManyField('Rating')
+    ratings = models.ManyToManyField('Rating', related_name='belongs_to', blank=True)
 
     class Meta:
         verbose_name_plural = 'Beers in Room'
+
+    def __str__(self) -> str:
+        return f"{self.room.name} - {self.beer}"
 
 
 class UserInRoom(models.Model):
@@ -58,3 +74,6 @@ class UserInRoom(models.Model):
 
     class Meta:
         verbose_name_plural = 'Users in Room'
+
+    def __str__(self) -> str:
+        return f"{self.user.username} - {self.room.name}"

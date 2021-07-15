@@ -1,6 +1,7 @@
-import React, {FC, useState} from "react";
-import {useParams} from "react-router";
+import React, {FC, useCallback, useState} from "react";
+import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
+import axiosClient from "../api/axiosClient";
 import {WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import "./Room.scss";
 
@@ -10,14 +11,25 @@ interface RoomParamsProps {
 
 const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
-  const socketUrl = `ws://127.0.0.1:8000/ws/room/${code}/`;
+  const history = useHistory();
+
+  const getWebsocketUrl = useCallback(() => {
+    return axiosClient.get(`/api/in?code=${code}`).then(() => {
+      return `ws://127.0.0.1:8000/ws/room/${code}/`;
+    }).catch(() => {
+      // idk if this is right approach
+      history.push('/');
+      return Promise.reject('User not in room!');
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code])
 
   const {
     sendJsonMessage,
     readyState,
-  } = useWebSocket(socketUrl, {
+  } = useWebSocket(getWebsocketUrl, {
     onOpen: () => console.log('Websocket open'),
-    shouldReconnect: (closeEvent) => true,
+    shouldReconnect: (closeEvent) => false,
     onMessage: (event) => {
       const parsed: WebsocketMessage = JSON.parse(event.data);
       switch (parsed.command) {
@@ -48,7 +60,7 @@ const Room: FC = () => {
     if (event.key === 'Enter') {
       handleSend();
     }
-  }
+  };
 
   return (
     <div>
