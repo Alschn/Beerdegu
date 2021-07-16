@@ -71,6 +71,7 @@ class UserInRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(auto_now_add=True)
+    last_active = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name_plural = 'Users in Room'

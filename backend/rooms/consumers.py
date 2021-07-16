@@ -2,7 +2,10 @@ import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from rooms.async_db import get_users_in_room, leave_room
+from rooms.async_db import (
+    get_users_in_room, bump_users_last_active_field,
+    leave_room
+)
 
 
 class RoomConsumer(AsyncWebsocketConsumer):
@@ -10,8 +13,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
     room_group_name: str
 
     commands = {
+        # two sided actions
         'get_new_message': 'get_new_message',
         'get_users': 'get_users',
+        # one sided actions
+        'user_active': 'user_active'
     }
 
     async def connect(self):
@@ -53,6 +59,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
     - get_new_message
     
     - get_users
+    - user_active
     
     - invalid_command
     """
@@ -79,6 +86,14 @@ class RoomConsumer(AsyncWebsocketConsumer):
             'data': users,
             'command': 'set_users',
         }))
+
+    async def user_active(self, event):
+        """
+        Client reports that they are active by sending command 'user_active'
+        Server updates last_active field.
+        """
+        user = self.scope['user']
+        await bump_users_last_active_field(room_name=self.room_name, user=user)
 
     async def user_leave_room(self, event):
         # check if it works later

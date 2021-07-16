@@ -10,14 +10,15 @@ interface RoomParamsProps {
   code: string;
 }
 
-const USERS_FETCH_INTERVAL_MS = 10_000;
+const USERS_FETCH_INTERVAL_MS = 12_000;
+const USER_PING_INTERVAL_MS = 7_000;
 
 const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
   const history = useHistory();
 
   const getWebsocketUrl = useCallback(() => {
-    return axiosClient.get(`/api/in?code=${code}`).then(() => {
+    return axiosClient.get(`/api/rooms/in?code=${code}`).then(() => {
       return `ws://127.0.0.1:8000/ws/room/${code}/`;
     }).catch(() => {
       // idk if this is right approach
@@ -32,7 +33,7 @@ const Room: FC = () => {
     readyState,
   } = useWebSocket(getWebsocketUrl, {
     onOpen: () => console.log('Websocket open'),
-    shouldReconnect: (closeEvent) => false,
+    shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
       const parsed: WebsocketMessage = JSON.parse(event.data);
       switch (parsed.command) {
@@ -76,6 +77,15 @@ const Room: FC = () => {
     }, USERS_FETCH_INTERVAL_MS)
     return () => clearInterval(interval);
   }, [getUsers])
+
+  useEffect(() => {
+    const pingInterval = setInterval(() => {
+      sendJsonMessage({
+        command: 'user_active',
+      })
+    }, USER_PING_INTERVAL_MS)
+    return () => clearInterval(pingInterval);
+  }, [])
 
   const handlePressEnter = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
