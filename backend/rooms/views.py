@@ -1,9 +1,11 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rooms.models import Room
+from rooms.permissions import IsHostOrListCreateOnly
+from rooms.serializers import RoomSerializer, DetailedRoomSerializer
 
 
 class UserIsInRoom(APIView):
@@ -35,3 +37,15 @@ class UserIsInRoom(APIView):
             {'message': 'User is not part of this room!'},
             status=status.HTTP_403_FORBIDDEN
         )
+
+
+class RoomsViewSet(viewsets.ModelViewSet):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    # permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
+    permission_classes = [IsHostOrListCreateOnly]
+
+    def get_serializer_class(self):
+        if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
+            return DetailedRoomSerializer
+        return super().get_serializer_class()

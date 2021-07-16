@@ -1,3 +1,4 @@
+from rest_framework.relations import StringRelatedField
 from rest_framework.serializers import ModelSerializer
 
 from beers.models import Beer, Hop, BeerStyle, Brewery
@@ -43,6 +44,15 @@ class BeerSerializer(ModelSerializer):
     class Meta:
         model = Beer
         fields = '__all__'
+
+
+class SimplifiedBeerSerializer(ModelSerializer):
+    brewery = StringRelatedField(read_only=True)
+    style = StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Beer
+        fields = ('id', 'name', 'brewery', 'style')
 
 
 class DetailedBeerSerializer(BeerSerializer):

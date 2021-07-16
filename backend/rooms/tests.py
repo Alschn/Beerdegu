@@ -21,3 +21,7 @@ class RoomTests(TestCase):
         )
         self.assertEqual(Room.objects.get(name='ABCDEFGH'), room)
         self.assertIn(self.user, room.users.all())
+
+
+class RoomsAPIViewsTest(TestCase):
+    pass
