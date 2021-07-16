@@ -49,6 +49,13 @@ def bump_users_last_active_field(room_name: str, user: User):
 
 
 @database_sync_to_async
+def save_user_form(room_name: str, user: User):
+    if user.is_anonymous:
+        return
+    # to do
+
+
+@database_sync_to_async
 def join_room(room_name: str, user: User):
     try:
         room = Room.objects.get(name=room_name)

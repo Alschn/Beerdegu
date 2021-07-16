@@ -4,7 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 from rooms.async_db import (
     get_users_in_room, bump_users_last_active_field,
-    leave_room
+    leave_room, save_user_form,
 )
 
 
@@ -17,7 +17,8 @@ class RoomConsumer(AsyncWebsocketConsumer):
         'get_new_message': 'get_new_message',
         'get_users': 'get_users',
         # one sided actions
-        'user_active': 'user_active'
+        'user_active': 'user_active',
+        'user_form_save': 'user_form_save',
     }
 
     async def connect(self):
@@ -57,9 +58,10 @@ class RoomConsumer(AsyncWebsocketConsumer):
     """
     Event handlers:
     - get_new_message
-    
     - get_users
+    
     - user_active
+    - user_form_save
     
     - invalid_command
     """
@@ -94,6 +96,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
         """
         user = self.scope['user']
         await bump_users_last_active_field(room_name=self.room_name, user=user)
+
+    async def user_form_save(self, event):
+        user = self.scope['user']
+        # to do
+        await save_user_form(room_name=self.room_name, user=user)
 
     async def user_leave_room(self, event):
         # check if it works later

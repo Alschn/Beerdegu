@@ -1,3 +1,4 @@
+import {Grid} from "@material-ui/core";
 import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
@@ -5,6 +6,7 @@ import axiosClient from "../api/axiosClient";
 import {UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import "./Room.scss";
 import Participants from "./room/Participants";
+import BeerForm from "./room/Form";
 
 interface RoomParamsProps {
   code: string;
@@ -17,8 +19,12 @@ const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
   const history = useHistory();
 
+  const [isHost, setIsHost] = useState<boolean>(false);
+
   const getWebsocketUrl = useCallback(() => {
-    return axiosClient.get(`/api/rooms/in?code=${code}`).then(() => {
+    return axiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
+      const {is_host} = data;
+      setIsHost(Boolean(is_host));
       return `ws://127.0.0.1:8000/ws/room/${code}/`;
     }).catch(() => {
       // idk if this is right approach
@@ -94,19 +100,22 @@ const Room: FC = () => {
   };
 
   return (
-    <div>
-      <h1>Room {code}</h1>
+    <Grid container justifyContent="center">
+      <Grid item xs={12} style={{textAlign: 'center'}}>
+        <h1>Room {code}</h1>
+        <h2>IsHost: {String(isHost)}</h2>
+        <h2>Websocket state: {connectionStatus}</h2>
+      </Grid>
 
-      <h2>Websocket state: {connectionStatus}</h2>
 
-      <div>
+      <Grid item xs={12}>
         <input onChange={handleChange} onKeyDown={handlePressEnter}/>
         <button onClick={handleSend}>
           Send message
         </button>
-      </div>
+      </Grid>
 
-      <div>
+      <Grid item xs={12}>
         <ol>
           {messages.length > 0 && messages.map((m, idx) => (
             <li key={"message" + idx}>{m}</li>
@@ -114,8 +123,10 @@ const Room: FC = () => {
         </ol>
 
         <Participants users={users}/>
-      </div>
-    </div>
+      </Grid>
+
+      <BeerForm sendMessage={sendJsonMessage}/>
+    </Grid>
   );
 };
 
