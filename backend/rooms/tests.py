@@ -114,6 +114,18 @@ class RoomsAPIViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), {'message': 'User is already in this room!'})
 
+    def test_join_room_full(self):
+        room = Room.objects.create(
+            name='FULL',
+            slots=1,
+            host=self.user2
+        )
+        self._require_login_and_auth()
+        self.assertEqual(room.slots, room.users.count())
+        response = self.client.put('/api/rooms/FULL/join', data={})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json(), {'message': f'Room FULL is full!'})
+
     def test_join_room_success(self):
         self._require_login_and_auth(other=True)
         r = Room.objects.get(name='12345678')

@@ -9,6 +9,7 @@ from rooms.serializers import RoomSerializer, DetailedRoomSerializer
 
 
 class UserIsInRoom(APIView):
+    """GET api/rooms/in?code=<str:name>"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -54,8 +55,7 @@ class RoomsViewSet(viewsets.ModelViewSet):
     """
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    # permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
-    permission_classes = [IsHostOrListCreateOnly]
+    permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
 
     def get_serializer_class(self):
         if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
@@ -77,7 +77,11 @@ class JoinRoom(APIView):
         users_in_room = room.users
 
         if not users_in_room.filter(id=sender.id).exists():
+            if users_in_room.count() >= room.slots:
+                return Response({'message': f'Room {room_name} is full!'}, status=status.HTTP_403_FORBIDDEN)
+
             users_in_room.add(sender)
+
             return Response({'message': f'Joined room {room_name}'}, status=status.HTTP_200_OK)
 
         return Response({'message': 'User is already in this room!'}, status=status.HTTP_400_BAD_REQUEST)
