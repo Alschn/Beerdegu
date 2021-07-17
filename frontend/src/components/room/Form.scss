@@ -1,0 +1,9 @@
+.form-textfield-wrapper {
+  display: flex;
+  justify-content: center;
+
+  & > .MuiTextField-root {
+    margin: 8px;
+    width: 50%;
+  }
+}

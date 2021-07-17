@@ -1,21 +1,43 @@
-import React, {FC, useState} from "react";
-import {useParams} from "react-router";
+import {Grid} from "@material-ui/core";
+import React, {FC, useCallback, useEffect, useState} from "react";
+import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
-import {WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
+import axiosClient from "../api/axiosClient";
+import {UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import "./Room.scss";
+import Participants from "./room/Participants";
+import BeerForm from "./room/Form";
 
 interface RoomParamsProps {
   code: string;
 }
 
+const USERS_FETCH_INTERVAL_MS = 12_000;
+const USER_PING_INTERVAL_MS = 7_000;
+
 const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
-  const socketUrl = `ws://127.0.0.1:8000/ws/room/${code}/`;
+  const history = useHistory();
+
+  const [isHost, setIsHost] = useState<boolean>(false);
+
+  const getWebsocketUrl = useCallback(() => {
+    return axiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
+      const {is_host} = data;
+      setIsHost(Boolean(is_host));
+      return `ws://127.0.0.1:8000/ws/room/${code}/`;
+    }).catch(() => {
+      // idk if this is right approach
+      history.push('/');
+      return Promise.reject('User not in room!');
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code])
 
   const {
     sendJsonMessage,
     readyState,
-  } = useWebSocket(socketUrl, {
+  } = useWebSocket(getWebsocketUrl, {
     onOpen: () => console.log('Websocket open'),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
@@ -23,6 +45,9 @@ const Room: FC = () => {
       switch (parsed.command) {
         case 'set_new_message':
           setMessages(prevState => [...prevState, parsed.data]);
+          break;
+        case 'set_users':
+          setUsers([...parsed.data]);
           break;
         default:
           break;
@@ -35,6 +60,8 @@ const Room: FC = () => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<string[]>([]);
 
+  const [users, setUsers] = useState<UserObject[]>([]);
+
   const handleChange = (e: React.BaseSyntheticEvent): void => setMessage(e.target.value);
 
   const handleSend = (): void => {
@@ -44,33 +71,62 @@ const Room: FC = () => {
     });
   };
 
+  const getUsers = useCallback((): void => {
+    sendJsonMessage({
+      command: 'get_users'
+    })
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getUsers();
+    }, USERS_FETCH_INTERVAL_MS)
+    return () => clearInterval(interval);
+  }, [getUsers])
+
+  useEffect(() => {
+    const pingInterval = setInterval(() => {
+      sendJsonMessage({
+        command: 'user_active',
+      })
+    }, USER_PING_INTERVAL_MS)
+    return () => clearInterval(pingInterval);
+  }, [])
+
   const handlePressEnter = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
       handleSend();
     }
-  }
+  };
 
   return (
-    <div>
-      <h1>Room {code}</h1>
+    <Grid container justifyContent="center">
+      <Grid item xs={12} style={{textAlign: 'center'}}>
+        <h1>Room {code}</h1>
+        <h2>IsHost: {String(isHost)}</h2>
+        <h2>Websocket state: {connectionStatus}</h2>
+      </Grid>
 
-      <h2>Websocket state: {connectionStatus}</h2>
 
-      <div>
+      <Grid item xs={12}>
         <input onChange={handleChange} onKeyDown={handlePressEnter}/>
         <button onClick={handleSend}>
           Send message
         </button>
-      </div>
+      </Grid>
 
-      <div>
+      <Grid item xs={12}>
         <ol>
           {messages.length > 0 && messages.map((m, idx) => (
             <li key={"message" + idx}>{m}</li>
           ))}
         </ol>
-      </div>
-    </div>
+
+        <Participants users={users}/>
+      </Grid>
+
+      <BeerForm sendMessage={sendJsonMessage}/>
+    </Grid>
   );
 };
 

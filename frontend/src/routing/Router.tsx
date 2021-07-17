@@ -5,6 +5,8 @@ import Room from "../components/Room";
 import PageNotFound from "./PageNotFound";
 import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
+import PrivateRoute from "./PrivateRoute";
+import AuthRoute from "./AuthRoute";
 
 const Router: FC = () => {
   return (
@@ -12,10 +14,10 @@ const Router: FC = () => {
       <Switch>
         <Route exact path="/" component={Home}/>
 
-        <Route exact path="/login" component={Login}/>
-        <Route exact path="/register" component={Register}/>
+        <AuthRoute exact path="/login" component={Login}/>
+        <AuthRoute exact path="/register" component={Register}/>
 
-        <Route exact path="/room/:code" component={Room}/>
+        <PrivateRoute exact path="/room/:code" component={Room}/>
 
         <Route path="*" component={PageNotFound}/>
       </Switch>
