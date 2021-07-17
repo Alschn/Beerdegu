@@ -7,6 +7,8 @@ import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
 import PrivateRoute from "./PrivateRoute";
 import AuthRoute from "./AuthRoute";
+import JoinRoom from "../components/pages/JoinRoom";
+import CreateRoom from "../components/pages/CreateRoom";
 
 const Router: FC = () => {
   return (
@@ -16,6 +18,9 @@ const Router: FC = () => {
 
         <AuthRoute exact path="/login" component={Login}/>
         <AuthRoute exact path="/register" component={Register}/>
+
+        <PrivateRoute exact path="/join" component={JoinRoom}/>
+        <PrivateRoute exact path="/create" component={CreateRoom}/>
 
         <PrivateRoute exact path="/room/:code" component={Room}/>
 

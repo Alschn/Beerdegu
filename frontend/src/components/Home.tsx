@@ -29,6 +29,11 @@ const Home: FC = () => {
           Learn React
         </a>
 
+        <a href="/login" className="App-link">Login</a>
+        <a href="/register" className="App-link">Register</a>
+        <a href="/join" className="App-link">Join</a>
+        <a href="/room/abcd" className="App-link">Room abcd</a>
+
         <div>
           <label htmlFor='char-input'>Make this text uppercase: </label>
           <input
