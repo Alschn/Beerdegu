@@ -41,7 +41,7 @@ class Rating(models.Model):
     note = models.PositiveIntegerField(validators=[
         MinValueValidator(1),
         MaxValueValidator(10),
-    ])
+    ], null=True, blank=True)
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     # noinspection PyUnresolvedReferences
