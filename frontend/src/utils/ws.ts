@@ -21,5 +21,5 @@ export interface WebsocketMessage {
 
 export type CommandType =
   'set_new_message' | 'set_users' |
-  ''
+  'set_beers' | 'set_form_data' | ''
   ;

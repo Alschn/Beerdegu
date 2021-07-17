@@ -1,6 +1,9 @@
 import {Grid, MenuItem, TextField} from "@material-ui/core";
 import React, {FC, Fragment, useEffect, useReducer} from "react";
 import "./Form.scss";
+import useWebSocket from "react-use-websocket";
+import {useRoomContext} from "../../hooks/useContextHook";
+import {WebsocketMessage} from "../../utils/ws";
 
 interface State {
   color: string,
@@ -8,11 +11,12 @@ interface State {
   foam: string,
   taste: string,
   opinion: string,
-  note: number | null
+  note: number
 }
 
 type Action =
-  { type: 'INPUT_CHANGE', field: string, payload: string | number }
+  { type: 'INPUT_CHANGE', field: string, payload: string | number } |
+  { type: 'FETCH_FORM_DATA', payload: State }
 
 const formReducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -21,13 +25,17 @@ const formReducer = (state: State, action: Action): State => {
         ...state,
         [action.field]: action.payload,
       };
+    case "FETCH_FORM_DATA":
+      return {
+        ...action.payload
+      }
     default:
       return state;
   }
 };
 
 interface BeerFormProps {
-  sendMessage: (data: { command: string, data: State, }) => void;
+  beerID: number;
 }
 
 const initialState = {
@@ -36,17 +44,34 @@ const initialState = {
   foam: "",
   taste: "",
   opinion: "",
-  note: null,
+  note: 1,
 };
 
-const FORM_SAVE_INTERVAL_MS = 30_000;
+const FORM_SAVE_INTERVAL_MS = 5_000;
 
 const notes: number[] = Array.from({length: 10}, (_, i) => i + 1);
 
-const BeerForm: FC<BeerFormProps> = ({sendMessage}) => {
+const BeerForm: FC<BeerFormProps> = ({beerID}) => {
+  const {code} = useRoomContext();
   const [state, dispatch] = useReducer(formReducer, initialState);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const {
+    sendJsonMessage,
+  } = useWebSocket(`ws://127.0.0.1:8000/ws/room/${code}/`, {
+    shouldReconnect: () => true,
+    share: true,
+    onMessage: (event) => {
+      const parsed: WebsocketMessage = JSON.parse(event.data);
+      if (parsed.command === 'set_form_data') {
+        dispatch({
+          type: 'FETCH_FORM_DATA',
+          payload: parsed.data
+        });
+      }
+    }
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     dispatch({
       type: 'INPUT_CHANGE',
       field: e.target.name,
@@ -55,16 +80,26 @@ const BeerForm: FC<BeerFormProps> = ({sendMessage}) => {
   };
 
   useEffect(() => {
+    sendJsonMessage({
+      command: 'get_form_data',
+      data: beerID
+    })
+  }, [sendJsonMessage, beerID])
+
+  useEffect(() => {
     // save form so that users do not lose fields they filled
     // in case they got disconnected
     const formSaveInterval = setInterval(() => {
-      sendMessage({
+      sendJsonMessage({
         command: 'user_form_save',
-        data: state,
+        data: {
+          ...state,
+          beer_id: beerID,
+        },
       });
     }, FORM_SAVE_INTERVAL_MS);
     return () => clearInterval(formSaveInterval);
-  }, [state, sendMessage])
+  }, [state, sendJsonMessage, beerID])
 
   return (
     <Fragment>
@@ -140,7 +175,9 @@ const BeerForm: FC<BeerFormProps> = ({sendMessage}) => {
           name="note"
           label="Ocena"
           variant="outlined"
-          multiline
+          InputLabelProps={{
+            shrink: true,
+          }}
           value={state.note}
           onChange={handleInputChange}
         >

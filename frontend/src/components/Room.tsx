@@ -3,17 +3,17 @@ import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import axiosClient from "../api/axiosClient";
-import {UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
+import {WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import "./Room.scss";
 import Participants from "./room/Participants";
-import BeerForm from "./room/Form";
+import BeerFormStepper from "./room/BeerFormStepper";
+import {RoomContext} from "../context/roomContext";
 
 interface RoomParamsProps {
   code: string;
 }
 
-const USERS_FETCH_INTERVAL_MS = 12_000;
-const USER_PING_INTERVAL_MS = 7_000;
+const USER_PING_INTERVAL_MS = 14_000;
 
 const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
@@ -46,13 +46,14 @@ const Room: FC = () => {
         case 'set_new_message':
           setMessages(prevState => [...prevState, parsed.data]);
           break;
-        case 'set_users':
-          setUsers([...parsed.data]);
+        case "set_beers":
+          setBeers([...parsed.data])
           break;
         default:
           break;
       }
-    }
+    },
+    share: true,
   });
 
   const connectionStatus = WebsocketConnectionState[readyState];
@@ -60,29 +61,16 @@ const Room: FC = () => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<string[]>([]);
 
-  const [users, setUsers] = useState<UserObject[]>([]);
+  const [beers, setBeers] = useState<any[]>([]);
 
   const handleChange = (e: React.BaseSyntheticEvent): void => setMessage(e.target.value);
 
-  const handleSend = (): void => {
+  const handleSendMessage = (): void => {
     sendJsonMessage({
-      message: message,
+      data: message,
       command: 'get_new_message',
     });
   };
-
-  const getUsers = useCallback((): void => {
-    sendJsonMessage({
-      command: 'get_users'
-    })
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getUsers();
-    }, USERS_FETCH_INTERVAL_MS)
-    return () => clearInterval(interval);
-  }, [getUsers])
 
   useEffect(() => {
     const pingInterval = setInterval(() => {
@@ -95,38 +83,50 @@ const Room: FC = () => {
 
   const handlePressEnter = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      handleSend();
+      handleSendMessage();
     }
   };
 
   return (
-    <Grid container justifyContent="center">
-      <Grid item xs={12} style={{textAlign: 'center'}}>
-        <h1>Room {code}</h1>
-        <h2>IsHost: {String(isHost)}</h2>
-        <h2>Websocket state: {connectionStatus}</h2>
+    <RoomContext.Provider value={{
+      code: code,
+      isHost: isHost,
+    }}>
+      <Grid container justifyContent="center">
+        <Grid item xs={12} style={{textAlign: 'center'}}>
+          <h1>Room {code}</h1>
+          <h2>IsHost: {String(isHost)}</h2>
+          <h2>Websocket state: {connectionStatus}</h2>
+        </Grid>
+
+        <Grid item xs={12}>
+          <ol>
+            {messages.length > 0 && messages.map((m, idx) => (
+              <li key={"message" + idx}>{m}</li>
+            ))}
+          </ol>
+
+          <Participants/>
+        </Grid>
+
+        <BeerFormStepper beers={beers}/>
+
+        <Grid item xs={12}>
+          <input onChange={handleChange} onKeyDown={handlePressEnter}/>
+
+          <button onClick={handleSendMessage}>
+            Send message
+          </button>
+
+          <button onClick={() => {
+            sendJsonMessage({
+              'command': 'get_beers'
+            })
+          }}>Get beers
+          </button>
+        </Grid>
       </Grid>
-
-
-      <Grid item xs={12}>
-        <input onChange={handleChange} onKeyDown={handlePressEnter}/>
-        <button onClick={handleSend}>
-          Send message
-        </button>
-      </Grid>
-
-      <Grid item xs={12}>
-        <ol>
-          {messages.length > 0 && messages.map((m, idx) => (
-            <li key={"message" + idx}>{m}</li>
-          ))}
-        </ol>
-
-        <Participants users={users}/>
-      </Grid>
-
-      <BeerForm sendMessage={sendJsonMessage}/>
-    </Grid>
+    </RoomContext.Provider>
   );
 };
 
