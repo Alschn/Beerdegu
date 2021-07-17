@@ -17,7 +17,7 @@ class UserIsInRoom(APIView):
 
         if not room_code:
             return Response(
-                {'message': 'Missing room_code parameter in query!'},
+                {'message': 'Missing code parameter in query!'},
                 status=status.HTTP_400_BAD_REQUEST)
 
         rooms = Room.objects.filter(name=room_code)
@@ -67,12 +67,13 @@ class JoinRoom(APIView):
     """PUT api/rooms/<str:name>/join"""
 
     def put(self, request, room_name):
-        room = Room.objects.filter(name=room_name)
+        room_query = Room.objects.filter(name=room_name)
         sender = request.user
 
-        if not room.exists():
+        if not room_query.exists():
             return Response({'message': 'Room not found!'}, status=status.HTTP_404_NOT_FOUND)
 
+        room = room_query.first()
         users_in_room = room.users
 
         if not users_in_room.filter(id=sender.id).exists():
@@ -83,15 +84,16 @@ class JoinRoom(APIView):
 
 
 class LeaveRoom(APIView):
-    """PUT api/rooms/<str:name>/leave"""
+    """DELETE api/rooms/<str:name>/leave"""
 
-    def put(self, request, room_name):
-        room = Room.objects.filter(name=room_name)
+    def delete(self, request, room_name):
+        room_query = Room.objects.filter(name=room_name)
         sender = request.user
 
-        if not room.exists():
+        if not room_query.exists():
             return Response({'message': 'Room not found!'}, status=status.HTTP_404_NOT_FOUND)
 
+        room = room_query.first()
         users_in_room = room.users
 
         if users_in_room.filter(id=sender.id).exists():
