@@ -1,0 +1,22 @@
+.room {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+  .room-icon {
+    margin: 8px;
+  }
+
+  .room-alert {
+
+  }
+
+  .room-form {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .room-button {
+    margin: 24px 0 16px;
+  }
+}
