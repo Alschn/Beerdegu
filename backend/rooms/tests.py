@@ -44,6 +44,15 @@ class RoomsAPIViewsTest(TestCase):
             host=cls.user1,
             slots=4,
         )
+        cls.room_with_pass = Room.objects.create(
+            name='abcdefgh',
+            host=User.objects.create_user(
+                username='Test3',
+                password='abcdef123@'
+            ),
+            password='password',
+            slots=2,
+        )
 
     # noinspection PyUnresolvedReferences
     def _require_login_and_auth(self, other: bool = False) -> None:
@@ -135,6 +144,30 @@ class RoomsAPIViewsTest(TestCase):
         self.assertEqual(response.json(), {'message': f'Joined room 12345678'})
         self.assertEqual(r.users.count(), 2)
         self.assertIn(self.user2, r.users.all())
+
+    def test_join_room_with_password_not_in_body(self):
+        self._require_login_and_auth()
+        response = self.client.put('/api/rooms/abcdefgh/join', data={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {'message': 'Room abcdefgh is protected. No password found in body'})
+        self.assertNotIn(self.user1, self.room_with_pass.users.all())
+
+    def test_join_room_password_invalid(self):
+        self._require_login_and_auth()
+        response = self.client.put('/api/rooms/abcdefgh/join', data={'password': '12345'})
+        self.assertEqual(response.json(), {'message': 'Invalid password!'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertNotIn(self.user1, self.room_with_pass.users.all())
+
+    def test_join_room_with_password_success(self):
+        self._require_login_and_auth()
+        r = Room.objects.get(name='abcdefgh')
+        self.assertEqual(r.users.count(), 1)
+        response = self.client.put('/api/rooms/abcdefgh/join', data={'password': 'password'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'message': f'Joined room abcdefgh'})
+        self.assertEqual(r.users.count(), 2)
+        self.assertIn(self.user1, r.users.all())
 
     def test_leave_room_not_found(self):
         self._require_login_and_auth()

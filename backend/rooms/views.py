@@ -74,11 +74,22 @@ class JoinRoom(APIView):
             return Response({'message': 'Room not found!'}, status=status.HTTP_404_NOT_FOUND)
 
         room = room_query.first()
+        password = request.data.get('password')
+
+        if room.password and not password:
+            return Response(
+                {'message': f'Room {room_name} is protected. No password found in body'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         users_in_room = room.users
 
         if not users_in_room.filter(id=sender.id).exists():
             if users_in_room.count() >= room.slots:
                 return Response({'message': f'Room {room_name} is full!'}, status=status.HTTP_403_FORBIDDEN)
+
+            if room.password and room.password != password:
+                return Response({'message': 'Invalid password!'}, status=status.HTTP_403_FORBIDDEN)
 
             users_in_room.add(sender)
 
