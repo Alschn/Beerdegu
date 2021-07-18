@@ -1,23 +1,29 @@
-import {Grid} from "@material-ui/core";
+import {Grid, useMediaQuery, useTheme} from "@material-ui/core";
 import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import axiosClient from "../api/axiosClient";
-import {WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
+import {UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import "./Room.scss";
-import Participants from "./room/Participants";
 import BeerFormStepper from "./room/BeerFormStepper";
 import {RoomContext} from "../context/roomContext";
+import Sidebar from "./layout/Sidebar";
+import Header from "./layout/Header";
+import ChatSidebar from "./layout/ChatSidebar";
+import DesktopChat from "./room/DesktopChat";
 
 interface RoomParamsProps {
   code: string;
 }
 
 const USER_PING_INTERVAL_MS = 14_000;
+const USERS_FETCH_INTERVAL_MS = 12_000;
 
 const Room: FC = () => {
   const {code} = useParams<RoomParamsProps>();
   const history = useHistory();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   const [isHost, setIsHost] = useState<boolean>(false);
 
@@ -46,6 +52,9 @@ const Room: FC = () => {
         case 'set_new_message':
           setMessages(prevState => [...prevState, parsed.data]);
           break;
+        case "set_users":
+          setUsers([...parsed.data]);
+          break;
         case "set_beers":
           setBeers([...parsed.data])
           break;
@@ -58,10 +67,13 @@ const Room: FC = () => {
 
   const connectionStatus = WebsocketConnectionState[readyState];
 
+  const [users, setUsers] = useState<UserObject[]>([]);
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<string[]>([]);
-
   const [beers, setBeers] = useState<any[]>([]);
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [openSidebarChat, setOpenSidebarChat] = useState<boolean>(false);
 
   const handleChange = (e: React.BaseSyntheticEvent): void => setMessage(e.target.value);
 
@@ -73,58 +85,81 @@ const Room: FC = () => {
   };
 
   useEffect(() => {
+    // close sidebar chat if window size is smaller than md
+    !matches && setOpenSidebarChat(false);
+  }, [matches])
+
+  useEffect(() => {
+    // users ping server to show that they are active
     const pingInterval = setInterval(() => {
       sendJsonMessage({
         command: 'user_active',
       })
     }, USER_PING_INTERVAL_MS)
     return () => clearInterval(pingInterval);
-  }, [])
+  }, [sendJsonMessage])
 
-  const handlePressEnter = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
+  useEffect(() => {
+    // check if users in room changed
+    const interval = setInterval(() => {
+      sendJsonMessage({
+        command: 'get_users'
+      })
+    }, USERS_FETCH_INTERVAL_MS)
+    return () => clearInterval(interval);
+  }, [sendJsonMessage])
 
   return (
     <RoomContext.Provider value={{
       code: code,
       isHost: isHost,
+      wsState: connectionStatus,
+      beers: beers,
+      users: users,
     }}>
-      <Grid container justifyContent="center">
-        <Grid item xs={12} style={{textAlign: 'center'}}>
-          <h1>Room {code}</h1>
-          <h2>IsHost: {String(isHost)}</h2>
-          <h2>Websocket state: {connectionStatus}</h2>
+      <Header
+        openDrawerHandler={() => setOpen(true)}
+        openSideBarChatHandler={() => setOpenSidebarChat(true)}
+      />
+      <Sidebar
+        open={open}
+        toggleDrawerHandler={() => setOpen(false)}
+      />
+      {!matches && (
+        <ChatSidebar
+          open={openSidebarChat}
+          toggleDrawerHandler={() => setOpenSidebarChat(false)}
+          message={message}
+          messages={messages}
+          handleChange={handleChange}
+          handleSendMessage={handleSendMessage}
+        />
+      )}
+
+      <Grid container>
+        <Grid item xs={12} md={8} lg={10} className="room-body">
+          <BeerFormStepper beers={beers}/>
+
+          <Grid item xs={12}>
+            <button onClick={() => {
+              sendJsonMessage({
+                'command': 'get_beers'
+              })
+            }}>Get beers
+            </button>
+          </Grid>
+
         </Grid>
 
-        <Grid item xs={12}>
-          <ol>
-            {messages.length > 0 && messages.map((m, idx) => (
-              <li key={"message" + idx}>{m}</li>
-            ))}
-          </ol>
-
-          <Participants/>
-        </Grid>
-
-        <BeerFormStepper beers={beers}/>
-
-        <Grid item xs={12}>
-          <input onChange={handleChange} onKeyDown={handlePressEnter}/>
-
-          <button onClick={handleSendMessage}>
-            Send message
-          </button>
-
-          <button onClick={() => {
-            sendJsonMessage({
-              'command': 'get_beers'
-            })
-          }}>Get beers
-          </button>
-        </Grid>
+        {matches && (
+          <Grid item md={4} lg={2} className="room-chat">
+            <DesktopChat
+              message={message} messages={messages}
+              handleSendMessage={handleSendMessage}
+              handleChange={handleChange}
+            />
+          </Grid>
+        )}
       </Grid>
     </RoomContext.Provider>
   );

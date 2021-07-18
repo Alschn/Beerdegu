@@ -1,32 +1,12 @@
 import React, {FC, useState} from 'react';
-import {createStyles, makeStyles, Theme, useTheme} from '@material-ui/core/styles';
+import {useTheme} from '@material-ui/core/styles';
 import MobileStepper from '@material-ui/core/MobileStepper';
 import Button from '@material-ui/core/Button';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import BeerForm from "./Form";
 import {Grid} from '@material-ui/core';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1,
-    },
-    header: {
-      display: 'flex',
-      alignItems: 'center',
-      height: 50,
-      paddingLeft: theme.spacing(4),
-      backgroundColor: theme.palette.background.default,
-    },
-    img: {
-      height: '30%',
-      maxHeight: 300,
-      overflow: 'hidden',
-      display: 'block',
-    },
-  }),
-);
+import "./BeerFormStepper.scss";
 
 interface BeerObject {
   id: number,
@@ -45,7 +25,6 @@ interface StepperProps {
 }
 
 const BeerFormStepper: FC<StepperProps> = ({beers}) => {
-  const classes = useStyles();
   const theme = useTheme();
 
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -58,19 +37,7 @@ const BeerFormStepper: FC<StepperProps> = ({beers}) => {
   if (maxSteps === 0) return null;
 
   return (
-    <div className={classes.root}>
-      <Grid container justifyContent="center">
-        <img
-          className={classes.img}
-          src={beers[activeStep].image}
-          alt={beers[activeStep].name}
-        />
-      </Grid>
-
-      <BeerForm
-        beerID={beers[activeStep].id}
-      />
-
+    <div className='beer-form-stepper-root'>
       <MobileStepper
         steps={maxSteps}
         position="static"
@@ -78,16 +45,36 @@ const BeerFormStepper: FC<StepperProps> = ({beers}) => {
         activeStep={activeStep}
         nextButton={
           <Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1}>
-            Next
+            Następne
             {theme.direction === 'rtl' ? <KeyboardArrowLeft/> : <KeyboardArrowRight/>}
           </Button>
         }
         backButton={
           <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
             {theme.direction === 'rtl' ? <KeyboardArrowRight/> : <KeyboardArrowLeft/>}
-            Back
+            Poprzednie
           </Button>
         }
+      />
+
+      <Grid container className="beer-info-wrapper">
+        <Grid item xs={2} className="beer-info-image">
+          <img
+            src={beers[activeStep].image}
+            alt={beers[activeStep].name}
+          />
+        </Grid>
+
+        <Grid item xs={10} className="beer-info-details">
+          <p><strong>Nazwa:</strong> {beers[activeStep].name}</p>
+          <p><strong>Browar:</strong> {beers[activeStep].brewery}</p>
+          <p><strong>Styl:</strong> {beers[activeStep].style}</p>
+          <p><strong>Opis:</strong> {beers[activeStep].description}</p>
+        </Grid>
+      </Grid>
+
+      <BeerForm
+        beerID={beers[activeStep].id}
       />
     </div>
   );
