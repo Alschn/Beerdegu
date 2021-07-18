@@ -55,6 +55,12 @@ class SimplifiedBeerSerializer(ModelSerializer):
         fields = ('id', 'name', 'brewery', 'style')
 
 
+class BeerRepresentationalSerializer(SimplifiedBeerSerializer):
+    class Meta:
+        model = Beer
+        fields = ('id', 'name', 'brewery', 'style', 'image', 'description')
+
+
 class DetailedBeerSerializer(BeerSerializer):
     """BeerSerializer with serialized relationships fields.
     Used when handling GET method (list/retrieve action)."""

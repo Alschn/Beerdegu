@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
-from beers.serializers import BeerSerializer
+from beers.serializers import BeerRepresentationalSerializer
 from rooms.models import Room, UserInRoom, BeerInRoom, Rating
 from rooms.serializers import RatingSerializer
 from users.serializers import UserSerializer
@@ -114,7 +114,7 @@ def get_beers_in_room(room_name: str):
     try:
         room = Room.objects.get(name=room_name)
         beers = room.beers.all()
-        serialized = BeerSerializer(beers, many=True).data
+        serialized = BeerRepresentationalSerializer(beers, many=True).data
         return serialized
     except ObjectDoesNotExist:
         return []
