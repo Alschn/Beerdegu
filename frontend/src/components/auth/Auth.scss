@@ -1,8 +1,13 @@
 .auth {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  justify-content: center;
+  padding-bottom: 100px;
+
+  min-height: 100vh;
+
   .auth-icon {
     margin: 8px;
   }

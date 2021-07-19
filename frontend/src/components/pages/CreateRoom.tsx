@@ -88,7 +88,7 @@ const CreateRoom = () => {
           <Button
             fullWidth
             variant="contained"
-            color="secondary"
+            color="primary"
             className="room-button"
             onClick={handleSubmit}
           >

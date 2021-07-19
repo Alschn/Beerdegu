@@ -7,24 +7,10 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import BeerForm from "./Form";
 import {Grid} from '@material-ui/core';
 import "./BeerFormStepper.scss";
+import {useRoomContext} from "../../hooks/useContextHook";
 
-interface BeerObject {
-  id: number,
-  name: string,
-  percentage: number,
-  volume_ml: number,
-  image?: string,
-  description?: string,
-  brewery?: any,
-  style?: any,
-  hops: any[]
-}
-
-interface StepperProps {
-  beers: BeerObject[]
-}
-
-const BeerFormStepper: FC<StepperProps> = ({beers}) => {
+const BeerFormStepper: FC = () => {
+  const {beers} = useRoomContext();
   const theme = useTheme();
 
   const [activeStep, setActiveStep] = useState<number>(0);

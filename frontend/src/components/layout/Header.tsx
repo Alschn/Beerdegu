@@ -33,17 +33,22 @@ const useStyles = makeStyles((theme: Theme) => ({
       display: "none"
     }
   },
-  chatIcon: {
-    color: '#eeeeee'
-  },
   avatars: {
     '& > *': {
       width: theme.spacing(4),
       height: theme.spacing(4),
       border: '1px solid #0080E3',
-      backgroundColor: '#0074d0',
     }
   },
+  chatIcon: {
+    color: '#eeeeee'
+  },
+  blue: {
+    backgroundColor: '#0074d0',
+  },
+  green: {
+    backgroundColor: '#008a28'
+  }
 }));
 
 interface HeaderProps {
@@ -70,7 +75,7 @@ const Header: FC<HeaderProps> = ({openDrawerHandler, openSideBarChatHandler}) =>
           </IconButton>
 
           <Typography className={classes.title} variant="h6" noWrap>
-            Room {code}
+            Pokój {code}
           </Typography>
 
           <div className={classes.grow}/>
@@ -87,6 +92,7 @@ const Header: FC<HeaderProps> = ({openDrawerHandler, openSideBarChatHandler}) =>
                 alt={username}
                 src=""
                 key={`avatar-${idx}`}
+                className={idx === 0 ? classes.blue : classes.green}
               >
                 {username.charAt(0) + username.charAt(1)}
               </Avatar>

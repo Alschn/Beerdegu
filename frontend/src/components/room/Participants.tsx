@@ -1,6 +1,6 @@
 import React, {FC} from "react";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {List, ListItem} from "@material-ui/core";
+import {List, ListItem, ListItemText} from "@material-ui/core";
 
 
 const Participants: FC = () => {
@@ -8,9 +8,17 @@ const Participants: FC = () => {
 
   return (
     <List>
-      <ListItem><strong>Participants:</strong></ListItem>
+      <ListItem>
+        <ListItemText>
+          <strong>Uczestnicy:</strong>
+        </ListItemText>
+      </ListItem>
       {users && users.length > 0 && users.map(
-        ({username}, idx) => <ListItem>{idx + 1}. {username}</ListItem>)
+        ({username}, idx) => <ListItem key={`li-user-${idx}`}>
+          <ListItemText>
+            <strong>{idx + 1}.</strong> {username}
+          </ListItemText>
+        </ListItem>)
       }
     </List>
   );

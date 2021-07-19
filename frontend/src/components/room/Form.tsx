@@ -3,16 +3,9 @@ import React, {FC, Fragment, useEffect, useReducer} from "react";
 import "./Form.scss";
 import useWebSocket from "react-use-websocket";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {WebsocketMessage} from "../../utils/ws";
+import {UserRatingsObject, WebsocketMessage} from "../../utils/ws";
 
-interface State {
-  color: string,
-  smell: string,
-  foam: string,
-  taste: string,
-  opinion: string,
-  note: number
-}
+type State = UserRatingsObject;
 
 type Action =
   { type: 'INPUT_CHANGE', field: string, payload: string | number } |

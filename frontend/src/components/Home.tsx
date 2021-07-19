@@ -1,30 +1,47 @@
-import React, {FC} from "react";
-import logo from "../logo.svg";
+import React, {FC, Fragment} from "react";
+import beers from "../images/logo.svg";
 import "./Home.scss";
+import {Button} from "@material-ui/core";
+import {useHistory} from "react-router";
 
 const Home: FC = () => {
+  const history = useHistory();
+  const token = localStorage.getItem('token');
+
+  const redirectTo = (path: string) => history.push(path);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo"/>
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <div className="App-body">
+        <div className="App-logo-wrapper">
+          <img className="App-logo" src={beers} alt="logo"/>
+          <span className="App-title">Beerdegu</span>
+        </div>
 
-        <a href="/login" className="App-link">Login</a>
-        <a href="/register" className="App-link">Register</a>
-        <a href="/join" className="App-link">Join</a>
-        <a href="/create" className="App-link">Create</a>
-        <a href="/room/abcd" className="App-link">Room abcd</a>
-      </header>
+        <div className="App-button-group">
+          {token !== null ? (
+            <Fragment>
+              <Button variant="contained" color="primary" onClick={() => redirectTo('/join')}>
+                Join
+              </Button>
+
+              <Button variant="contained" color="secondary" onClick={() => redirectTo('/create')}>
+                Create
+              </Button>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Button variant="contained" color="primary" onClick={() => redirectTo('/login')}>
+                Login
+              </Button>
+
+              <Button variant="contained" color="secondary" onClick={() => redirectTo('/register')}>
+                Register
+              </Button>
+            </Fragment>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

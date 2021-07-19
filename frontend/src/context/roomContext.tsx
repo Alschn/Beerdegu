@@ -1,27 +1,21 @@
-import React, {createContext, FC} from "react";
-import {UserObject} from "../utils/ws";
+import {createContext} from "react";
+import {BeerObject, RatingsObject, UserObject} from "../utils/ws";
+
+export type roomStateType = 'WAITING' | 'STARTING' | 'IN_PROGRESS' | 'FINISHED';
 
 interface RoomContextProps {
-  code?: string,
-  isHost?: boolean,
-  wsState?: string,
-  beers?: any[],
-  users?: UserObject[],
+  code: string,
+  isHost: boolean,
+  sendMessage: (jsonMessage: any) => void,
+  wsState: string,
+  message: string,
+  messages: string[],
+  beers: BeerObject[],
+  users: UserObject[],
+  roomState: roomStateType,
+  results: RatingsObject[],
+  userResults: any[],
 }
 
-export const RoomContext = createContext<RoomContextProps>({});
-
-
-interface RoomContextProviderProps {
-
-}
-
-const RoomContextProvider: FC<RoomContextProviderProps> = () => {
-  return (
-    <RoomContext.Provider value={{}}>
-    {/* maybe will be needed */}
-    </RoomContext.Provider>
-  );
-};
-
-export default RoomContextProvider;
+const RoomContext = createContext<RoomContextProps>({} as RoomContextProps);
+export default RoomContext;
