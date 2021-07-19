@@ -1,27 +1,30 @@
-.auth {
+.room {
   display: flex;
   flex-direction: column;
   align-items: center;
 
   justify-content: center;
+
+  // raise it by 100px up
   padding-bottom: 100px;
 
   min-height: 100vh;
 
-  .auth-icon {
+  .room-icon {
     margin: 8px;
+    background-color: cornflowerblue;
   }
 
-  .auth-alert {
+  .room-alert {
 
   }
 
-  .auth-form {
+  .room-form {
     width: 100%;
     margin-top: 8px;
   }
 
-  .auth-button {
+  .room-button {
     margin: 24px 0 16px;
   }
 }

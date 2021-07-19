@@ -199,6 +199,7 @@ class BeersAPIViewsTest(TestCase):
         )
 
     def test_update_beer_style_by_id(self):
+        self._require_login_and_auth()
         response = self.client.put(f'/api/styles/{self.style_apa.id}/', data={
             'name': 'APA',
             'description': 'Very nice beer style',
@@ -208,6 +209,7 @@ class BeersAPIViewsTest(TestCase):
         self.assertEqual(response.json(), StyleSerializer(self.style_apa).data)
 
     def test_update_beer_style_invalid_data(self):
+        self._require_login_and_auth()
         response = self.client.patch(f'/api/styles/{self.style_ipa.id}/', data={
             'description': ''.join(choice(ascii_letters) for _ in range(1001)),
         })
@@ -268,6 +270,7 @@ class BeersAPIViewsTest(TestCase):
 
     def test_update_hop_by_id(self):
         self.assertIsNone(self.hop_amarillo.description)
+        self._require_login_and_auth()
         response = self.client.patch(f'/api/hops/{self.hop_amarillo.id}/', data={
             'description': 'Amerykański chmiel uniwersalny'
         })
@@ -276,12 +279,14 @@ class BeersAPIViewsTest(TestCase):
         self.assertEqual(self.hop_amarillo.description, 'Amerykański chmiel uniwersalny')
 
     def test_update_hop_invalid_data(self):
+        self._require_login_and_auth()
         response = self.client.patch(f'/api/hops/{self.hop_amarillo.id}/', data={
             'name': ''.join(choice(ascii_letters) for _ in range(31))
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_hop_by_id(self):
+        self._require_login_and_auth()
         response = self.client.delete(f'/api/hops/{self.hop_simcoe.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(ObjectDoesNotExist):
@@ -337,6 +342,7 @@ class BeersAPIViewsTest(TestCase):
 
     def test_update_brewery_by_id(self):
         self.assertEqual(self.brewery_pinta.city, 'Wieprz')
+        self._require_login_and_auth()
         response = self.client.patch(f'/api/breweries/{self.brewery_pinta.id}/', data={
             'city': 'Warszawa'
         })
@@ -345,13 +351,14 @@ class BeersAPIViewsTest(TestCase):
         self.assertEqual(self.brewery_pinta.city, 'Warszawa')
 
     def test_update_brewery_invalid_data(self):
-        self.assertEqual(self.brewery_pinta.city, 'Wieprz')
+        self._require_login_and_auth()
         response = self.client.put(f'/api/breweries/{self.brewery_pinta.id}/', data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), {'name': ['This field is required.']})
 
     def test_delete_brewery_by_id(self):
         lookup_id = self.brewery_to_delete.id
+        self._require_login_and_auth()
         response = self.client.delete(f'/api/breweries/{lookup_id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(ObjectDoesNotExist):

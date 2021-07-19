@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from rooms.models import Room
+from rooms.serializers import RoomSerializer
 
 
 class RoomTests(TestCase):
@@ -43,6 +44,15 @@ class RoomsAPIViewsTest(TestCase):
             name='12345678',
             host=cls.user1,
             slots=4,
+        )
+        cls.room_with_pass = Room.objects.create(
+            name='abcdefgh',
+            host=User.objects.create_user(
+                username='Test3',
+                password='abcdef123@'
+            ),
+            password='password',
+            slots=2,
         )
 
     # noinspection PyUnresolvedReferences
@@ -111,8 +121,20 @@ class RoomsAPIViewsTest(TestCase):
     def test_join_room_already_in(self):
         self._require_login_and_auth()
         response = self.client.put('/api/rooms/12345678/join', data={})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'message': 'User is already in this room!'})
+
+    def test_join_room_full(self):
+        room = Room.objects.create(
+            name='FULL',
+            slots=1,
+            host=self.user2
+        )
+        self._require_login_and_auth()
+        self.assertEqual(room.slots, room.users.count())
+        response = self.client.put('/api/rooms/FULL/join', data={})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json(), {'message': f'Room FULL is full!'})
 
     def test_join_room_success(self):
         self._require_login_and_auth(other=True)
@@ -123,6 +145,30 @@ class RoomsAPIViewsTest(TestCase):
         self.assertEqual(response.json(), {'message': f'Joined room 12345678'})
         self.assertEqual(r.users.count(), 2)
         self.assertIn(self.user2, r.users.all())
+
+    def test_join_room_with_password_not_in_body(self):
+        self._require_login_and_auth()
+        response = self.client.put('/api/rooms/abcdefgh/join', data={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {'message': 'Room abcdefgh is protected. No password found in body'})
+        self.assertNotIn(self.user1, self.room_with_pass.users.all())
+
+    def test_join_room_password_invalid(self):
+        self._require_login_and_auth()
+        response = self.client.put('/api/rooms/abcdefgh/join', data={'password': '12345'})
+        self.assertEqual(response.json(), {'message': 'Invalid password!'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertNotIn(self.user1, self.room_with_pass.users.all())
+
+    def test_join_room_with_password_success(self):
+        self._require_login_and_auth()
+        r = Room.objects.get(name='abcdefgh')
+        self.assertEqual(r.users.count(), 1)
+        response = self.client.put('/api/rooms/abcdefgh/join', data={'password': 'password'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'message': f'Joined room abcdefgh'})
+        self.assertEqual(r.users.count(), 2)
+        self.assertIn(self.user1, r.users.all())
 
     def test_leave_room_not_found(self):
         self._require_login_and_auth()
@@ -170,4 +216,20 @@ class RoomsAPIViewsTest(TestCase):
         pass
 
     def test_get_update_delete_room_doesnt_exist(self):
-        pass
+        self._require_login_and_auth()
+        response_get = self.client.get('/api/rooms/123/')
+        self.assertEqual(response_get.status_code, status.HTTP_404_NOT_FOUND)
+
+        self._require_login_and_auth()
+        response_put = self.client.put('/api/rooms/123/', {})
+        self.assertEqual(response_put.status_code, status.HTTP_404_NOT_FOUND)
+
+        response_patch = self.client.patch('/api/rooms/123/', {})
+        self.assertEqual(response_patch.status_code, status.HTTP_404_NOT_FOUND)
+
+        response_delete = self.client.delete('/api/rooms/123/')
+        self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class RoomsAsyncDbTests(TestCase):
+    pass

@@ -20,8 +20,7 @@ class BeerViewSet(viewsets.ModelViewSet):
     queryset = Beer.objects.all()
     serializer_class = BeerSerializer
     lookup_field = 'id'
-
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
@@ -41,7 +40,7 @@ class HopViewSet(viewsets.ModelViewSet):
     queryset = Hop.objects.all()
     serializer_class = HopSerializer
     lookup_field = 'id'
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class BeerStyleViewSet(viewsets.ModelViewSet):
@@ -56,7 +55,7 @@ class BeerStyleViewSet(viewsets.ModelViewSet):
     queryset = BeerStyle.objects.all()
     serializer_class = StyleSerializer
     lookup_field = 'id'
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class BreweryViewSet(viewsets.ModelViewSet):
@@ -71,4 +70,4 @@ class BreweryViewSet(viewsets.ModelViewSet):
     queryset = Brewery.objects.all()
     serializer_class = BrewerySerializer
     lookup_field = 'id'
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]

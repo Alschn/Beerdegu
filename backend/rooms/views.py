@@ -9,6 +9,7 @@ from rooms.serializers import RoomSerializer, DetailedRoomSerializer
 
 
 class UserIsInRoom(APIView):
+    """GET api/rooms/in?code=<str:name>"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -54,8 +55,7 @@ class RoomsViewSet(viewsets.ModelViewSet):
     """
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    # permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
-    permission_classes = [IsHostOrListCreateOnly]
+    permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
 
     def get_serializer_class(self):
         if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
@@ -65,6 +65,7 @@ class RoomsViewSet(viewsets.ModelViewSet):
 
 class JoinRoom(APIView):
     """PUT api/rooms/<str:name>/join"""
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, room_name):
         room_query = Room.objects.filter(name=room_name)
@@ -74,17 +75,33 @@ class JoinRoom(APIView):
             return Response({'message': 'Room not found!'}, status=status.HTTP_404_NOT_FOUND)
 
         room = room_query.first()
+        password = request.data.get('password')
+
+        if room.password and not password:
+            return Response(
+                {'message': f'Room {room_name} is protected. No password found in body'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         users_in_room = room.users
 
         if not users_in_room.filter(id=sender.id).exists():
+            if users_in_room.count() >= room.slots:
+                return Response({'message': f'Room {room_name} is full!'}, status=status.HTTP_403_FORBIDDEN)
+
+            if room.password and room.password != password:
+                return Response({'message': 'Invalid password!'}, status=status.HTTP_403_FORBIDDEN)
+
             users_in_room.add(sender)
+
             return Response({'message': f'Joined room {room_name}'}, status=status.HTTP_200_OK)
 
-        return Response({'message': 'User is already in this room!'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'User is already in this room!'}, status=status.HTTP_200_OK)
 
 
 class LeaveRoom(APIView):
     """DELETE api/rooms/<str:name>/leave"""
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, room_name):
         room_query = Room.objects.filter(name=room_name)

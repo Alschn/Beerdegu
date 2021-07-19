@@ -2,8 +2,15 @@
   display: flex;
   justify-content: center;
 
-  & > .MuiTextField-root {
+  .MuiTextField-root {
     margin: 8px;
     width: 50%;
+  }
+}
+
+
+@media screen and (max-width: 767px) {
+  .form-textfield-wrapper .MuiTextField-root {
+    width: 90%;
   }
 }

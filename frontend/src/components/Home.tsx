@@ -1,44 +1,47 @@
-import React, {FC, useState} from "react";
-import axios from "axios";
-import logo from "../logo.svg";
+import React, {FC, Fragment} from "react";
+import beers from "../images/logo.svg";
 import "./Home.scss";
+import {Button} from "@material-ui/core";
+import {useHistory} from "react-router";
 
 const Home: FC = () => {
-  const [textInput, setTextInput] = useState<string>("");
-  const [output, setOutput] = useState<string>("");
+  const history = useHistory();
+  const token = localStorage.getItem('token');
 
-  const handleSubmit = () => {
-    axios.get(`/api/test?text=${textInput}`).then(res => {
-      setOutput(res.data.text);
-    }).catch(err => console.log(err));
-  };
+  const redirectTo = (path: string) => history.push(path);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo"/>
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-
-        <div>
-          <label htmlFor='char-input'>Make this text uppercase: </label>
-          <input
-            id='char-input' type='text' value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-          />
-          <button onClick={handleSubmit}>Submit</button>
-          <h3>{output}</h3>
+      <div className="App-body">
+        <div className="App-logo-wrapper">
+          <img className="App-logo" src={beers} alt="logo"/>
+          <span className="App-title">Beerdegu</span>
         </div>
-      </header>
+
+        <div className="App-button-group">
+          {token !== null ? (
+            <Fragment>
+              <Button variant="contained" color="primary" onClick={() => redirectTo('/join')}>
+                Join
+              </Button>
+
+              <Button variant="contained" color="secondary" onClick={() => redirectTo('/create')}>
+                Create
+              </Button>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Button variant="contained" color="primary" onClick={() => redirectTo('/login')}>
+                Login
+              </Button>
+
+              <Button variant="contained" color="secondary" onClick={() => redirectTo('/register')}>
+                Register
+              </Button>
+            </Fragment>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

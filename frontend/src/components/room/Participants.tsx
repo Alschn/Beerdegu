@@ -1,16 +1,26 @@
 import React, {FC} from "react";
-import {UserObject} from "../../utils/ws";
+import {useRoomContext} from "../../hooks/useContextHook";
+import {List, ListItem, ListItemText} from "@material-ui/core";
 
 
-interface ParticipantsProps {
-  users: UserObject[],
-}
+const Participants: FC = () => {
+  const {users} = useRoomContext();
 
-const Participants: FC<ParticipantsProps> = ({users}) => {
   return (
-    <ol>
-      {users.length > 0 && users.map(({id, username}) => <li>{id} {username}</li>)}
-    </ol>
+    <List>
+      <ListItem>
+        <ListItemText>
+          <strong>Uczestnicy:</strong>
+        </ListItemText>
+      </ListItem>
+      {users && users.length > 0 && users.map(
+        ({username}, idx) => <ListItem key={`li-user-${idx}`}>
+          <ListItemText>
+            <strong>{idx + 1}.</strong> {username}
+          </ListItemText>
+        </ListItem>)
+      }
+    </List>
   );
 };
 
