@@ -3,14 +3,18 @@ import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import axiosClient from "../api/axiosClient";
-import {UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
-import "./Room.scss";
+import {BeerObject, RatingsObject, UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
 import BeerFormStepper from "./room/BeerFormStepper";
-import {RoomContext} from "../context/roomContext";
+import RoomContext, {roomStateType} from "../context/roomContext";
 import Sidebar from "./layout/Sidebar";
 import Header from "./layout/Header";
 import ChatSidebar from "./layout/ChatSidebar";
 import DesktopChat from "./room/DesktopChat";
+import "./Room.scss";
+import BeerRatingsTable from "./room/BeerRatingsTable";
+import UserRatingsTable from "./room/UserRatingsTable";
+import ResultsStepper from "./room/ResultsStepper";
+
 
 interface RoomParamsProps {
   code: string;
@@ -56,7 +60,17 @@ const Room: FC = () => {
           setUsers([...parsed.data]);
           break;
         case "set_beers":
-          setBeers([...parsed.data])
+          setBeers([...parsed.data]);
+          // if (parsed.extra) setRoomState(parsed.extra.state);
+          break;
+        case "set_room_state":
+          setRoomState(parsed.data.state);
+          break;
+        case "set_final_results":
+          setResults([...parsed.data]);
+          break;
+        case "set_user_results":
+          setUserResults([...parsed.data]);
           break;
         default:
           break;
@@ -70,7 +84,10 @@ const Room: FC = () => {
   const [users, setUsers] = useState<UserObject[]>([]);
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<string[]>([]);
-  const [beers, setBeers] = useState<any[]>([]);
+  const [beers, setBeers] = useState<BeerObject[]>([]);
+  const [roomState, setRoomState] = useState<roomStateType>("WAITING");
+  const [results, setResults] = useState<RatingsObject[]>([]);
+  const [userResults, setUserResults] = useState<any[]>([]);
 
   const [open, setOpen] = useState<boolean>(false);
   const [openSidebarChat, setOpenSidebarChat] = useState<boolean>(false);
@@ -109,13 +126,34 @@ const Room: FC = () => {
     return () => clearInterval(interval);
   }, [sendJsonMessage])
 
+  useEffect(() => {
+    if (roomState === 'IN_PROGRESS') {
+      sendJsonMessage({
+        command: 'load_beers',
+      })
+    } else if (roomState === 'FINISHED') {
+      sendJsonMessage({
+        command: 'get_user_results',
+      });
+      sendJsonMessage({
+        command: 'get_final_results',
+      });
+    }
+  }, [roomState, sendJsonMessage])
+
   return (
     <RoomContext.Provider value={{
       code: code,
       isHost: isHost,
       wsState: connectionStatus,
+      sendMessage: sendJsonMessage,
+      message: message,
+      messages: messages,
       beers: beers,
       users: users,
+      roomState: roomState,
+      results: results,
+      userResults: userResults,
     }}>
       <Header
         openDrawerHandler={() => setOpen(true)}
@@ -129,8 +167,6 @@ const Room: FC = () => {
         <ChatSidebar
           open={openSidebarChat}
           toggleDrawerHandler={() => setOpenSidebarChat(false)}
-          message={message}
-          messages={messages}
           handleChange={handleChange}
           handleSendMessage={handleSendMessage}
         />
@@ -138,23 +174,13 @@ const Room: FC = () => {
 
       <Grid container>
         <Grid item xs={12} md={8} lg={10} className="room-body">
-          <BeerFormStepper beers={beers}/>
-
-          <Grid item xs={12}>
-            <button onClick={() => {
-              sendJsonMessage({
-                'command': 'get_beers'
-              })
-            }}>Get beers
-            </button>
-          </Grid>
-
+          {roomState === 'IN_PROGRESS' && <BeerFormStepper/>}
+          {roomState === 'FINISHED' && (<ResultsStepper/>)}
         </Grid>
 
         {matches && (
           <Grid item md={4} lg={2} className="room-chat">
             <DesktopChat
-              message={message} messages={messages}
               handleSendMessage={handleSendMessage}
               handleChange={handleChange}
             />

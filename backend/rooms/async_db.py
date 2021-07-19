@@ -3,11 +3,13 @@ from datetime import timedelta
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.aggregates import Avg, Count
+from django.db.models.fields import DecimalField
 from django.utils import timezone
 
-from beers.serializers import BeerRepresentationalSerializer
+from beers.serializers import BeerRepresentationalSerializer, BeerWithResultsSerializer
 from rooms.models import Room, UserInRoom, BeerInRoom, Rating
-from rooms.serializers import RatingSerializer
+from rooms.serializers import RatingSerializer, RoomSerializer
 from users.serializers import UserSerializer
 
 
@@ -121,24 +123,52 @@ def get_beers_in_room(room_name: str):
 
 
 @database_sync_to_async
-def join_room(room_name: str, user: User):
+def get_current_room(room_name: str):
     try:
         room = Room.objects.get(name=room_name)
-        participants = room.users
-        if not participants.filter(id=user.id).exists():
-            participants.add(user)
-    except Room.DoesNotExist:
-        pass
+        serialized = RoomSerializer(room).data
+        return serialized
+    except ObjectDoesNotExist:
+        return
 
 
 @database_sync_to_async
-def leave_room(room_name: str, user: User):
+def change_room_state_to(state: str, room_name: str):
+    try:
+        room = Room.objects.get(name=room_name)
+        serializer = RoomSerializer(instance=room, data={'state': state}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return serializer.data
+        return RoomSerializer(room).data
+    except ObjectDoesNotExist:
+        return
+
+
+@database_sync_to_async
+def get_final_user_beer_ratings(room_name: str, user: User):
     if user.is_anonymous:
         return
+
     try:
-        room = Room.objects.get(room=room_name)
-        participants = room.users
-        if participants.filter(id=user.id).exists():
-            participants.remove(user)
-    except Room.DoesNotExist:
+        ratings = Rating.objects.filter(added_by=user, belongs_to__room__name=room_name)
+        serialized = RatingSerializer(ratings, many=True).data
+        return serialized
+
+    except ObjectDoesNotExist:
+        return
+
+
+@database_sync_to_async
+def get_final_beers_ratings(room_name: str):
+    try:
+        room = Room.objects.get(name=room_name)
+        b = room.beers.through
+
+        beers_with_ratings = b.objects.all().annotate(
+            average_rating=Avg('ratings__note', output_field=DecimalField())
+        )
+        return BeerWithResultsSerializer(beers_with_ratings, many=True).data
+
+    except ObjectDoesNotExist:
         return

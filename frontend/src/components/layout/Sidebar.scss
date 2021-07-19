@@ -1,3 +1,19 @@
 .sidebar {
   width: 250px;
+
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 10px 10px 10px 15px;
+
+    .logo {
+      height: 50px;
+      margin-right: 20px;
+    }
+
+    .title {
+      font-size: 26px;
+      font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    }
+  }
 }
