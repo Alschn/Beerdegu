@@ -65,6 +65,7 @@ class RoomsViewSet(viewsets.ModelViewSet):
 
 class JoinRoom(APIView):
     """PUT api/rooms/<str:name>/join"""
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, room_name):
         room_query = Room.objects.filter(name=room_name)
@@ -95,11 +96,12 @@ class JoinRoom(APIView):
 
             return Response({'message': f'Joined room {room_name}'}, status=status.HTTP_200_OK)
 
-        return Response({'message': 'User is already in this room!'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'User is already in this room!'}, status=status.HTTP_200_OK)
 
 
 class LeaveRoom(APIView):
     """DELETE api/rooms/<str:name>/leave"""
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, room_name):
         room_query = Room.objects.filter(name=room_name)

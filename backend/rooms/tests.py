@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from rooms.models import Room
+from rooms.serializers import RoomSerializer
 
 
 class RoomTests(TestCase):
@@ -120,7 +121,7 @@ class RoomsAPIViewsTest(TestCase):
     def test_join_room_already_in(self):
         self._require_login_and_auth()
         response = self.client.put('/api/rooms/12345678/join', data={})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'message': 'User is already in this room!'})
 
     def test_join_room_full(self):
@@ -215,4 +216,20 @@ class RoomsAPIViewsTest(TestCase):
         pass
 
     def test_get_update_delete_room_doesnt_exist(self):
-        pass
+        self._require_login_and_auth()
+        response_get = self.client.get('/api/rooms/123/')
+        self.assertEqual(response_get.status_code, status.HTTP_404_NOT_FOUND)
+
+        self._require_login_and_auth()
+        response_put = self.client.put('/api/rooms/123/', {})
+        self.assertEqual(response_put.status_code, status.HTTP_404_NOT_FOUND)
+
+        response_patch = self.client.patch('/api/rooms/123/', {})
+        self.assertEqual(response_patch.status_code, status.HTTP_404_NOT_FOUND)
+
+        response_delete = self.client.delete('/api/rooms/123/')
+        self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class RoomsAsyncDbTests(TestCase):
+    pass
