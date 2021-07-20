@@ -11,6 +11,16 @@ class RoomSerializer(serializers.ModelSerializer):
         exclude = ('password',)
 
 
+class CreateRoomSerializer(serializers.ModelSerializer):
+    host = serializers.PrimaryKeyRelatedField(
+        read_only=True, default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Room
+        fields = ['name', 'password', 'slots', 'host']
+
+
 class DetailedRoomSerializer(RoomSerializer):
     host = UserSerializer(read_only=True)
     users = UserSerializer(many=True, read_only=True)
