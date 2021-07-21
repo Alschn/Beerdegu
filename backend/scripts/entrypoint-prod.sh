@@ -2,4 +2,5 @@
 python3 backend/manage.py makemigrations --no-input
 python3 backend/manage.py migrate --no-input
 
-daphne -b 0.0.0.0 backend/core.asgi:application -v2
+cd backend
+daphne -b 0.0.0.0 core.asgi:application -v2
