@@ -1,3 +1,4 @@
 build:
   docker:
     web: Dockerfile.prod
+    worker: python backend/manage.py runworker -v2
