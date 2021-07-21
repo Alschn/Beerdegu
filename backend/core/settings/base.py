@@ -170,3 +170,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # required by django.contrib.sites
 SITE_ID = 1
+
+ACCOUNT_EMAIL_VERIFICATION = "none"

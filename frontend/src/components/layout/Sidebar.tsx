@@ -49,11 +49,11 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
   const getRatingsAndStatistics = () => {
     sendMessage({
       command: 'get_user_ratings',
-    })
+    });
 
     sendMessage({
       command: 'get_final_ratings',
-    })
+    });
   };
 
   return (
@@ -99,14 +99,17 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
                 </ListItem>
               )}
 
-              <ListItem button onClick={() => changeRoomState('FINISHED')}>
-                <ListItemText>Zakończ degustację</ListItemText>
-              </ListItem>
+              {roomState === 'IN_PROGRESS' && (
+                <ListItem button onClick={() => changeRoomState('FINISHED')}>
+                  <ListItemText>Zakończ degustację</ListItemText>
+                </ListItem>
+              )}
 
-              <ListItem button onClick={() => getRatingsAndStatistics()}>
-                <ListItemText>Wyświetl statystyki</ListItemText>
-              </ListItem>
-
+              {roomState === 'FINISHED' && (
+                <ListItem button onClick={() => getRatingsAndStatistics()}>
+                  <ListItemText>Wyświetl statystyki</ListItemText>
+                </ListItem>
+              )}
               <Divider/>
             </>
           )}
