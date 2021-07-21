@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.db import IntegrityError
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -8,26 +7,7 @@ from rooms.models import Room
 from rooms.serializers import RoomSerializer, DetailedRoomSerializer
 
 
-class RoomTests(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        cls.user = User.objects.create_user(
-            username='Test',
-            password='!@#$%'
-        )
-
-    def test_create_room(self):
-        """Checks if room was created and host was added to users."""
-        room = Room.objects.create(
-            name='ABCDEFGH',
-            host=self.user,
-            slots=4,
-        )
-        self.assertEqual(Room.objects.get(name='ABCDEFGH'), room)
-        self.assertIn(self.user, room.users.all())
-
-
-class RoomsAPIViewsTest(TestCase):
+class RoomsAPIViewsTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
 
@@ -35,7 +15,7 @@ class RoomsAPIViewsTest(TestCase):
     def setUpTestData(cls) -> None:
         cls.user1 = User.objects.create_user(username='Test', password='!@#$%')
         cls.user2 = User.objects.create_user(username='Test2', password='!@#$%')
-        cls.room = Room.objects.create(name='12345678', host=cls.user1, slots=4,)
+        cls.room = Room.objects.create(name='12345678', host=cls.user1, slots=4, )
         cls.room_with_pass = Room.objects.create(
             name='abcdefgh', password='password', slots=2,
             host=User.objects.create_user(
@@ -298,7 +278,3 @@ class RoomsAPIViewsTest(TestCase):
 
         response_delete = self.client.delete('/api/rooms/123/')
         self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
-
-
-class RoomsAsyncDbTests(TestCase):
-    pass
