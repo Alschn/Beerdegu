@@ -4,6 +4,7 @@ python3 manage.py makemigrations --no-input
 python3 manage.py migrate --no-input
 
 script="
+from django.contrib.auth.models import User;
 if not User.objects.filter(username=username).exists():
     User.objects.create_superuser('$DJANGO_SUPERUSER_USERNAME', '$DJANGO_SUPERUSER_EMAIL', '$DJANGO_SUPERUSER_PASSWORD');
     print('Superuser created.');
