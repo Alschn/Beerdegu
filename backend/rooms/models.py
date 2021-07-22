@@ -44,6 +44,9 @@ class Rating(models.Model):
     ], null=True, blank=True)
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
+    class Meta:
+        ordering = ['id']
+
     # noinspection PyUnresolvedReferences
     def __str__(self) -> str:
         to_str = f"{self.note} by {self.added_by}"

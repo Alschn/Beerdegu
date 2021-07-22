@@ -28,10 +28,12 @@ class DetailedRoomSerializer(RoomSerializer):
 
 
 class RatingSerializer(serializers.ModelSerializer):
+    beer = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Rating
         fields = [
-            'color', 'foam', 'smell', 'taste', 'opinion', 'note'
+            'color', 'foam', 'smell', 'taste', 'opinion', 'note', 'beer'
         ]
 
     def to_representation(self, instance):

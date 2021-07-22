@@ -22,6 +22,9 @@ class Beer(models.Model):
             to_str += f", {self.brewery}"
         return to_str
 
+    class Meta:
+        ordering = ['id']
+
 
 class Brewery(models.Model):
     name = models.CharField(max_length=100, unique=True)
