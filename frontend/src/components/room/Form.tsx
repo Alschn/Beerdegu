@@ -4,6 +4,7 @@ import "./Form.scss";
 import useWebSocket from "react-use-websocket";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {UserRatingsObject, WebsocketMessage} from "../../utils/ws";
+import {HOST, WS_SCHEME} from "../../config";
 
 type State = UserRatingsObject;
 
@@ -50,7 +51,7 @@ const BeerForm: FC<BeerFormProps> = ({beerID}) => {
 
   const {
     sendJsonMessage,
-  } = useWebSocket(`ws://127.0.0.1:8000/ws/room/${code}/`, {
+  } = useWebSocket(`${WS_SCHEME}://${HOST}/ws/room/${code}/`, {
     shouldReconnect: () => true,
     share: true,
     onMessage: (event) => {

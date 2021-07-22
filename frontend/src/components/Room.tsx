@@ -12,6 +12,7 @@ import ChatSidebar from "./layout/ChatSidebar";
 import DesktopChat from "./room/DesktopChat";
 import "./Room.scss";
 import ResultsStepper from "./room/ResultsStepper";
+import {HOST, WS_SCHEME} from "../config";
 
 
 interface RoomParamsProps {
@@ -33,7 +34,7 @@ const Room: FC = () => {
     return axiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
       const {is_host} = data;
       setIsHost(Boolean(is_host));
-      return `ws://127.0.0.1:8000/ws/room/${code}/`;
+      return `${WS_SCHEME}://${HOST}/ws/room/${code}/`;
     }).catch(() => {
       // idk if this is right approach
       history.push('/');
