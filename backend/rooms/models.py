@@ -17,7 +17,7 @@ class Room(models.Model):
 
     name = models.CharField(unique=True, max_length=8)
     password = models.CharField(max_length=20, null=True, blank=True)
-    host = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='host')
+    host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='host')
     slots = models.PositiveIntegerField(default=1, validators=[
         MinValueValidator(1),
         MaxValueValidator(10),
@@ -43,6 +43,9 @@ class Rating(models.Model):
         MaxValueValidator(10),
     ], null=True, blank=True)
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ['id']
 
     # noinspection PyUnresolvedReferences
     def __str__(self) -> str:

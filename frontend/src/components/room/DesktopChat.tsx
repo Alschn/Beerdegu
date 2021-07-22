@@ -18,26 +18,30 @@ const DesktopChat: FC<ChatProps> = (
   return (
     <div className="desktop-chat">
       {/* to do desktop chat */}
-      <List>
+      <List className="desktop-chat-messages">
         {messages.length > 0 && messages.map((m, idx) => (
           <ListItem key={"message" + idx}>{m}</ListItem>
         ))}
       </List>
 
-      <TextField
-        value={message}
-        onChange={handleChange}
-        onKeyDown={handlePressEnter}
-        variant="outlined"
-      />
+      <div className="desktop-chat-input">
+        <TextField
+          value={message}
+          onChange={handleChange}
+          onKeyDown={handlePressEnter}
+          variant="outlined"
+          className="input-field"
+        />
 
-      <Button
-        onClick={handleSendMessage}
-        variant="contained"
-        color="primary"
-      >
-        Wyślij
-      </Button>
+        <Button
+          onClick={handleSendMessage}
+          variant="contained"
+          color="primary"
+          className="submit-button"
+        >
+          Wyślij
+        </Button>
+      </div>
     </div>
   );
 };

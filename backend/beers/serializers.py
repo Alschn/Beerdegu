@@ -61,7 +61,7 @@ class SimplifiedBeerSerializer(serializers.ModelSerializer):
 class BeerRepresentationalSerializer(SimplifiedBeerSerializer):
     class Meta:
         model = Beer
-        fields = ('id', 'name', 'brewery', 'style', 'image', 'description')
+        fields = ('id', 'name', 'brewery', 'style', 'percentage', 'image', 'description')
 
 
 class BeerWithResultsSerializer(serializers.ModelSerializer):
@@ -74,7 +74,6 @@ class BeerWithResultsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeerInRoom
         fields = ('beer', 'average_rating')
-
 
 
 class DetailedBeerSerializer(BeerSerializer):

@@ -166,7 +166,6 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_create_room(self):
         self._require_login_and_auth(other=True)
-        self.user2.host = None
         response = self.client.post('/api/rooms/', data={
             'name': 'Good',
             'password': 'anything',

@@ -1,14 +1,23 @@
 import React, {FC, Fragment} from "react";
-import beers from "../images/logo.svg";
-import "./Home.scss";
+import beers from "../../images/logo.svg";
 import {Button} from "@material-ui/core";
 import {useHistory} from "react-router";
+import {onLogout} from "../../api/auth";
+import "./Home.scss";
+
 
 const Home: FC = () => {
   const history = useHistory();
   const token = localStorage.getItem('token');
 
   const redirectTo = (path: string) => history.push(path);
+
+  const logout = () => {
+    onLogout().then(() => {
+      localStorage.removeItem('token');
+      window.location.reload();
+    });
+  };
 
   return (
     <div className="App">
@@ -22,11 +31,18 @@ const Home: FC = () => {
           {token !== null ? (
             <Fragment>
               <Button variant="contained" color="primary" onClick={() => redirectTo('/join')}>
-                Join
+                Join Room
               </Button>
 
               <Button variant="contained" color="secondary" onClick={() => redirectTo('/create')}>
-                Create
+                Create Room
+              </Button>
+
+              <Button
+                variant="contained" color="secondary" onClick={() => logout()}
+                className="App-button-logout"
+              >
+                Logout
               </Button>
             </Fragment>
           ) : (

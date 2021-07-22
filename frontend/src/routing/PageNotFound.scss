@@ -1,0 +1,21 @@
+.PageNotFound {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  .text {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-size: 8vmin;
+  }
+
+  .image {
+    height: 18vmin;
+    pointer-events: none;
+    padding-top: 3vmin;
+    margin: 20px;
+  }
+}
+
+

@@ -1,7 +1,3 @@
-.App {
-
-}
-
 .App-logo-wrapper {
   display: flex;
   align-items: center;
@@ -11,19 +7,26 @@
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     font-size: 8vmin;
   }
+
+  .App-logo {
+    height: 18vmin;
+    pointer-events: none;
+    margin: 20px;
+  }
 }
 
 .App-button-group {
   button {
-    margin: 10px;
-    width: 25vmin;
-  }
-}
+    margin: 8px;
 
-.App-logo {
-  height: 18vmin;
-  pointer-events: none;
-  margin: 20px;
+    &:not(button:nth-child(3)) {
+      width: 28vmin;
+    }
+
+    &.App-button-logout {
+      background-color: #02b057 !important;
+    }
+  }
 }
 
 .App-body {

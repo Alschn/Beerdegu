@@ -3,16 +3,23 @@ import {Button, Container, CssBaseline, Grid, Link} from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import "./Auth.scss";
+import LockOpenOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
 import {onLogin} from "../../api/auth";
 import {useHistory} from "react-router";
+import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
+import "./Auth.scss";
+
 
 const Login: FC = () => {
   const history = useHistory();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const [response, setResponse] = useState<AlertContentObject>({
+    message: "",
+    severity: "error",
+  });
 
   const handleSubmit = (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
@@ -21,9 +28,17 @@ const Login: FC = () => {
       password: password,
     }).then(({data}) => {
       const {key} = data;
+      setResponse(
+        {message: 'Logged in! Redirecting to home page ...', severity: 'success'}
+      );
       localStorage.setItem('token', key);
-      history.push("/");
-    }).catch(err => console.log(err));
+      setTimeout(() => history.push("/"), 800)
+    }).catch(err => {
+      if (err.response) setResponse({
+        message: `${err.response.statusText} (${err.response.status})`,
+        severity: 'error',
+      });
+    });
   };
 
   const handleChange = (e: React.BaseSyntheticEvent) => {
@@ -44,11 +59,14 @@ const Login: FC = () => {
       <CssBaseline/>
       <div className="auth">
         <Avatar className="auth-icon">
-          <LockOutlinedIcon/>
+          <LockOpenOutlinedIcon/>
         </Avatar>
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
+        <div className="auth-alert">
+          <CollapsableAlert content={response}/>
+        </div>
         <div className="auth-form">
           <TextField
             variant="outlined"

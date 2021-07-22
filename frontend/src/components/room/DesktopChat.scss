@@ -1,0 +1,16 @@
+.desktop-chat {
+  position: relative;
+  height: calc(100vh - 100px);
+  width: 100%;
+
+  .desktop-chat-messages {
+    height: calc(100vh - 150px);
+    overflow-y: scroll;
+  }
+
+  .desktop-chat-input {
+    .text-field {}
+
+    .submit-button {}
+  }
+}

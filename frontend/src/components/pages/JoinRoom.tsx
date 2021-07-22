@@ -7,11 +7,17 @@ import SupervisorAccountRoundedIcon from '@material-ui/icons/SupervisorAccountRo
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import "./JoinCreateRoom.scss";
+import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 
 const JoinRoom: FC = () => {
   const history = useHistory();
   const [roomName, setRoomName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const [response, setResponse] = useState<AlertContentObject>({
+    message: '',
+    severity: 'error',
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.target.id === 'roomName' ? setRoomName(e.target.value) : setPassword(e.target.value);
@@ -22,8 +28,17 @@ const JoinRoom: FC = () => {
       'name': roomName,
       'password': password,
     }).then(() => {
-      history.push(`/room/${roomName}`);
-    }).catch(err => console.log(err));
+      setResponse({
+        message: `Joining room ${roomName} ...`,
+        severity: 'success',
+      })
+      setTimeout(() => history.push(`/room/${roomName}`), 1000)
+    }).catch(err => {
+      if (err.response) setResponse({
+        message: `${err.response.statusText} (${err.response.status})`,
+        severity: 'error',
+      });
+    });
   };
 
   return (
@@ -36,6 +51,9 @@ const JoinRoom: FC = () => {
         <Typography component="h1" variant="h5">
           Join Room
         </Typography>
+        <div className="auth-alert">
+          <CollapsableAlert content={response}/>
+        </div>
         <div className="room-form">
           <TextField
             variant="outlined"

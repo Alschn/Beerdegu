@@ -3,6 +3,7 @@ from datetime import timedelta
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 from django.db.models.aggregates import Avg
 from django.db.models.fields import DecimalField
 from django.utils import timezone
@@ -115,7 +116,7 @@ def get_user_form_data(room_name: str, user: User, beer_id: str):
 def get_beers_in_room(room_name: str):
     try:
         room = Room.objects.get(name=room_name)
-        beers = room.beers.all()
+        beers = room.beers.all().order_by('id')
         serialized = BeerRepresentationalSerializer(beers, many=True).data
         return serialized
     except ObjectDoesNotExist:
@@ -151,7 +152,9 @@ def get_final_user_beer_ratings(room_name: str, user: User):
         return
 
     try:
-        ratings = Rating.objects.filter(added_by=user, belongs_to__room__name=room_name)
+        ratings = Rating.objects.filter(
+            added_by=user, belongs_to__room__name=room_name
+        ).annotate(beer=F('belongs_to__beer'))
         serialized = RatingSerializer(ratings, many=True).data
         return serialized
 
@@ -167,7 +170,7 @@ def get_final_beers_ratings(room_name: str):
 
         beers_with_ratings = b.objects.all().annotate(
             average_rating=Avg('ratings__note', output_field=DecimalField())
-        )
+        ).order_by('beer')
         return BeerWithResultsSerializer(beers_with_ratings, many=True).data
 
     except ObjectDoesNotExist:

@@ -55,6 +55,7 @@ const BeerFormStepper: FC = () => {
           <p><strong>Nazwa:</strong> {beers[activeStep].name}</p>
           <p><strong>Browar:</strong> {beers[activeStep].brewery}</p>
           <p><strong>Styl:</strong> {beers[activeStep].style}</p>
+          <p><strong>Zawartość alkoholu:</strong> {beers[activeStep].percentage}%</p>
           <p><strong>Opis:</strong> {beers[activeStep].description}</p>
         </Grid>
       </Grid>
