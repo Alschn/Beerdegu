@@ -6,6 +6,7 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import axiosClient from "../../api/axiosClient";
 import {useHistory} from "react-router";
+import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 
 const CreateRoom = () => {
   const history = useHistory();
@@ -19,6 +20,11 @@ const CreateRoom = () => {
     slots: undefined,
   });
 
+  const [response, setResponse] = useState<AlertContentObject>({
+    message: '',
+    severity: 'error',
+  })
+
   const handleChange = (e: React.BaseSyntheticEvent) => {
     const field = e.target.name;
     setFormState({
@@ -29,8 +35,17 @@ const CreateRoom = () => {
 
   const handleSubmit = () => {
     axiosClient.post('/api/rooms/', {...formState}).then(() => {
-      history.push(`/room/${formState.name}`)
-    }).catch(err => console.log(err));
+      setResponse({
+        message: `Created room ${formState.name}! Redirecting ...`,
+        severity: 'success',
+      })
+      setTimeout(() => history.push(`/room/${formState.name}`), 1000)
+    }).catch(err => {
+      if (err.response) setResponse({
+        message: `${err.response.statusText} (${err.response.status})`,
+        severity: 'error',
+      });
+    });
   };
 
   return (
@@ -43,6 +58,9 @@ const CreateRoom = () => {
         <Typography component="h1" variant="h5">
           Create New Room
         </Typography>
+        <div className="room-alert">
+          <CollapsableAlert content={response}/>
+        </div>
         <div className="room-form">
           <TextField
             variant="outlined"

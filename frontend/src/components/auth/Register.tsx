@@ -8,11 +8,11 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import "./Auth.scss";
-import {Collapse} from '@material-ui/core';
-import {Alert} from '@material-ui/lab';
 import {onRegister} from "../../api/auth";
 import {useHistory} from "react-router";
+import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
+import "./Auth.scss";
+
 
 const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,7 +27,9 @@ const Register: FC = () => {
   const [password1, setPassword1] = useState<string>("");
   const [password2, setPassword2] = useState<string>("");
 
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [response, setResponse] = useState<AlertContentObject>({
+    message: '',
+  });
 
   const handleSubmit = (e: React.BaseSyntheticEvent): void => {
     e.preventDefault();
@@ -37,8 +39,17 @@ const Register: FC = () => {
       password1: password1,
       password2: password2,
     }).then(() => {
-      history.push("/login");
-    }).catch(err => console.log(err))
+      setResponse({
+        message: 'Created account! Redirecting to login page...',
+        severity: 'success',
+      });
+      setTimeout(() => history.push("/login"), 1000)
+    }).catch(err => {
+      if (err.response) setResponse({
+        message: `${err.response.statusText} (${err.response.status})`,
+        severity: 'error',
+      });
+    })
   }
 
   const passwordsMatch = (): boolean => password1 === password2;
@@ -54,18 +65,8 @@ const Register: FC = () => {
           Sign up
         </Typography>
         <div className="auth-alert">
-          <Collapse in={errorMessage !== ""}>
-            {errorMessage && (
-              <Alert
-                severity="error"
-                onClose={() => setErrorMessage("")}
-              >
-                {errorMessage}
-              </Alert>
-            )}
-          </Collapse>
+          <CollapsableAlert content={response}/>
         </div>
-
         <form className="auth-form" noValidate onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12}>

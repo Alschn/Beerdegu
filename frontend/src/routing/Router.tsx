@@ -1,7 +1,7 @@
 import React, {FC} from "react";
 import {BrowserRouter, Route, Switch} from "react-router-dom";
-import Home from "../components/Home";
-import Room from "../components/Room";
+import Home from "../components/pages/Home";
+import Room from "../components/pages/Room";
 import PageNotFound from "./PageNotFound";
 import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";

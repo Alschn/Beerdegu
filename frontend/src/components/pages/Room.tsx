@@ -2,17 +2,17 @@ import {Grid, useMediaQuery, useTheme} from "@material-ui/core";
 import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
-import axiosClient from "../api/axiosClient";
-import {BeerObject, RatingsObject, UserObject, WebsocketConnectionState, WebsocketMessage} from "../utils/ws";
-import BeerFormStepper from "./room/BeerFormStepper";
-import RoomContext, {roomStateType} from "../context/roomContext";
-import Sidebar from "./layout/Sidebar";
-import Header from "./layout/Header";
-import ChatSidebar from "./layout/ChatSidebar";
-import DesktopChat from "./room/DesktopChat";
+import axiosClient from "../../api/axiosClient";
+import {BeerObject, RatingsObject, UserObject, WebsocketConnectionState, WebsocketMessage} from "../../utils/ws";
+import BeerFormStepper from "../room/BeerFormStepper";
+import RoomContext, {roomStateType} from "../../context/roomContext";
+import Sidebar from "../layout/Sidebar";
+import Header from "../layout/Header";
+import ChatSidebar from "../layout/ChatSidebar";
+import DesktopChat from "../room/DesktopChat";
+import ResultsStepper from "../room/ResultsStepper";
+import {HOST, WS_SCHEME} from "../../config";
 import "./Room.scss";
-import ResultsStepper from "./room/ResultsStepper";
-import {HOST, WS_SCHEME} from "../config";
 
 
 interface RoomParamsProps {
