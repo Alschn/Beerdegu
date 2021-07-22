@@ -4,55 +4,24 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from rooms.models import Room
-from rooms.serializers import RoomSerializer
+from rooms.serializers import RoomSerializer, DetailedRoomSerializer
 
 
-class RoomTests(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        cls.user = User.objects.create_user(
-            username='Test',
-            password='!@#$%'
-        )
-
-    def test_create_room(self):
-        """Checks if room was created and host was added to users."""
-        room = Room.objects.create(
-            name='ABCDEFGH',
-            host=self.user,
-            slots=4,
-        )
-        self.assertEqual(Room.objects.get(name='ABCDEFGH'), room)
-        self.assertIn(self.user, room.users.all())
-
-
-class RoomsAPIViewsTest(TestCase):
+class RoomsAPIViewsTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user1 = User.objects.create_user(
-            username='Test',
-            password='!@#$%'
-        )
-        cls.user2 = User.objects.create_user(
-            username='Test2',
-            password='!@#$%'
-        )
-        cls.room = Room.objects.create(
-            name='12345678',
-            host=cls.user1,
-            slots=4,
-        )
+        cls.user1 = User.objects.create_user(username='Test', password='!@#$%')
+        cls.user2 = User.objects.create_user(username='Test2', password='!@#$%')
+        cls.room = Room.objects.create(name='12345678', host=cls.user1, slots=4, )
         cls.room_with_pass = Room.objects.create(
-            name='abcdefgh',
+            name='abcdefgh', password='password', slots=2,
             host=User.objects.create_user(
                 username='Test3',
                 password='abcdef123@'
             ),
-            password='password',
-            slots=2,
         )
 
     # noinspection PyUnresolvedReferences
@@ -91,10 +60,7 @@ class RoomsAPIViewsTest(TestCase):
         to_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            {
-                'message': 'Test is in this room.',
-                'is_host': True,
-            },
+            {'message': 'Test is in this room.', 'is_host': True},
             to_json
         )
 
@@ -105,10 +71,7 @@ class RoomsAPIViewsTest(TestCase):
         to_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            {
-                'message': 'Test2 is in this room.',
-                'is_host': False,
-            },
+            {'message': 'Test2 is in this room.', 'is_host': False},
             to_json
         )
 
@@ -192,28 +155,114 @@ class RoomsAPIViewsTest(TestCase):
         self.assertEqual(r.users.count(), 0)
         self.assertNotIn(self.user1, r.users.all())
 
-    # to do ...
-
     def test_list_rooms(self):
-        pass
+        self._require_login_and_auth()
+        response = self.client.get('/api/rooms/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            first=response.json(),
+            second=DetailedRoomSerializer(Room.objects.all(), many=True).data
+        )
 
     def test_create_room(self):
-        pass
+        self._require_login_and_auth(other=True)
+        self.user2.host = None
+        response = self.client.post('/api/rooms/', data={
+            'name': 'Good',
+            'password': 'anything',
+            'slots': 5,
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Room.objects.filter(name='Good').exists())
 
     def test_create_room_name_not_unique(self):
-        pass
+        self._require_login_and_auth(other=True)
+        response = self.client.post('/api/rooms/', data={
+            'name': '12345678',
+            'password': '',
+            'slots': 3,
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {'name': ['room with this name already exists.']})
 
     def test_create_room_wrong_slots_number(self):
-        pass
+        self._require_login_and_auth(other=True)
+        r1 = self.client.post('/api/rooms/', data={
+            'name': 'ooo', 'password': 'anything', 'slots': 11,
+        })
+        self.assertEqual(r1.status_code, status.HTTP_400_BAD_REQUEST)
+
+        r2 = self.client.post('/api/rooms/', data={
+            'name': 'ooo', 'password': 'anything', 'slots': -1,
+        })
+        self.assertEqual(r2.status_code, status.HTTP_400_BAD_REQUEST)
+
+        r3 = self.client.post('/api/rooms/', data={
+            'name': 'ooo', 'password': 'anything', 'slots': 5.6,
+        })
+        self.assertEqual(r3.status_code, status.HTTP_400_BAD_REQUEST)
+
+        r4 = self.client.post('/api/rooms/', data={
+            'name': 'ooo', 'password': 'anything', 'slots': 'a',
+        })
+        self.assertEqual(r4.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_room_but_user_already_host_in_other_room(self):
+        self._require_login_and_auth()
+        response = self.client.post('/api/rooms/', data={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json(),
+            {'message': 'User is already a host of another room. Leave it and try again!'}
+        )
 
     def test_get_room_by_id(self):
-        pass
+        self._require_login_and_auth()
+        response = self.client.get(f'/api/rooms/{self.room.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), DetailedRoomSerializer(self.room).data)
 
     def test_update_room_by_id(self):
-        pass
+        self._require_login_and_auth()
+        lookup_id = self.room.id
+        self.assertEqual(self.room.state, 'WAITING')
+        response = self.client.patch(f'/api/rooms/{lookup_id}/', {
+            'state': 'IN_PROGRESS'
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.room.refresh_from_db()
+        self.assertEqual(self.room.state, 'IN_PROGRESS')
+        self.assertEqual(
+            first=response.json(),
+            second=RoomSerializer(Room.objects.get(id=lookup_id)).data
+        )
+
+    def test_update_room_not_host(self):
+        self._require_login_and_auth()
+        self.assertEqual(self.room.state, 'WAITING')
+        response = self.client.patch(f'/api/rooms/{self.room_with_pass.id}/', {
+            'state': 'IN_PROGRESS'
+        })
+        self.assertEqual(self.room.state, 'WAITING')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'You do not have permission to perform this action.'}
+        )
 
     def test_delete_room_by_id(self):
-        pass
+        self._require_login_and_auth()
+        response = self.client.delete(f'/api/rooms/{self.room.id}/')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_room_not_host(self):
+        self._require_login_and_auth()
+        response = self.client.delete(f'/api/rooms/{self.room_with_pass.id}/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.json(),
+            {'detail': 'You do not have permission to perform this action.'}
+        )
 
     def test_get_update_delete_room_doesnt_exist(self):
         self._require_login_and_auth()
@@ -229,7 +278,3 @@ class RoomsAPIViewsTest(TestCase):
 
         response_delete = self.client.delete('/api/rooms/123/')
         self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
-
-
-class RoomsAsyncDbTests(TestCase):
-    pass

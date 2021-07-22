@@ -28,9 +28,7 @@ const CreateRoom = () => {
   };
 
   const handleSubmit = () => {
-    axiosClient.post('/api/rooms/', {...formState}).then((res) => {
-      console.log(res.data);
-      // maybe display popup, freeze and then redirect
+    axiosClient.post('/api/rooms/', {...formState}).then(() => {
       history.push(`/room/${formState.name}`)
     }).catch(err => console.log(err));
   };

@@ -1,11 +1,14 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rooms.models import Room
 from rooms.permissions import IsHostOrListCreateOnly
-from rooms.serializers import RoomSerializer, DetailedRoomSerializer
+from rooms.serializers import (
+    RoomSerializer, DetailedRoomSerializer, CreateRoomSerializer
+)
 
 
 class UserIsInRoom(APIView):
@@ -60,7 +63,30 @@ class RoomsViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
             return DetailedRoomSerializer
+        if hasattr(self, 'action') and self.action == 'create':
+            return CreateRoomSerializer
         return super().get_serializer_class()
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        sender = request.user
+
+        rooms = Room.objects.filter(host=sender)
+
+        if rooms.exists():
+            return Response(
+                {'message': 'User is already a host of another room. Leave it and try again!'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = self.get_serializer_class()(data=request.data, context={'request': request})
+
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer) -> None:
+        serializer.save(host=self.request.user)
 
 
 class JoinRoom(APIView):

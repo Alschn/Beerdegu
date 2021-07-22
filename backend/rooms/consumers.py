@@ -1,6 +1,7 @@
 import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.conf import settings
 
 from rooms.async_db import (
     get_users_in_room, bump_users_last_active_field,
@@ -73,7 +74,8 @@ class RoomConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)  # parsed object
         command = data.get('command')
 
-        print(f"Received:\n{data}\nFrom: {self.scope.get('user')}")
+        if settings.DEBUG:
+            print(f"Received:\n{data}\nFrom: {self.scope.get('user')}")
 
         if not command:
             return
@@ -144,14 +146,10 @@ class RoomConsumer(AsyncWebsocketConsumer):
         }))
 
     async def get_beers(self, event):
-        # state = await change_room_state_to('IN_PROGRESS', self.room_name)
-        # if not state:
-        #     return
         beers = await get_beers_in_room(room_name=self.room_name)
         await self.send(text_data=json.dumps({
             'data': beers,
             'command': 'set_beers',
-            # 'extra': state,
         }))
 
     async def load_beers(self, event):

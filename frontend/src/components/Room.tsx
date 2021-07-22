@@ -11,9 +11,8 @@ import Header from "./layout/Header";
 import ChatSidebar from "./layout/ChatSidebar";
 import DesktopChat from "./room/DesktopChat";
 import "./Room.scss";
-import BeerRatingsTable from "./room/BeerRatingsTable";
-import UserRatingsTable from "./room/UserRatingsTable";
 import ResultsStepper from "./room/ResultsStepper";
+import {HOST, WS_SCHEME} from "../config";
 
 
 interface RoomParamsProps {
@@ -35,7 +34,7 @@ const Room: FC = () => {
     return axiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
       const {is_host} = data;
       setIsHost(Boolean(is_host));
-      return `ws://127.0.0.1:8000/ws/room/${code}/`;
+      return `${WS_SCHEME}://${HOST}/ws/room/${code}/`;
     }).catch(() => {
       // idk if this is right approach
       history.push('/');
@@ -61,7 +60,6 @@ const Room: FC = () => {
           break;
         case "set_beers":
           setBeers([...parsed.data]);
-          // if (parsed.extra) setRoomState(parsed.extra.state);
           break;
         case "set_room_state":
           setRoomState(parsed.data.state);
@@ -131,12 +129,16 @@ const Room: FC = () => {
       sendJsonMessage({
         command: 'load_beers',
       })
-    } else if (roomState === 'FINISHED') {
+    }
+  }, [roomState, sendJsonMessage])
+
+  useEffect(() => {
+    if (roomState === 'FINISHED') {
       sendJsonMessage({
-        command: 'get_user_results',
+        command: 'get_user_ratings',
       });
       sendJsonMessage({
-        command: 'get_final_results',
+        command: 'get_final_ratings',
       });
     }
   }, [roomState, sendJsonMessage])
