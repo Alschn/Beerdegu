@@ -102,6 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.dmypy.json
 
 ###
 ### FRONTEND
@@ -131,5 +132,6 @@ yarn-error.log*
 
 .idea
 
+# docker volumes
 postgres-data
 redis-data

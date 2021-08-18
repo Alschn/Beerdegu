@@ -162,3 +162,15 @@ This repository uses Github Actions to run test pipeline.
 I was not able to configure automatic deploys with Github Actions.
 This was the [error](https://github.com/AkhileshNS/heroku-deploy/issues/84).  
 
+# To do list
+- [ ] Test async db utils and consumer (+ get Github Actions postgres connection to work with async stuff)
+- [ ] Enable creating multiple rooms if all rooms are in finished state (perhaps add additional room state)
+- [ ] Browsing and adding beers to room by host (inside the room) - IN PROGRESS
+- [ ] Browsing api (beers, breweries etc.)
+- [ ] All rooms view - CRUD (join, create, delete), most likely a table
+- [ ] User profile with list of past beer tasting sessions and statistics
+- [ ] Export ratings tables to CSV (PDF kinda done)
+- [ ] Additional statistics in room (e.g best/worst beer, group by votes, the longest opinion, similar ratings etc.)
+- [ ] Desktop and mobile chat
+- [ ] Separate header/sidebar outside of the room
+- [ ] Responsiveness (right now using Mobile First Approach)
