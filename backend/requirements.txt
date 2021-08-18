@@ -21,6 +21,7 @@ dj-rest-auth==2.1.8
 Django==3.2.5
 django-allauth==0.44.0
 django-cors-headers==3.7.0
+django-filter==2.4.0
 django-stubs==1.8.0
 django-stubs-ext==0.2.0
 django-templated-mail==1.1.1

@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    # django utils
+    'django_filters',
     # cors headers
     'corsheaders',
     # rest framework
@@ -148,7 +150,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Authentication
+# Rest Framework config - Authentication, filtering
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         ('rest_framework.permissions.AllowAny',)
@@ -157,10 +159,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         ('rest_framework.authentication.TokenAuthentication',)
     ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',)
 }
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
 STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

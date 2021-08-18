@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from beers.models import Beer, Hop, BeerStyle, Brewery
@@ -21,6 +21,8 @@ class BeerViewSet(viewsets.ModelViewSet):
     serializer_class = BeerSerializer
     lookup_field = 'id'
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'brewery__name', 'style__name']
 
     def get_serializer_class(self):
         if hasattr(self, 'action') and self.action in ['list', 'retrieve']:

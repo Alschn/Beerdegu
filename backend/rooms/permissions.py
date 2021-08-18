@@ -16,3 +16,14 @@ class IsHostOrListCreateOnly(BasePermission):
         elif request.method in ALLOWED_METHODS:
             return True
         return False
+
+
+class IsHostOrListOnly(BasePermission):
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        if request.method == 'GET':
+            return True
+        room = Room.objects.filter(name=view.kwargs.get('room_name'))
+        if room.exists():
+            if room.first().host != request.user:
+                return False
+        return True
