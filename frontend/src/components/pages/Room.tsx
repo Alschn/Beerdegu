@@ -14,6 +14,7 @@ import ResultsStepper from "../room/ResultsStepper";
 import {HOST, WS_SCHEME} from "../../config";
 import "./Room.scss";
 import SearchAPI from "../room/SearchAPI";
+import Waiting from "../room/Waiting";
 
 
 interface RoomParamsProps {
@@ -144,6 +145,21 @@ const Room: FC = () => {
     }
   }, [roomState, sendJsonMessage]);
 
+  const renderComponentByRoomState = (): JSX.Element => {
+    switch (roomState) {
+      case "WAITING":
+        return <Waiting/>;
+      case "STARTING":
+        return <SearchAPI/>;
+      case "IN_PROGRESS":
+        return <BeerFormStepper/>;
+      case "FINISHED":
+        return <ResultsStepper/>;
+      default:
+        return <></>;
+    }
+  };
+
   return (
     <RoomContext.Provider value={{
       code: code,
@@ -177,9 +193,7 @@ const Room: FC = () => {
 
       <Grid container>
         <Grid item xs={12} md={8} lg={10} className="room-body">
-          {roomState === 'STARTING' && <SearchAPI/>}
-          {roomState === 'IN_PROGRESS' && <BeerFormStepper/>}
-          {roomState === 'FINISHED' && (<ResultsStepper/>)}
+          {renderComponentByRoomState()}
         </Grid>
 
         {matches && (

@@ -31,6 +31,10 @@ const SearchAPI: FC = () => {
     ).catch(err => console.log(err));
   };
 
+  const handleSubmitWithEnter = (e: React.KeyboardEvent): void => {
+    e.key === 'Enter' && handleSubmit();
+  };
+
   const removeBeer = (id: number) => {
     removeBeerFromRoom(code, id).then(() => {
       loadBeers();
@@ -56,7 +60,7 @@ const SearchAPI: FC = () => {
           </Grid>
 
           <Grid item xs={12} className="search-api__inputs">
-            <input value={query} onChange={handleQueryChange}/>
+            <input value={query} onChange={handleQueryChange} onKeyDown={handleSubmitWithEnter}/>
             <button onClick={handleSubmit}>
               <SearchIcon/>
             </button>
@@ -70,6 +74,7 @@ const SearchAPI: FC = () => {
                 description={beer.description}
                 image={beer.image}
                 brewery={beer.brewery.name}
+                casual={false}
               />
             ))}
           </Grid>
@@ -114,19 +119,14 @@ const SearchAPI: FC = () => {
           <h2>Piwa w pokoju:</h2>
 
           {beers && beers.length > 0 && beers.map((beer) => (
-            <Tooltip title={String(beer.description)}>
-              <ListItem className="beers-list-item">
-                <ListItemAvatar>
-                  <Avatar>
-                    <img src={beer.image} alt="" height={40}/>
-                  </Avatar>
-                </ListItemAvatar>
-
-                <ListItemText className="beers-list-item-name">
-                  {beer.name}
-                </ListItemText>
-              </ListItem>
-            </Tooltip>
+            <BeerCard
+              beerId={beer.id}
+              name={beer.name}
+              description={beer.description}
+              image={beer.image}
+              brewery={beer.brewery.name}
+              casual
+            />
           ))}
         </List>
       </Grid>
