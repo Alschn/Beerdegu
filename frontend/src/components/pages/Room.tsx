@@ -13,6 +13,8 @@ import DesktopChat from "../room/DesktopChat";
 import ResultsStepper from "../room/ResultsStepper";
 import {HOST, WS_SCHEME} from "../../config";
 import "./Room.scss";
+import SearchAPI from "../room/SearchAPI";
+import Waiting from "../room/Waiting";
 
 
 interface RoomParamsProps {
@@ -109,28 +111,28 @@ const Room: FC = () => {
     const pingInterval = setInterval(() => {
       sendJsonMessage({
         command: 'user_active',
-      })
-    }, USER_PING_INTERVAL_MS)
+      });
+    }, USER_PING_INTERVAL_MS);
     return () => clearInterval(pingInterval);
-  }, [sendJsonMessage])
+  }, [sendJsonMessage]);
 
   useEffect(() => {
     // check if users in room changed
     const interval = setInterval(() => {
       sendJsonMessage({
         command: 'get_users'
-      })
+      });
     }, USERS_FETCH_INTERVAL_MS)
     return () => clearInterval(interval);
-  }, [sendJsonMessage])
+  }, [sendJsonMessage]);
 
   useEffect(() => {
     if (roomState === 'IN_PROGRESS') {
       sendJsonMessage({
         command: 'load_beers',
-      })
+      });
     }
-  }, [roomState, sendJsonMessage])
+  }, [roomState, sendJsonMessage]);
 
   useEffect(() => {
     if (roomState === 'FINISHED') {
@@ -141,7 +143,22 @@ const Room: FC = () => {
         command: 'get_final_ratings',
       });
     }
-  }, [roomState, sendJsonMessage])
+  }, [roomState, sendJsonMessage]);
+
+  const renderComponentByRoomState = (): JSX.Element => {
+    switch (roomState) {
+      case "WAITING":
+        return <Waiting/>;
+      case "STARTING":
+        return <SearchAPI/>;
+      case "IN_PROGRESS":
+        return <BeerFormStepper/>;
+      case "FINISHED":
+        return <ResultsStepper/>;
+      default:
+        return <></>;
+    }
+  };
 
   return (
     <RoomContext.Provider value={{
@@ -176,8 +193,7 @@ const Room: FC = () => {
 
       <Grid container>
         <Grid item xs={12} md={8} lg={10} className="room-body">
-          {roomState === 'IN_PROGRESS' && <BeerFormStepper/>}
-          {roomState === 'FINISHED' && (<ResultsStepper/>)}
+          {renderComponentByRoomState()}
         </Grid>
 
         {matches && (

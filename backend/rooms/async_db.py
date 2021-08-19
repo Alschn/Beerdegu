@@ -165,10 +165,10 @@ def get_final_user_beer_ratings(room_name: str, user: User):
 @database_sync_to_async
 def get_final_beers_ratings(room_name: str):
     try:
-        room = Room.objects.get(name=room_name)
-        b = room.beers.through
+        beer_in_room = Room.beers.through   # intersection table
+        beers = beer_in_room.objects.filter(room__name=room_name)
 
-        beers_with_ratings = b.objects.all().annotate(
+        beers_with_ratings = beers.annotate(
             average_rating=Avg('ratings__note', output_field=DecimalField())
         ).order_by('beer')
         return BeerWithResultsSerializer(beers_with_ratings, many=True).data

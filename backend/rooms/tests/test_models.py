@@ -11,6 +11,11 @@ class RoomsModelsTests(TestCase):
             username='Test',
             password='!@#$%'
         )
+        cls.room1 = Room.objects.create(
+            name='TestRoom',
+            host=cls.user,
+            slots=4,
+        )
 
     def test_create_room(self):
         """Checks if room was created and host was added to users."""
@@ -21,3 +26,15 @@ class RoomsModelsTests(TestCase):
         )
         self.assertEqual(Room.objects.get(name='ABCDEFGH'), room)
         self.assertIn(self.user, room.users.all())
+
+    def test_room_to_string(self):
+        self.assertEqual(str(self.room1), "'TestRoom' 1/4 - waiting")
+
+    def test_rating_to_string(self):
+        pass
+
+    def test_beer_in_room_to_string(self):
+        pass
+
+    def test_user_in_room_to_string(self):
+        pass

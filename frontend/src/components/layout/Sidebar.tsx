@@ -89,20 +89,30 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
                 </ListItem>
               )}
 
-              {roomState !== 'IN_PROGRESS' && (
+              {roomState === 'WAITING' && (
+                <ListItem button onClick={() => changeRoomState('STARTING')}>
+                  <ListItemText>Przejdź do wyboru piw</ListItemText>
+                </ListItem>
+              )}
+
+              {roomState !== 'IN_PROGRESS' ? (
                 <ListItem button onClick={() => {
                   changeRoomState('IN_PROGRESS')
                 }}>
                   <ListItemText>
-                    {roomState === 'WAITING' ? 'Rozpocznij' : 'Wznów'} degustację
+                    {roomState === 'WAITING' || roomState === 'STARTING' ? 'Rozpocznij' : 'Wznów'} degustację
                   </ListItemText>
                 </ListItem>
-              )}
+              ) : (
+                <>
+                  <ListItem button onClick={() => changeRoomState('STARTING')}>
+                    <ListItemText>Wróc do wyboru piw</ListItemText>
+                  </ListItem>
 
-              {roomState === 'IN_PROGRESS' && (
-                <ListItem button onClick={() => changeRoomState('FINISHED')}>
-                  <ListItemText>Zakończ degustację</ListItemText>
-                </ListItem>
+                  <ListItem button onClick={() => changeRoomState('FINISHED')}>
+                    <ListItemText>Zakończ degustację</ListItemText>
+                  </ListItem>
+                </>
               )}
 
               {roomState === 'FINISHED' && (

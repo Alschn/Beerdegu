@@ -1,6 +1,12 @@
 import {withStyles} from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 
+export const TableRowCell = withStyles(theme => ({
+  root: {
+    backgroundColor: '#ffffff',
+  }
+}))(TableCell);
+
 export const TableHeaderCell = withStyles(theme => ({
   root: {
     backgroundColor: '#00ae1a',

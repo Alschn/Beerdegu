@@ -1,0 +1,45 @@
+.search-api {
+  .search-api__header,
+  .search-api__inputs-header,
+  .search-api__inputs {
+    display: flex;
+    justify-content: center;
+  }
+
+  .search-api__inputs {
+    input {
+      width: 80%;
+      font-size: 18px;
+      padding: 5px;
+    }
+
+    button {
+      width: 50px;
+      cursor: pointer;
+    }
+  }
+
+  .search-api__results {
+    display: flex;
+    justify-content: center;
+
+    padding-top: 32px;
+  }
+
+  .beers-list {
+
+    .beers-list-item {
+
+    }
+  }
+
+  .beers-list-casual-wrapper {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+
+    .beers-list-casual {
+
+    }
+  }
+}
