@@ -161,18 +161,18 @@ class BeersInRoom(APIView):
     # seems a bit over-engineered - rewrite it later
 
     def _room_exists_predicate(self, room_name):
-        if not Room.objects.filter(name=room_name).exists():
-            return Response(
-                {'message': 'Room with given name does not exist!'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        return Room.objects.filter(name=room_name).exists()
 
     def get_queryset(self):
         room_name = self.kwargs.get(self.lookup_url_kwarg)
         return BeerInRoom.objects.filter(room__name=room_name)
 
     def get(self, request, room_name, **kwargs):
-        self._room_exists_predicate(room_name)
+        if not self._room_exists_predicate(room_name):
+            return Response(
+                {'message': 'Room with given name does not exist!'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         qs = Beer.objects.filter(room__name=room_name)
         return Response({
@@ -181,7 +181,12 @@ class BeersInRoom(APIView):
         }, status.HTTP_200_OK)
 
     def put(self, request, room_name, **kwargs):
-        self._room_exists_predicate(room_name)
+        if not self._room_exists_predicate(room_name):
+            return Response(
+                {'message': 'Room with given name does not exist!'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         beer_id = request.data.get('beer_id')
         if not beer_id:
             return Response({'message': 'Beer id not found in request body!'}, status.HTTP_400_BAD_REQUEST)
@@ -202,7 +207,11 @@ class BeersInRoom(APIView):
         }, status.HTTP_201_CREATED)
 
     def delete(self, request, room_name, **kwargs):
-        self._room_exists_predicate(room_name)
+        if not self._room_exists_predicate(room_name):
+            return Response(
+                {'message': 'Room with given name does not exist!'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         beer_id = request.query_params.get('id')
         if not beer_id:

@@ -6,6 +6,7 @@
     <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt=""/>
     <img src="https://img.shields.io/badge/Sass-CC6699?style=for-the-badge&logo=sass&logoColor=white" alt=""/>
+    <img src="https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Docker-008FCC?style=for-the-badge&logo=docker&logoColor=white" alt=""/>
@@ -27,21 +28,23 @@ This setup has been tested with Python 3.8/3.9 and Node 12.
 - Django + Django Rest Framework : `django` `djangorestframework`
 - Django Channels 3 : `channels`- handling websockets backend
 - `django-cors-headers` - handling cross origin requests
+- `django-filter` - filter backend for drf views
 - `coverage` - for code coverage reports and running unit tests
 - `mypy` + `djangorestframework-stubs` - for better typing experience
 - `psycopg2` - needed to use Postgres (in Docker container)
 - `channels_redis` - connection to Redis database service
 - `whitenoise` - building static files
-- `daphne` - production asgi server (not configured yet)
+- `daphne` - production asgi server
 
 
 ### Frontend
 - React
 - Typescript
-- `react-use-websocket` - websocket client, connects with backend
+- `react-use-websocket` - websocket client, connects with ws backend
 - `html2canvas`, `jspdf` - converting html to canvas and saving to pdf
+- `@material-ui/core`, `@material-ui/icons`, `@material-ui/lab` - UI library
 - `node-sass` - enables scss/sass support
-- `axios` - for making requests
+- `axios` - for making http requests
 
 # Development setup
 
@@ -153,8 +156,6 @@ docker exec -it CONTAINER_ID /bin/sh
    *or* by pushing to your github repository, having Automatic Deploys set up    
    9) Go to `<app name>.herokuapp.com` to see the published website.  
 
-If you are having issues with heroku repository, try ```heroku git:remote -a <your app name>```.
-
 ## CI
 This repository uses Github Actions to run test pipeline.  
 `tests.yml` - runs backend and frontend tests separately
@@ -165,7 +166,7 @@ This was the [error](https://github.com/AkhileshNS/heroku-deploy/issues/84).
 # To do list
 - [ ] Test async db utils and consumer (+ get Github Actions postgres connection to work with async stuff)
 - [ ] Enable creating multiple rooms if all rooms are in finished state (perhaps add additional room state)
-- [ ] Browsing and adding beers to room by host (inside the room) - IN PROGRESS
+- [X] Browsing and adding beers to room by host (inside the room)
 - [ ] Browsing api (beers, breweries etc.)
 - [ ] All rooms view - CRUD (join, create, delete), most likely a table
 - [ ] User profile with list of past beer tasting sessions and statistics
