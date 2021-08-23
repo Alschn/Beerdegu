@@ -2,7 +2,6 @@ import {Grid, useMediaQuery, useTheme} from "@material-ui/core";
 import React, {FC, useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
-import axiosClient from "../../api/axiosClient";
 import {BeerObject, RatingsObject, UserObject, WebsocketConnectionState, WebsocketMessage} from "../../utils/ws";
 import BeerFormStepper from "../room/BeerFormStepper";
 import RoomContext, {roomStateType} from "../../context/roomContext";
@@ -15,6 +14,7 @@ import {HOST, WS_SCHEME} from "../../config";
 import "./Room.scss";
 import SearchAPI from "../room/SearchAPI";
 import Waiting from "../room/Waiting";
+import useAxios from "../../hooks/useAxios";
 
 
 interface RoomParamsProps {
@@ -29,11 +29,12 @@ const Room: FC = () => {
   const history = useHistory();
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));
+  const {get} = useAxios();
 
   const [isHost, setIsHost] = useState<boolean>(false);
 
   const getWebsocketUrl = useCallback(() => {
-    return axiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
+    return get(`/api/rooms/in?code=${code}`).then(({data}) => {
       const {is_host} = data;
       setIsHost(Boolean(is_host));
       return `${WS_SCHEME}://${HOST}/ws/room/${code}/`;

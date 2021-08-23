@@ -4,12 +4,14 @@ import Avatar from "@material-ui/core/Avatar";
 import GroupAddRoundedIcon from '@material-ui/icons/GroupAddRounded';
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import axiosClient from "../../api/axiosClient";
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
+import useAxios from "../../hooks/useAxios";
 
 const CreateRoom = () => {
   const history = useHistory();
+  const {post} = useAxios();
+
   const [formState, setFormState] = useState<{
     name: string,
     password: string,
@@ -34,7 +36,7 @@ const CreateRoom = () => {
   };
 
   const handleSubmit = () => {
-    axiosClient.post('/api/rooms/', {...formState}).then(() => {
+    post('/api/rooms/', {...formState}).then(() => {
       setResponse({
         message: `Created room ${formState.name}! Redirecting ...`,
         severity: 'success',

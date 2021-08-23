@@ -22,7 +22,7 @@ with an option to deploy to Heroku. Running development setup
 without docker-compose is also possible.
 
 ### Tools, libraries, frameworks:
-This setup has been tested with Python 3.8/3.9 and Node 12.
+This setup has been tested with Python 3.8/3.9 and Node 12/14.
 
 ### Backend
 - Django + Django Rest Framework : `django` `djangorestframework`

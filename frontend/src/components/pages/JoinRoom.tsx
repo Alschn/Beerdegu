@@ -1,5 +1,4 @@
 import React, {FC, useState} from "react";
-import axiosClient from "../../api/axiosClient";
 import {useHistory} from "react-router";
 import {Button, Container, CssBaseline} from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
@@ -8,11 +7,14 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import "./JoinCreateRoom.scss";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
+import useAxios from "../../hooks/useAxios";
 
 const JoinRoom: FC = () => {
   const history = useHistory();
   const [roomName, setRoomName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const {put} = useAxios();
 
   const [response, setResponse] = useState<AlertContentObject>({
     message: '',
@@ -24,7 +26,7 @@ const JoinRoom: FC = () => {
   };
 
   const handleSubmit = () => {
-    axiosClient.put(`/api/rooms/${roomName}/join`, {
+    put(`/api/rooms/${roomName}/join`, {
       'name': roomName,
       'password': password,
     }).then(() => {
