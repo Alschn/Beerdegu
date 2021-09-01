@@ -75,6 +75,7 @@ const SearchAPI: FC = () => {
                 image={beer.image}
                 brewery={beer.brewery.name}
                 casual={false}
+                key={`beer-${beer.id}`}
               />
             ))}
           </Grid>

@@ -6,11 +6,10 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import useAxios from "../../hooks/useAxios";
+import AxiosClient from "../../api/axiosClient";
 
 const CreateRoom = () => {
   const history = useHistory();
-  const {post} = useAxios();
 
   const [formState, setFormState] = useState<{
     name: string,
@@ -25,9 +24,9 @@ const CreateRoom = () => {
   const [response, setResponse] = useState<AlertContentObject>({
     message: '',
     severity: 'error',
-  })
+  });
 
-  const handleChange = (e: React.BaseSyntheticEvent) => {
+  const handleChange = (e: React.BaseSyntheticEvent): void => {
     const field = e.target.name;
     setFormState({
       ...formState,
@@ -35,13 +34,13 @@ const CreateRoom = () => {
     });
   };
 
-  const handleSubmit = () => {
-    post('/api/rooms/', {...formState}).then(() => {
+  const handleSubmit = (): void => {
+    AxiosClient.post('/api/rooms/', {...formState}).then(() => {
       setResponse({
         message: `Created room ${formState.name}! Redirecting ...`,
         severity: 'success',
-      })
-      setTimeout(() => history.push(`/room/${formState.name}`), 1000)
+      });
+      setTimeout(() => history.push(`/room/${formState.name}`), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

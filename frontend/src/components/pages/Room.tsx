@@ -15,6 +15,7 @@ import "./Room.scss";
 import SearchAPI from "../room/SearchAPI";
 import Waiting from "../room/Waiting";
 import useAxios from "../../hooks/useAxios";
+import AxiosClient from "../../api/axiosClient";
 
 
 interface RoomParamsProps {
@@ -29,12 +30,11 @@ const Room: FC = () => {
   const history = useHistory();
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));
-  const {get} = useAxios();
 
   const [isHost, setIsHost] = useState<boolean>(false);
 
   const getWebsocketUrl = useCallback(() => {
-    return get(`/api/rooms/in?code=${code}`).then(({data}) => {
+    return AxiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
       const {is_host} = data;
       setIsHost(Boolean(is_host));
       return `${WS_SCHEME}://${HOST}/ws/room/${code}/`;
