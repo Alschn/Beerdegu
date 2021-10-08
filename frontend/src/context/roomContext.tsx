@@ -1,4 +1,4 @@
-import {createContext} from "react";
+import {createContext, Dispatch} from "react";
 import {BeerObject, RatingsObject, UserObject} from "../utils/ws";
 
 export type roomStateType = 'WAITING' | 'STARTING' | 'IN_PROGRESS' | 'FINISHED';
@@ -15,6 +15,7 @@ interface RoomContextProps {
   roomState: roomStateType,
   results: RatingsObject[],
   userResults: any[],
+  dispatch: Dispatch<any>,
 }
 
 const RoomContext = createContext<RoomContextProps>({} as RoomContextProps);
