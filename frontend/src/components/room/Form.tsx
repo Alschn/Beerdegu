@@ -5,32 +5,17 @@ import useWebSocket from "react-use-websocket";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {UserRatingsObject, WebsocketMessage} from "../../utils/ws";
 import {HOST, WS_SCHEME} from "../../config";
+import usePrevious from "../../hooks/usePrevious";
+
+const FORM_SAVE_INTERVAL_MS = 5_000;
+
+const notes: number[] = Array.from({length: 10}, (_, i) => i + 1);
 
 type State = UserRatingsObject;
 
 type Action =
   { type: 'INPUT_CHANGE', field: string, payload: string | number } |
   { type: 'FETCH_FORM_DATA', payload: State }
-
-const formReducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "INPUT_CHANGE":
-      return {
-        ...state,
-        [action.field]: action.payload,
-      };
-    case "FETCH_FORM_DATA":
-      return {
-        ...action.payload
-      }
-    default:
-      return state;
-  }
-};
-
-interface BeerFormProps {
-  beerID: number;
-}
 
 const initialState = {
   color: "",
@@ -41,13 +26,32 @@ const initialState = {
   note: 1,
 };
 
-const FORM_SAVE_INTERVAL_MS = 5_000;
+const formReducer = (state: State = initialState, action: Action): State => {
+  switch (action.type) {
+    case "INPUT_CHANGE":
+      return {
+        ...state,
+        [action.field]: action.payload,
+      };
+    case "FETCH_FORM_DATA":
+      return {
+        ...action.payload
+      };
+    default:
+      return state;
+  }
+};
 
-const notes: number[] = Array.from({length: 10}, (_, i) => i + 1);
+interface BeerFormProps {
+  beerID: number;
+}
+
 
 const BeerForm: FC<BeerFormProps> = ({beerID}) => {
   const {code} = useRoomContext();
   const [state, dispatch] = useReducer(formReducer, initialState);
+
+  const prevState = usePrevious({...state, beer_id: beerID});
 
   const {
     sendJsonMessage,
@@ -74,11 +78,21 @@ const BeerForm: FC<BeerFormProps> = ({beerID}) => {
   };
 
   useEffect(() => {
+    // save previous form (if there was one) every time user goes forward/backwards
+    // to make sure their input had been saved
+    if (prevState) {
+      sendJsonMessage({
+        command: 'user_form_save',
+        data: prevState,
+      });
+    }
+
+    // load current form
     sendJsonMessage({
       command: 'get_form_data',
       data: beerID
-    })
-  }, [sendJsonMessage, beerID])
+    });
+  }, [sendJsonMessage, beerID]);
 
   useEffect(() => {
     // save form so that users do not lose fields they filled
@@ -93,7 +107,7 @@ const BeerForm: FC<BeerFormProps> = ({beerID}) => {
       });
     }, FORM_SAVE_INTERVAL_MS);
     return () => clearInterval(formSaveInterval);
-  }, [state, sendJsonMessage, beerID])
+  }, [state, sendJsonMessage, beerID]);
 
   return (
     <Fragment>

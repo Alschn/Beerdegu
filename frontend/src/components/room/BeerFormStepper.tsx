@@ -16,9 +16,9 @@ const BeerFormStepper: FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0);
   const maxSteps = beers.length;
 
-  const handleNext = () => setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const handleNext = (): void => setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
-  const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  const handleBack = (): void => setActiveStep((prevActiveStep) => prevActiveStep - 1);
 
   if (maxSteps === 0) return null;
 
