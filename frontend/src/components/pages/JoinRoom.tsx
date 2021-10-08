@@ -7,34 +7,32 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import "./JoinCreateRoom.scss";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import useAxios from "../../hooks/useAxios";
+import AxiosClient from "../../api/axiosClient";
 
 const JoinRoom: FC = () => {
   const history = useHistory();
   const [roomName, setRoomName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const {put} = useAxios();
-
   const [response, setResponse] = useState<AlertContentObject>({
     message: '',
     severity: 'error',
-  })
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     e.target.id === 'roomName' ? setRoomName(e.target.value) : setPassword(e.target.value);
   };
 
-  const handleSubmit = () => {
-    put(`/api/rooms/${roomName}/join`, {
+  const handleSubmit = (): void => {
+    AxiosClient.put(`/api/rooms/${roomName}/join`, {
       'name': roomName,
       'password': password,
     }).then(() => {
       setResponse({
         message: `Joining room ${roomName} ...`,
         severity: 'success',
-      })
-      setTimeout(() => history.push(`/room/${roomName}`), 1000)
+      });
+      setTimeout(() => history.push(`/room/${roomName}`), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

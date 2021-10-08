@@ -38,13 +38,13 @@ class RoomConsumer(AsyncWebsocketConsumer):
     }
 
     async def connect(self):
-        if self.scope['user'].is_anonymous:
-            await self.close()
+        if not (current_user := self.scope.get('user')) or current_user.is_anonymous:
+            return
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'room_%s' % self.room_name
 
-        self.private_group_name = f"room_user_{self.scope['user'].username}"
+        self.private_group_name = f"room_user_{current_user.username}"
 
         # public room
         await self.channel_layer.group_add(
@@ -72,12 +72,11 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)  # parsed object
-        command = data.get('command')
 
         if settings.DEBUG:
-            print(f"Received:\n{data}\nFrom: {self.scope.get('user')}")
+            print(f"\nReceived:\n{data}\nFrom: {self.scope.get('user')}")
 
-        if not command:
+        if not (command := data.get('command')):
             return
 
         if command in self.private_commands:
@@ -113,11 +112,14 @@ class RoomConsumer(AsyncWebsocketConsumer):
     - get_new_message
     - get_users
     - get_beers
+    - load_beers
     - get_form_data
-    
     - user_active
     - user_form_save
-    
+    - get_room_state
+    - change_room_state
+    - get_final_ratings
+    - get_user_ratings
     - invalid_command
     """
 
@@ -126,8 +128,8 @@ class RoomConsumer(AsyncWebsocketConsumer):
         Receive message => Broadcast it to others and update client
         'get_new_message' => 'set_new_message'
         """
-        str_message: str = event['data']
-        user = self.scope['user']
+        str_message: str = event.get('data')
+        user = self.scope.get('user')
 
         await self.send(text_data=json.dumps({
             'data': f'{user.username}: {str_message}',
