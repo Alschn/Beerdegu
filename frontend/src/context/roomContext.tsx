@@ -1,5 +1,5 @@
 import {createContext, Dispatch} from "react";
-import {BeerObject, RatingsObject, UserObject} from "../utils/ws";
+import {BeerObject, ChatMessageObject, RatingsObject, UserObject} from "../utils/ws";
 
 export type roomStateType = 'WAITING' | 'STARTING' | 'IN_PROGRESS' | 'FINISHED';
 
@@ -9,7 +9,7 @@ interface RoomContextProps {
   sendMessage: (jsonMessage: any) => void,
   wsState: string,
   message: string,
-  messages: string[],
+  messages: ChatMessageObject[],
   beers: BeerObject[],
   users: UserObject[],
   roomState: roomStateType,

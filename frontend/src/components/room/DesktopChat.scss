@@ -1,16 +1,41 @@
-.desktop-chat {
-  position: relative;
-  height: calc(100vh - 100px);
-  width: 100%;
+/*
+ room-chat:
+  - desktop-chat-messages
+  - desktop-chat-input
+*/
 
-  .desktop-chat-messages {
-    height: calc(100vh - 150px);
-    overflow-y: scroll;
+.desktop-chat-messages {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  height: calc(100vh - 136px);
+  overflow-y: scroll;
+  overflow-wrap: break-word;
+
+  .chat-message {
+    display: inline-block;
+
+    &:first-of-type {
+      padding-top: 0;
+    }
+
+    &:last-of-type {
+      padding-bottom: 0;
+    }
   }
+}
 
-  .desktop-chat-input {
-    .text-field {}
+.desktop-chat-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
 
-    .submit-button {}
+  border-top: 1px solid black;
+  width: 100%;
+  display: flex;
+
+  .input-field {
+    flex-grow: 1;
   }
 }

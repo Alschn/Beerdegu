@@ -1,0 +1,10 @@
+.room-chat {
+  position: fixed;
+  right: 0;
+  top: 64px; // header height offset
+
+  min-height: calc(100vh - 64px);
+  width: 100%;
+
+  border-left: 1px solid black;
+}
