@@ -160,18 +160,24 @@ docker exec -it CONTAINER_ID /bin/sh
 This repository uses Github Actions to run test pipeline.  
 `tests.yml` - runs backend and frontend tests separately
 
-I was not able to configure automatic deploys with Github Actions.
-This was the [error](https://github.com/AkhileshNS/heroku-deploy/issues/84).  
 
 # To do list
+
+### Recently done:
+- [X] Browsing and adding beers to room by host (inside the room)
+- [X] Desktop and mobile chat (without saving messages to db)
+
+### In progress:
+- [ ] New website design with landing page, sub pages, separate header/sidebar outside of the room - IN PROGRESS
+- [ ] All rooms view - CRUD (join, create, delete) - IN PROGRESS
+
+---
+- [ ] Browsing api (beers, breweries etc.)
+- [ ] User profile with list of past beer tasting sessions and statistics
+
+- [ ] Animate route switch
 - [ ] Test async db utils and consumer (+ get Github Actions postgres connection to work with async stuff)
 - [ ] Enable creating multiple rooms if all rooms are in finished state (perhaps add additional room state)
-- [X] Browsing and adding beers to room by host (inside the room)
-- [ ] Browsing api (beers, breweries etc.)
-- [ ] All rooms view - CRUD (join, create, delete), most likely a table
-- [ ] User profile with list of past beer tasting sessions and statistics
 - [ ] Export ratings tables to CSV (PDF kinda done)
 - [ ] Additional statistics in room (e.g best/worst beer, group by votes, the longest opinion, similar ratings etc.)
-- [ ] Desktop and mobile chat
-- [ ] Separate header/sidebar outside of the room
 - [ ] Responsiveness (right now using Mobile First Approach)
