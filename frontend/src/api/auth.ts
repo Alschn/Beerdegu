@@ -16,6 +16,7 @@ export const onLogin = (request_body: LoginData): Promise<any> => {
   return axiosClient.post('/auth/login/', {...request_body});
 };
 
+
 export const onRegister = (request_body: RegisterData): Promise<any> => {
   return axiosClient.post('/auth/register/', {...request_body});
 };
@@ -23,3 +24,10 @@ export const onRegister = (request_body: RegisterData): Promise<any> => {
 export const onLogout = (): Promise<any> => {
   return axiosClient.post('/auth/logout/', {});
 };
+
+export const logout = () => {
+ return onLogout().then(() => {
+   localStorage.removeItem('token');
+   window.location.reload();
+ }).catch(err => console.log(err));
+}
