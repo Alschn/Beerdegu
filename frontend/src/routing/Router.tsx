@@ -10,6 +10,7 @@ import AuthRoute from "./AuthRoute";
 import JoinRoom from "../components/pages/JoinRoom";
 import CreateRoom from "../components/pages/CreateRoom";
 import Lobby from "../components/pages/Lobby";
+import Browser from "../components/pages/Browser";
 
 const Router: FC = () => {
   return (
@@ -21,6 +22,7 @@ const Router: FC = () => {
         <AuthRoute exact path="/register" component={Register}/>
 
         <PrivateRoute exact path="/lobby" component={Lobby}/>
+        <PrivateRoute exact path="/browser" component={Browser}/>
 
         <PrivateRoute exact path="/join" component={JoinRoom}/>
         <PrivateRoute exact path="/create" component={CreateRoom}/>

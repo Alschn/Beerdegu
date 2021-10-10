@@ -7,11 +7,16 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import "./JoinCreateRoom.scss";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import AxiosClient from "../../api/axiosClient";
+import {joinRoom} from "../../api/lobby";
 
-const JoinRoom: FC = () => {
+interface JoinRoomProps {
+  roomNameProp?: string,
+  isRoute?: boolean,
+}
+
+const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
   const history = useHistory();
-  const [roomName, setRoomName] = useState<string>("");
+  const [roomName, setRoomName] = useState<string>(roomNameProp != null ? String(roomNameProp) : '');
   const [password, setPassword] = useState<string>("");
 
   const [response, setResponse] = useState<AlertContentObject>({
@@ -24,10 +29,7 @@ const JoinRoom: FC = () => {
   };
 
   const handleSubmit = (): void => {
-    AxiosClient.put(`/api/rooms/${roomName}/join`, {
-      'name': roomName,
-      'password': password,
-    }).then(() => {
+    joinRoom(roomName, password).then(() => {
       setResponse({
         message: `Joining room ${roomName} ...`,
         severity: 'success',
@@ -44,7 +46,7 @@ const JoinRoom: FC = () => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline/>
-      <div className="room">
+      <div className={isRoute ? 'room room-route' : 'room room-embedded'}>
         <Avatar className="room-icon">
           <SupervisorAccountRoundedIcon/>
         </Avatar>
@@ -64,6 +66,7 @@ const JoinRoom: FC = () => {
             label="Room Name"
             name="roomName"
             autoFocus
+            value={roomName}
             onChange={handleChange}
           />
           <TextField

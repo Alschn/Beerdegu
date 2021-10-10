@@ -5,10 +5,16 @@
 
   justify-content: center;
 
-  // raise it by 100px up
-  padding-bottom: 100px;
+  // when using component as route
+  &.room-route {
+    padding-bottom: 100px;
+    min-height: 100vh;
+  }
 
-  min-height: 100vh;
+  // when embedding component
+  &.room-embedded {
+    padding: 50px 20px;
+  }
 
   .room-icon {
     margin: 8px;

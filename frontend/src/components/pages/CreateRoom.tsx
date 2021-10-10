@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {FC, useState} from "react";
 import {Button, Container, CssBaseline} from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import GroupAddRoundedIcon from '@material-ui/icons/GroupAddRounded';
@@ -6,16 +6,17 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import AxiosClient from "../../api/axiosClient";
+import {createRoom} from "../../api/lobby";
+import type {createRoomForm} from "../../api/lobby";
 
-const CreateRoom = () => {
+interface CreateRoomProps {
+  isRoute?: boolean,
+}
+
+const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
   const history = useHistory();
 
-  const [formState, setFormState] = useState<{
-    name: string,
-    password: string,
-    slots: undefined | number
-  }>({
+  const [formState, setFormState] = useState<createRoomForm>({
     name: '',
     password: '',
     slots: undefined,
@@ -35,7 +36,7 @@ const CreateRoom = () => {
   };
 
   const handleSubmit = (): void => {
-    AxiosClient.post('/api/rooms/', {...formState}).then(() => {
+    createRoom(formState).then(() => {
       setResponse({
         message: `Created room ${formState.name}! Redirecting ...`,
         severity: 'success',
@@ -52,7 +53,7 @@ const CreateRoom = () => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline/>
-      <div className="room">
+      <div className={isRoute ? 'room room-route' : 'room room-embedded'}>
         <Avatar className="room-icon">
           <GroupAddRoundedIcon/>
         </Avatar>
