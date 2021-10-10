@@ -6,9 +6,15 @@ from users.serializers import UserSerializer
 
 
 class RoomSerializer(serializers.ModelSerializer):
+    has_password = serializers.SerializerMethodField()
+
     class Meta:
         model = Room
         exclude = ('password',)
+
+    def get_has_password(self, obj):
+        # cast to bool to check if password exists
+        return not not obj.password
 
 
 class CreateRoomSerializer(serializers.ModelSerializer):
