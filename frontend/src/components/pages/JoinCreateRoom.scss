@@ -8,7 +8,7 @@
   // when using component as route
   &.room-route {
     padding-bottom: 100px;
-    min-height: 100vh;
+    min-height: calc(100vh - 300px);
   }
 
   // when embedding component

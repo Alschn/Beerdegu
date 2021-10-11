@@ -1,5 +1,5 @@
 .lobby {
-  height: calc(100vh - 80px);
+  height: calc(100vh - 150px);
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -34,4 +34,8 @@
   }
 }
 
-
+@media (max-width: 1200px) {
+  .lobby .lobby-container .lobby-table-container {
+    height: 500px;
+  }
+}

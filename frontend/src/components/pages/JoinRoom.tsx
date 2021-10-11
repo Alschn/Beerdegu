@@ -1,6 +1,6 @@
 import React, {FC, useState} from "react";
 import {useHistory} from "react-router";
-import {Button, Container, CssBaseline} from "@material-ui/core";
+import {Button, Container} from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import SupervisorAccountRoundedIcon from '@material-ui/icons/SupervisorAccountRounded';
 import Typography from "@material-ui/core/Typography";
@@ -8,6 +8,7 @@ import TextField from "@material-ui/core/TextField";
 import "./JoinCreateRoom.scss";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {joinRoom} from "../../api/lobby";
+import {onSubmit, submitWithEnter} from "../../utils/forms";
 
 interface JoinRoomProps {
   roomNameProp?: string,
@@ -28,7 +29,8 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
     e.target.id === 'roomName' ? setRoomName(e.target.value) : setPassword(e.target.value);
   };
 
-  const handleSubmit = (): void => {
+  const submitForm = (): void => {
+    if (!roomName) return;
     joinRoom(roomName, password).then(() => {
       setResponse({
         message: `Joining room ${roomName} ...`,
@@ -43,9 +45,10 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
     });
   };
 
+  const onEnterKeyDown = (e: React.KeyboardEvent): void => submitWithEnter(e, submitForm);
+
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline/>
       <div className={isRoute ? 'room room-route' : 'room room-embedded'}>
         <Avatar className="room-icon">
           <SupervisorAccountRoundedIcon/>
@@ -56,39 +59,43 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
         <div className="auth-alert">
           <CollapsableAlert content={response}/>
         </div>
-        <div className="room-form">
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="roomName"
-            label="Room Name"
-            name="roomName"
-            autoFocus
-            value={roomName}
-            onChange={handleChange}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            onChange={handleChange}
-          />
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className="room-button"
-            onClick={handleSubmit}
-          >
-            Join
-          </Button>
-        </div>
+        <form noValidate onSubmit={(e) => onSubmit(e, submitForm)}>
+          <div className="room-form">
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="roomName"
+              label="Room Name"
+              name="roomName"
+              autoFocus
+              value={roomName}
+              onChange={handleChange}
+              onKeyDown={onEnterKeyDown}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              onChange={handleChange}
+              onKeyDown={onEnterKeyDown}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className="room-button"
+            >
+              Join
+            </Button>
+          </div>
+        </form>
       </div>
     </Container>
   );

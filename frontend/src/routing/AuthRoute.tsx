@@ -1,5 +1,6 @@
 import React, {ComponentType, FC} from "react";
 import {Redirect, Route} from "react-router";
+import WrapWithHeader from "../components/layout/WrapWithHeader";
 
 type authPathType = "/login" | "/register";
 
@@ -22,9 +23,11 @@ const AuthRoute: FC<PrivateRouteProps> = (
   return isAuthenticated ? (
     <Redirect to=""/>
   ) : (
-    <Route path={path} exact={exact} component={component}>
-      {children}
-    </Route>
+    <WrapWithHeader>
+      <Route path={path} exact={exact} component={component}>
+        {children}
+      </Route>
+    </WrapWithHeader>
   );
 };
 

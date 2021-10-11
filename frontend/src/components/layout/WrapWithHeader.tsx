@@ -74,7 +74,7 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
             {isAuthenticated ? (
               <ul className="header-links">
                 <li>
-                  <a href="/profile">Profile</a>
+                  <a href="/">Profile</a>
                 </li>
                 <li onClick={logout}>
                   <span>Logout</span>

@@ -12,7 +12,6 @@ import Button from "@material-ui/core/Button";
 import CreateRoomDialog from "../lobby/CreateRoomDialog";
 import JoinRoomDialog from "../lobby/JoinRoomDialog";
 import "./Lobby.scss";
-import WrapWithHeader from "../layout/WrapWithHeader";
 
 
 interface Column {
