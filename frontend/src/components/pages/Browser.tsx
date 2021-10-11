@@ -1,7 +1,7 @@
 import {FC} from "react";
 
 const Browser: FC = () => {
-  return <div>Browser</div>;
+  return <div>Not implemented yet</div>;
 };
 
 export default Browser;
