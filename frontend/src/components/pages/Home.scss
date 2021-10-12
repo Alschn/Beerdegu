@@ -18,6 +18,7 @@
 .App-button-group {
   button {
     margin: 8px;
+    height: 36px;
 
     &:not(button:nth-child(3)) {
       width: 28vmin;
@@ -30,7 +31,7 @@
 }
 
 .App-body {
-  min-height: 100vh;
+  min-height: calc(100vh - 200px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -50,5 +51,13 @@
   }
   to {
     transform: scale(1.02);
+  }
+}
+
+@media (max-width: 497px) {
+  .App-button-group {
+    button {
+      min-height: 48px;
+    }
   }
 }
