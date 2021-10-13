@@ -72,6 +72,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)  # parsed object
+        data_content = data.get('data')
 
         if settings.DEBUG:
             print(f"\nReceived:\n{data}\nFrom: {self.scope.get('user')}")
@@ -84,15 +85,21 @@ class RoomConsumer(AsyncWebsocketConsumer):
                 self.private_group_name,
                 {
                     'type': self.private_commands[command],
-                    'data': data.get('data'),
+                    'data': data_content,
                 }
             )
         else:
+            if command == "get_new_message":
+                data_content = {
+                    'message': data.get('data'),
+                    'user': str(self.scope.get('user')),
+                }
+
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': self.commands.get(command, 'invalid_command'),
-                    'data': data.get('data'),
+                    'data': data_content,
                 }
             )
 
@@ -128,11 +135,10 @@ class RoomConsumer(AsyncWebsocketConsumer):
         Receive message => Broadcast it to others and update client
         'get_new_message' => 'set_new_message'
         """
-        str_message: str = event.get('data')
-        user = self.scope.get('user')
+        content: dict = event.get('data')
 
         await self.send(text_data=json.dumps({
-            'data': f'{user.username}: {str_message}',
+            'data': content,
             'command': 'set_new_message'
         }))
 
@@ -221,4 +227,5 @@ class RoomConsumer(AsyncWebsocketConsumer):
         }))
 
     async def invalid_command(self, event):
-        pass
+        if settings.DEBUG:
+            print(f'Received an invalid command!\n')

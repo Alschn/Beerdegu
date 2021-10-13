@@ -2,7 +2,14 @@ import {Grid, useMediaQuery, useTheme} from "@material-ui/core";
 import React, {FC, useCallback, useEffect, useReducer, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
-import {BeerObject, RatingsObject, UserObject, WebsocketConnectionState, WebsocketMessage} from "../../utils/ws";
+import {
+  BeerObject,
+  ChatMessageObject,
+  RatingsObject,
+  UserObject,
+  WebsocketConnectionState,
+  WebsocketMessage
+} from "../../utils/ws";
 import RoomContext, {roomStateType} from "../../context/roomContext";
 import Sidebar from "../layout/Sidebar";
 import Header from "../layout/Header";
@@ -24,7 +31,7 @@ interface RoomParamsProps {
 }
 
 interface State {
-  messages: string[],
+  messages: ChatMessageObject[],
   beers: BeerObject[],
   users: UserObject[],
   roomState: roomStateType,
@@ -33,7 +40,7 @@ interface State {
 }
 
 type Action =
-  | { type: 'set_new_message', payload: string }
+  | { type: 'set_new_message', payload: ChatMessageObject }
   | { type: 'set_beers', payload: BeerObject[] }
   | { type: 'set_users', payload: UserObject[] }
   | { type: 'set_room_state', payload: roomStateType }
@@ -144,10 +151,14 @@ const Room: FC = () => {
   const handleChange = (e: React.BaseSyntheticEvent): void => setMessage(e.target.value);
 
   const handleSendMessage = (): void => {
-    sendJsonMessage({
-      data: message,
-      command: 'get_new_message',
-    });
+    if (message) {
+      sendJsonMessage({
+        data: message,
+        command: 'get_new_message',
+      });
+      // clear input after sending message
+      setMessage('');
+    }
   };
 
   useEffect(() => {

@@ -58,3 +58,8 @@ export type CommandType =
   'set_room_state' | 'set_final_results' |
   'set_user_results'
   ;
+
+export interface ChatMessageObject {
+  message: string,
+  user: string,
+}

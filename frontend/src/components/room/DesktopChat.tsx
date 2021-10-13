@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, Fragment} from "react";
 import {Button, List, ListItem, TextField} from "@material-ui/core";
 import "./DesktopChat.scss";
 import {useRoomContext} from "../../hooks/useContextHook";
@@ -16,11 +16,12 @@ const DesktopChat: FC<ChatProps> = (
   const handlePressEnter = (event: React.KeyboardEvent) => event.key === 'Enter' && handleSendMessage();
 
   return (
-    <div className="desktop-chat">
-      {/* to do desktop chat */}
+    <Fragment>
       <List className="desktop-chat-messages">
         {messages.length > 0 && messages.map((m, idx) => (
-          <ListItem key={"message" + idx}>{m}</ListItem>
+          <ListItem key={"message" + idx} className="chat-message">
+            <b>{m.user}:</b> <span>{m.message}</span>
+          </ListItem>
         ))}
       </List>
 
@@ -42,7 +43,7 @@ const DesktopChat: FC<ChatProps> = (
           Wyślij
         </Button>
       </div>
-    </div>
+    </Fragment>
   );
 };
 

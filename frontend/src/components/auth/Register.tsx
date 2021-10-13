@@ -1,7 +1,6 @@
 import React, {FC, useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
@@ -11,6 +10,7 @@ import Container from '@material-ui/core/Container';
 import {onRegister} from "../../api/auth";
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
+import {onSubmit, submitWithEnter} from '../../utils/forms';
 import "./Auth.scss";
 
 
@@ -31,8 +31,7 @@ const Register: FC = () => {
     message: '',
   });
 
-  const handleSubmit = (e: React.BaseSyntheticEvent): void => {
-    e.preventDefault();
+  const submitForm = (): void => {
     onRegister({
       username: username,
       email: email,
@@ -43,20 +42,21 @@ const Register: FC = () => {
         message: 'Created account! Redirecting to login page...',
         severity: 'success',
       });
-      setTimeout(() => history.push("/login"), 1000)
+      setTimeout(() => history.push("/login"), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,
         severity: 'error',
       });
-    })
-  }
+    });
+  };
 
   const passwordsMatch = (): boolean => password1 === password2;
 
+  const onEnterKeyDown = (e: React.KeyboardEvent): void => submitWithEnter(e, submitForm);
+
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline/>
       <div className="auth">
         <Avatar className="auth-icon">
           <LockOutlinedIcon/>
@@ -67,7 +67,7 @@ const Register: FC = () => {
         <div className="auth-alert">
           <CollapsableAlert content={response}/>
         </div>
-        <form className="auth-form" noValidate onSubmit={handleSubmit}>
+        <form className="auth-form" noValidate onSubmit={(e) => onSubmit(e, submitForm)}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
@@ -80,6 +80,7 @@ const Register: FC = () => {
                 label="User Name"
                 autoFocus
                 onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={onEnterKeyDown}
               />
             </Grid>
             <Grid item xs={12}>
@@ -97,6 +98,7 @@ const Register: FC = () => {
                 helperText={
                   email !== "" && !validateEmail(email) && "Invalid email format"
                 }
+                onKeyDown={onEnterKeyDown}
               />
             </Grid>
             <Grid item xs={12}>
@@ -114,6 +116,7 @@ const Register: FC = () => {
                 helperText={
                   !passwordsMatch() && "Passwords don't match"
                 }
+                onKeyDown={onEnterKeyDown}
               />
             </Grid>
             <Grid item xs={12}>
@@ -131,6 +134,7 @@ const Register: FC = () => {
                 helperText={
                   !passwordsMatch() && "Passwords don't match"
                 }
+                onKeyDown={onEnterKeyDown}
               />
             </Grid>
           </Grid>

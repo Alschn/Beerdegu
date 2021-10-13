@@ -1,0 +1,41 @@
+.lobby {
+  height: calc(100vh - 150px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+
+  .lobby-container {
+    width: 100%;
+
+    .lobby-table-container {
+      height: 650px;
+      overflow-y: auto;
+
+      .Mui-selected {
+        background-color: rgba(11, 11, 11, 0.1) !important;
+      }
+    }
+
+    .lobby-bar {
+      width: 100%;
+      height: 50px;
+      display: flex;
+      justify-items: flex-end;
+
+      .grow-full {
+        flex-grow: 1;
+      }
+
+      button {
+        margin: 5px 5px 5px 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .lobby .lobby-container .lobby-table-container {
+    height: 500px;
+  }
+}
