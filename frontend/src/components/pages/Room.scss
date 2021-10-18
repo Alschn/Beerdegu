@@ -1,7 +1,13 @@
+$header-height: 64px;
+
+.room-body {
+  padding-top: calc(#{$header-height} - 2px);
+}
+
 .room-chat {
   position: fixed;
   right: 0;
-  top: 64px; // header height offset
+  top: $header-height;
 
   min-height: calc(100vh - 64px);
   width: 100%;
