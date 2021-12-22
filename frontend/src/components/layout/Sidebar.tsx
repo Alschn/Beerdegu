@@ -1,8 +1,7 @@
-import React, {FC} from "react";
-import Drawer from "@material-ui/core/Drawer";
+import {FC} from "react";
 import Participants from "../room/Participants";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {Divider, List, ListItem, ListItemText} from "@material-ui/core";
+import {Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
 import logo from "../../images/logo.svg";
 import axiosClient from "../../api/axiosClient";
 import {useHistory} from "react-router";

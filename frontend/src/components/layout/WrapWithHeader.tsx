@@ -1,10 +1,9 @@
 import {FC, Fragment, ReactNode, useState} from "react";
 import {logout} from "../../api/auth";
 import logo from "../../images/logo.svg";
-import {useMediaQuery} from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
-import CloseIcon from "@material-ui/icons/Close";
+import {useMediaQuery, IconButton} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 import OverlayMenu from "./OverlayMenu";
 import "./WrapWithHeader.scss";
 

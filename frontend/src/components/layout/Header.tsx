@@ -1,14 +1,11 @@
-import React, {FC} from "react";
-import {makeStyles, Theme} from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import MenuIcon from "@material-ui/icons/Menu";
+import {FC} from "react";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {Avatar} from "@material-ui/core";
-import {AvatarGroup} from "@material-ui/lab";
-import ChatOutlinedIcon from '@material-ui/icons/ChatOutlined';
+import {AppBar, Avatar, IconButton, Toolbar, Typography} from "@mui/material";
+import {AvatarGroup} from "@mui/lab";
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import MenuIcon from "@mui/icons-material/Menu";
+import {makeStyles} from "@mui/styles";
+import {Theme} from "@mui/system";
 
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -102,6 +99,6 @@ const Header: FC<HeaderProps> = ({openDrawerHandler, openSideBarChatHandler}) =>
       </AppBar>
     </div>
   );
-}
+};
 
 export default Header;

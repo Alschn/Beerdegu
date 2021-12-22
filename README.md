@@ -6,9 +6,9 @@
     <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt=""/>
     <img src="https://img.shields.io/badge/Sass-CC6699?style=for-the-badge&logo=sass&logoColor=white" alt=""/>
-    <img src="https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white" alt=""/>
+    <img src="https://img.shields.io/badge/MUI-0081CB?style=for-the-badge&logo=mui&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt=""/>
-    <img src="https://img.shields.io/badge/redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white" alt=""/>
+    <img src="https://img.shields.io/badge/Redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Docker-008FCC?style=for-the-badge&logo=docker&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white" alt=""/>
 </div>
@@ -42,7 +42,7 @@ This setup has been tested with Python 3.8/3.9 and Node 12/14.
 - Typescript
 - `react-use-websocket` - websocket client, connects with ws backend
 - `html2canvas`, `jspdf` - converting html to canvas and saving to pdf
-- `@material-ui/core`, `@material-ui/icons`, `@material-ui/lab` - UI library
+- `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@mui/styles` - Material UI library
 - `node-sass` - enables scss/sass support
 - `axios` - for making http requests
 

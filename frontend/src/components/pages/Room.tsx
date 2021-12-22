@@ -1,5 +1,5 @@
-import {Grid, useMediaQuery, useTheme} from "@material-ui/core";
-import React, {FC, useCallback, useEffect, useReducer, useState} from "react";
+import {Grid, useMediaQuery, useTheme} from "@mui/material";
+import {FC, useCallback, useEffect, useReducer, useState} from "react";
 import {useHistory, useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import {

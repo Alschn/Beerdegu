@@ -1,11 +1,12 @@
-import {Grid, MenuItem, TextField} from "@material-ui/core";
+import {Grid, MenuItem, TextField} from "@mui/material";
 import React, {FC, Fragment, useEffect, useReducer} from "react";
-import "./Form.scss";
 import useWebSocket from "react-use-websocket";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {UserRatingsObject, WebsocketMessage} from "../../utils/ws";
 import {HOST, WS_SCHEME} from "../../config";
 import usePrevious from "../../hooks/usePrevious";
+import "./Form.scss";
+
 
 const FORM_SAVE_INTERVAL_MS = 5_000;
 

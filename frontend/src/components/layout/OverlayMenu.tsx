@@ -1,6 +1,6 @@
 import {FC, Fragment, useEffect} from "react";
-import "./OverlayMenu.scss";
 import {logout} from "../../api/auth";
+import "./OverlayMenu.scss";
 
 interface OverlayMenuProps {
   isOpen: boolean;

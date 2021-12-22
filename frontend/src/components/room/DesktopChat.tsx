@@ -1,7 +1,8 @@
 import React, {FC, Fragment} from "react";
-import {Button, List, ListItem, TextField} from "@material-ui/core";
-import "./DesktopChat.scss";
+import {Button, List, ListItem, TextField} from "@mui/material";
 import {useRoomContext} from "../../hooks/useContextHook";
+import "./DesktopChat.scss";
+
 
 interface ChatProps {
   handleSendMessage: () => void,

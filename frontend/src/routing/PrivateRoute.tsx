@@ -1,4 +1,4 @@
-import React, {ComponentType, FC} from "react";
+import {ComponentType, FC, ReactNode} from "react";
 import {Redirect, Route} from "react-router";
 import WrapWithHeader from "../components/layout/WrapWithHeader";
 
@@ -7,7 +7,7 @@ interface PrivateRouteProps {
   path: string,
   exact?: boolean,
   withHeader?: boolean,
-  children?: React.ReactNode,
+  children?: ReactNode,
 }
 
 const PrivateRoute: FC<PrivateRouteProps> = ({component, children, path, exact, withHeader = true}) => {
