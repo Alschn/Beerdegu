@@ -1,13 +1,13 @@
-import React, {FC} from "react";
-import Drawer from "@material-ui/core/Drawer";
+import {BaseSyntheticEvent, FC} from "react";
 import {SidebarProps} from "./Sidebar";
-import "./Sidebar.scss";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {Button, List, ListItem, TextField} from "@material-ui/core";
+import {Button, List, ListItem, TextField, Drawer} from "@mui/material";
+import "./Sidebar.scss";
+
 
 interface ChatSidebarProps extends SidebarProps {
   handleSendMessage: () => void,
-  handleChange: (e: React.BaseSyntheticEvent) => void,
+  handleChange: (e: BaseSyntheticEvent) => void,
 }
 
 const ChatSidebar: FC<ChatSidebarProps> = ({open, toggleDrawerHandler, handleSendMessage, handleChange}) => {

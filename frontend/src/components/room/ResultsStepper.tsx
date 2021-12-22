@@ -1,9 +1,7 @@
 import React, {FC, useRef, useState} from 'react';
-import {useTheme} from '@material-ui/core/styles';
-import MobileStepper from '@material-ui/core/MobileStepper';
-import Button from '@material-ui/core/Button';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import {Button, MobileStepper} from '@mui/material';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import UserRatingsTable from "./UserRatingsTable";
 import BeerRatingsTable from "./BeerRatingsTable";
 import {useRoomContext} from "../../hooks/useContextHook";
@@ -12,7 +10,6 @@ import "./ResultsStepper.scss";
 
 const ResultsStepper: FC = () => {
   const {results} = useRoomContext();
-  const theme = useTheme();
 
   const [activeStep, setActiveStep] = useState<number>(0);
 
@@ -22,8 +19,8 @@ const ResultsStepper: FC = () => {
   const tableRef = useRef(null);
 
   return (
-    <div className='results-stepper'>
-      <div className='results-stepper-header'>
+    <div className="results-stepper">
+      <div className="results-stepper-header">
         <h1>Degustacja zakończyła się!</h1>
       </div>
 
@@ -37,7 +34,7 @@ const ResultsStepper: FC = () => {
             size="small" onClick={handleBack}
             disabled={activeStep === 0}
           >
-            {theme.direction === 'rtl' ? <KeyboardArrowRight/> : <KeyboardArrowLeft/>}
+            <KeyboardArrowLeft/>
             <strong>Twoje oceny</strong>
           </Button>
         }
@@ -47,7 +44,7 @@ const ResultsStepper: FC = () => {
             disabled={activeStep === 1 || results.length === 0}
           >
             <strong>Wyniki</strong>
-            {theme.direction === 'rtl' ? <KeyboardArrowLeft/> : <KeyboardArrowRight/>}
+            <KeyboardArrowRight/>
           </Button>
         }
       />
@@ -71,6 +68,6 @@ const ResultsStepper: FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default ResultsStepper;

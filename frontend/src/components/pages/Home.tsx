@@ -1,10 +1,10 @@
-import React, {FC, Fragment} from "react";
+import {FC, Fragment} from "react";
 import beers from "../../images/logo.svg";
-import {Button} from "@material-ui/core";
+import {Button} from "@mui/material";
 import {useHistory} from "react-router";
 import {logout} from "../../api/auth";
-import "./Home.scss";
 import WrapWithHeader from "../layout/WrapWithHeader";
+import "./Home.scss";
 
 
 const Home: FC = () => {
@@ -29,7 +29,7 @@ const Home: FC = () => {
                   Join Room
                 </Button>
 
-                <Button variant="contained" color="secondary" onClick={() => redirectTo('/create')}>
+                <Button variant="contained" color="error" onClick={() => redirectTo('/create')}>
                   Create Room
                 </Button>
 
@@ -46,7 +46,7 @@ const Home: FC = () => {
                   Login
                 </Button>
 
-                <Button variant="contained" color="secondary" onClick={() => redirectTo('/register')}>
+                <Button variant="contained" color="error" onClick={() => redirectTo('/register')}>
                   Register
                 </Button>
               </Fragment>

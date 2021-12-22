@@ -1,12 +1,6 @@
 import React, {FC, useState} from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import Container from '@material-ui/core/Container';
+import {Avatar, Button, TextField, Link, Grid, Typography, Container} from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import {onRegister} from "../../api/auth";
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";

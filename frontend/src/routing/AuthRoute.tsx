@@ -1,4 +1,4 @@
-import React, {ComponentType, FC} from "react";
+import {ComponentType, FC} from "react";
 import {Redirect, Route} from "react-router";
 import WrapWithHeader from "../components/layout/WrapWithHeader";
 

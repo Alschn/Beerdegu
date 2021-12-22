@@ -1,7 +1,8 @@
-import React, {PureComponent} from "react";
-import "./PageNotFound.scss";
-import empty from "../images/empty.svg";
+import {PureComponent} from "react";
 import WrapWithHeader from "../components/layout/WrapWithHeader";
+import empty from "../images/empty.svg";
+import "./PageNotFound.scss";
+
 
 class PageNotFound extends PureComponent<any, any> {
   render() {

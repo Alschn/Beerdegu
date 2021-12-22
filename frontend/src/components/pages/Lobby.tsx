@@ -1,14 +1,17 @@
-import React, {FC, useEffect, useReducer, useState} from 'react';
-import Paper from '@material-ui/core/Paper';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import {Container, Divider} from "@material-ui/core";
+import {FC, MouseEvent, useEffect, useReducer, useState} from 'react';
+import {
+  Button,
+  Container,
+  Divider,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material';
 import {getRooms} from "../../api/lobby";
-import Button from "@material-ui/core/Button";
 import CreateRoomDialog from "../lobby/CreateRoomDialog";
 import JoinRoomDialog from "../lobby/JoinRoomDialog";
 import "./Lobby.scss";
@@ -115,7 +118,7 @@ const Lobby: FC = () => {
   }, []);
 
 
-  const handleRowClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
+  const handleRowClick = (e: MouseEvent<HTMLTableRowElement>) => {
     const roomName = e.currentTarget.getAttribute('data-room-name');
     setSelected(roomName);
   };
@@ -178,7 +181,7 @@ const Lobby: FC = () => {
           <Button
             onClick={() => dispatch({type: 'OPEN_CREATE_DIALOG', payload: true})}
             variant="contained"
-            color="secondary"
+            color="error"
           >
             Create Room
           </Button>

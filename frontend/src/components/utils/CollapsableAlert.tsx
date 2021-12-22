@@ -1,6 +1,6 @@
-import {Collapse} from "@material-ui/core";
-import {Alert} from "@material-ui/lab";
-import React, {FC, useEffect, useState} from "react";
+import {Collapse} from "@mui/material";
+import {Alert} from "@mui/lab";
+import {FC, useEffect, useState} from "react";
 
 export interface AlertContentObject {
   message: string,
