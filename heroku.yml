@@ -1,8 +1,24 @@
+# setup - Specifies the add-ons and config vars to create during app provisioning
+# build - Specifies the Dockerfile to build
+# release - Specifies the release phase tasks to execute
+# run - Specifies process types and the commands to run for each
+
 build:
   docker:
     web: Dockerfile.prod
+
+release:
+  command:
+    - ./entrypoint-prod.sh
+  image: web
+
 run:
+  web:
+    command:
+      - cd backend && daphne -b 0.0.0.0 -p $PORT core.asgi:application -v2
+    image: web
+
   worker:
     command:
-      - python3 backend/manage.py runworker -v2
+      - python3 worker/manage.py runworker -v2
     image: web

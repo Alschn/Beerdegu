@@ -12,5 +12,3 @@ else:
     print('Superuser creation skipped!');
 "
 printf "$script" | python manage.py shell
-
-daphne -b 0.0.0.0 -p $PORT core.asgi:application -v2
