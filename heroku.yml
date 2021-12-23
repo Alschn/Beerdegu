@@ -15,10 +15,10 @@ release:
 run:
   web:
     command:
-      - cd backend && daphne -b 0.0.0.0 -p $PORT core.asgi:application -v2
+      - daphne -b 0.0.0.0 -p $PORT backend.core.asgi:application -v2
     image: web
 
   worker:
     command:
-      - python3 worker/manage.py runworker -v2
+      - python3 backend/manage.py runworker -v2
     image: web
