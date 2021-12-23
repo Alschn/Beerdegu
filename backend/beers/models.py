@@ -12,6 +12,15 @@ class Beer(models.Model):
         max_digits=4, decimal_places=2, validators=[MinValueValidator(Decimal('0'))]
     )
     volume_ml = models.PositiveIntegerField()
+    hop_rate = models.PositiveIntegerField(null=True, blank=True, help_text="Grams of hops per liter [g/L]")
+    extract = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Concentration of dissolved solids (mainly sugars) in a brewery wort. [°BLG]"
+    )
+    IBU = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Bitterness measured in International Bitterness Units scale"
+    )
     image = models.URLField(null=True, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
     hops = models.ManyToManyField('Hop', blank=True)
