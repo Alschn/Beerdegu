@@ -20,5 +20,5 @@ run:
 
   worker:
     command:
-      - python3 backend/manage.py runworker -v2
+      - python3 backend/manage.py runworker channels -v2
     image: web
