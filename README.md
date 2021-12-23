@@ -106,6 +106,15 @@ coverage report -m
 ```
 
 ## With Docker
+
+First define environmental variables in `.env` in root directory:
+```
+DB_NAME
+DB_USERNAME
+DB_PASSWORD
+```
+
+
 Make sure Docker Engine is running.  
 
 While in **root directory**, build docker images and run them with docker-compose. This might take up to few minutes. 
@@ -131,7 +140,7 @@ To run commands in active container:
 ```shell script
 docker exec -it CONTAINER_ID bash
 ```
-In case it does not work, try:
+In case there is no bash installed, try:
 ```shell script
 docker exec -it CONTAINER_ID /bin/sh
 ```
