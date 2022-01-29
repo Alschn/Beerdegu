@@ -17,6 +17,9 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
 
+admin.site.site_title = "Beerdegu Admin"
+admin.site.site_header = "Beerdegu Admin"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),

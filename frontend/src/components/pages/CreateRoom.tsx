@@ -1,9 +1,6 @@
-import React, {FC, useState} from "react";
-import {Button, Container} from "@material-ui/core";
-import Avatar from "@material-ui/core/Avatar";
-import GroupAddRoundedIcon from '@material-ui/icons/GroupAddRounded';
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
+import {BaseSyntheticEvent, FC, KeyboardEvent, useState} from "react";
+import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
+import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded';
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import type {createRoomForm} from "../../api/lobby";
@@ -28,7 +25,7 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
     severity: 'error',
   });
 
-  const handleChange = (e: React.BaseSyntheticEvent): void => {
+  const handleChange = (e: BaseSyntheticEvent): void => {
     const field = e.target.name;
     setFormState({
       ...formState,
@@ -52,7 +49,7 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
     });
   };
 
-  const onEnterKeyDown = (e: React.KeyboardEvent): void => submitWithEnter(e, submitForm);
+  const onEnterKeyDown = (e: KeyboardEvent): void => submitWithEnter(e, submitForm);
 
   return (
     <Container component="main" maxWidth="xs">

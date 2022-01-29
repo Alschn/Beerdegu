@@ -1,20 +1,23 @@
-import React, {FC, useCallback, useEffect, useState} from "react";
-import {Grid, List} from "@material-ui/core";
+import {BaseSyntheticEvent, FC, KeyboardEvent, useCallback, useEffect, useState} from "react";
+import {
+  Avatar,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  ListItemText,
+  Tooltip
+} from "@mui/material";
 import {getBeersByQuery} from "../../api/search";
 import {BeerObject} from "../../utils/ws";
 import BeerCard from "../utils/BeerCard";
-import "./SearchAPI.scss";
 import {useRoomContext} from "../../hooks/useContextHook";
-import Tooltip from "@material-ui/core/Tooltip";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Avatar from "@material-ui/core/Avatar";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from '@material-ui/icons/Delete';
-import SearchIcon from '@material-ui/icons/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
 import {removeBeerFromRoom} from "../../api/room";
+import "./SearchAPI.scss";
 
 
 const SearchAPI: FC = () => {
@@ -23,7 +26,7 @@ const SearchAPI: FC = () => {
 
   const {beers, sendMessage, roomState, code, isHost} = useRoomContext();
 
-  const handleQueryChange = (e: React.BaseSyntheticEvent): void => setQuery(e.target.value);
+  const handleQueryChange = (e: BaseSyntheticEvent): void => setQuery(e.target.value);
 
   const handleSubmit = (): void => {
     getBeersByQuery(query).then(
@@ -31,7 +34,7 @@ const SearchAPI: FC = () => {
     ).catch(err => console.log(err));
   };
 
-  const handleSubmitWithEnter = (e: React.KeyboardEvent): void => {
+  const handleSubmitWithEnter = (e: KeyboardEvent): void => {
     e.key === 'Enter' && handleSubmit();
   };
 

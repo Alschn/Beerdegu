@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     # django utils
     'django_filters',
+    'import_export',
     # cors headers
     'corsheaders',
     # rest framework

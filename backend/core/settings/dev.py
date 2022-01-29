@@ -1,8 +1,6 @@
 """
 Configuration for development with Docker.
 """
-import os
-
 from core.settings.base import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -18,8 +16,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
         'HOST': os.environ.get('DB_HOST', 'db'),
-        'PORT': 5432
+        'PORT': os.environ.get('DB_PORT', 5432),
     }
 }
 
@@ -27,7 +26,13 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('redis_db', 6379)],  # redis_db = service's name
+            "hosts": [
+                (
+                    # redis_db = service's name
+                    os.environ.get('REDIS_HOST', 'redis_db'),
+                    os.environ.get('REDIS_PORT', 6379)
+                )
+            ],
         },
     },
 }

@@ -1,11 +1,11 @@
-import React from "react";
+import {FormEvent, KeyboardEvent} from "react";
 
-export const onSubmit = (e: React.FormEvent, submitCallback: () => void) => {
+export const onSubmit = (e: FormEvent, submitCallback: () => void) => {
   e.preventDefault();
   submitCallback();
 };
 
-export const submitWithEnter = (e: React.KeyboardEvent, submitCallback: () => void) => {
+export const submitWithEnter = (e: KeyboardEvent, submitCallback: () => void) => {
   if (e.key === 'Enter') {
     e.preventDefault();
     submitCallback();

@@ -1,14 +1,14 @@
 import React, {FC, useState} from "react";
-import {Button, Container, Grid, Link} from "@material-ui/core";
-import Avatar from "@material-ui/core/Avatar";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import LockOpenOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
+import {Button, Container, Grid, Link} from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import {onLogin} from "../../api/auth";
 import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import "./Auth.scss";
 import {onSubmit, submitWithEnter} from "../../utils/forms";
+import "./Auth.scss";
 
 
 const Login: FC = () => {

@@ -2,7 +2,7 @@ import Waiting from "./Waiting";
 import SearchAPI from "./SearchAPI";
 import BeerFormStepper from "./BeerFormStepper";
 import ResultsStepper from "./ResultsStepper";
-import React, {FC} from "react";
+import {FC} from "react";
 import {roomStateType} from "../../context/roomContext";
 
 const RoomStateComponent: FC<{ state: roomStateType }> = ({state}) => {

@@ -1,4 +1,4 @@
-import {Dialog} from "@material-ui/core";
+import {Dialog} from "@mui/material";
 import {Dispatch, FC} from "react";
 import JoinRoom from "../pages/JoinRoom";
 

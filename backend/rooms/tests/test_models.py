@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from rooms.models import Room
+from beers.models import Beer
+from rooms.models import Room, Rating, UserInRoom, BeerInRoom
 
 
 class RoomsModelsTests(TestCase):
@@ -31,10 +32,22 @@ class RoomsModelsTests(TestCase):
         self.assertEqual(str(self.room1), "'TestRoom' 1/4 - waiting")
 
     def test_rating_to_string(self):
-        pass
+        rating = Rating.objects.create(added_by=self.user, note=10)
+        self.assertEqual(str(rating), f'10 by {self.user.username}')
+
+    def test_rating_without_note_to_string(self):
+        rating = Rating.objects.create(added_by=self.user)
+        self.assertEqual(str(rating), f'None by {self.user.username}')
 
     def test_beer_in_room_to_string(self):
-        pass
-
+        user = User.objects.create_user(username="test2", password="test2")
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        room = Room.objects.create(name="testroom", slots=4, host=user, state="STARTING")
+        beer_in_room = BeerInRoom.objects.create(beer=beer, room=room)
+        self.assertEqual(str(beer_in_room), f'{room.name} - {beer}')
+        
     def test_user_in_room_to_string(self):
-        pass
+        user = User.objects.create_user(username="test3", password="test3")
+        room = Room.objects.create(name="testr00m", slots=3, host=user, state="STARTING")
+        user_in_room = UserInRoom.objects.create(user=user, room=room)
+        self.assertEqual(str(user_in_room), f'{user.username} - {room.name}')

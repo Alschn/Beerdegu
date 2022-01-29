@@ -1,14 +1,11 @@
 import React, {FC, useState} from "react";
 import {useHistory} from "react-router";
-import {Button, Container} from "@material-ui/core";
-import Avatar from "@material-ui/core/Avatar";
-import SupervisorAccountRoundedIcon from '@material-ui/icons/SupervisorAccountRounded';
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import "./JoinCreateRoom.scss";
+import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
+import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {joinRoom} from "../../api/lobby";
 import {onSubmit, submitWithEnter} from "../../utils/forms";
+import "./JoinCreateRoom.scss";
 
 interface JoinRoomProps {
   roomNameProp?: string,

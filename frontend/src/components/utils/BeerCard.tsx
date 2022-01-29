@@ -1,15 +1,11 @@
-import React, {FC} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
+import {FC} from 'react';
+import {Button, Card, CardActions, CardContent, Tooltip, Typography} from '@mui/material';
+import {makeStyles} from '@mui/styles';
 import {useRoomContext} from "../../hooks/useContextHook";
 import {addBeerToRoom} from "../../api/room";
+import {Theme} from "@mui/system";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
   // casual = false
   root: {
     maxWidth: 345,

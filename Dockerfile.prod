@@ -35,8 +35,3 @@ WORKDIR /app
 RUN DJANGO_SETTINGS_MODULE=core.settings.prod \
     SECRET_KEY=TEST_SECRET_KEY \
     python3 backend/manage.py collectstatic --noinput
-
-EXPOSE $PORT
-
-RUN ["chmod", "+x", "/app/entrypoint-prod.sh"]
-ENTRYPOINT ["/app/entrypoint-prod.sh"]
