@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'dj_rest_auth.registration',
     # apps
+    'core',
     'api',
     'users',
     'rooms',
