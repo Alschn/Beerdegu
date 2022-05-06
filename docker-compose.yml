@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.9"
 
 services:
   backend:
@@ -10,8 +10,6 @@ services:
       - "8000:8000"
     stdin_open: true
     tty: true
-    depends_on:
-      - db
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.dev
     links:
@@ -21,15 +19,13 @@ services:
     container_name: frontend
     build: ./frontend
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app/frontend
+      - node-modules:/app/frontend/node_modules
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-    depends_on:
-      - backend
     command: npm start
 
   db:
@@ -55,3 +51,4 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  node-modules:
