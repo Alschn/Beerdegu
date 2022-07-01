@@ -26,7 +26,6 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-    command: npm start
 
   db:
     container_name: db
