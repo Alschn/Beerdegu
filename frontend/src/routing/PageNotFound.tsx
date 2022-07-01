@@ -1,6 +1,7 @@
 import {PureComponent} from "react";
+import { Link } from "react-router-dom";
 import WrapWithHeader from "../components/layout/WrapWithHeader";
-import empty from "../images/empty.svg";
+// import empty from "../images/empty.svg";
 import "./PageNotFound.scss";
 
 
@@ -10,9 +11,9 @@ class PageNotFound extends PureComponent<any, any> {
       <WrapWithHeader>
         <div className="PageNotFound">
           <span className="text">Page not found!</span>
-          <a href="/">
-            <img className="image" src={empty} alt=""/>
-          </a>
+          <Link to="/">
+            <img className="image" src={""} alt=""/>
+          </Link>
         </div>
       </WrapWithHeader>
     );

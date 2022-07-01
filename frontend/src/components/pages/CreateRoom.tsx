@@ -1,18 +1,18 @@
 import {BaseSyntheticEvent, FC, KeyboardEvent, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
 import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded';
-import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import type {createRoomForm} from "../../api/lobby";
 import {createRoom} from "../../api/lobby";
 import {onSubmit, submitWithEnter} from "../../utils/forms";
+import {useNavigate} from "react-router-dom";
 
 interface CreateRoomProps {
   isRoute?: boolean,
 }
 
 const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [formState, setFormState] = useState<createRoomForm>({
     name: '',
@@ -40,7 +40,7 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
         message: `Created room ${formState.name}! Redirecting ...`,
         severity: 'success',
       });
-      setTimeout(() => history.push(`/room/${formState.name}`), 1000);
+      setTimeout(() => navigate(`/room/${formState.name}`), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

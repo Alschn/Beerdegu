@@ -1,37 +1,41 @@
 import {FC} from "react";
-import {BrowserRouter, Route, Switch} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Home from "../components/pages/Home";
 import Room from "../components/pages/Room";
 import PageNotFound from "./PageNotFound";
 import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
-import PrivateRoute from "./PrivateRoute";
-import AuthRoute from "./AuthRoute";
 import JoinRoom from "../components/pages/JoinRoom";
 import CreateRoom from "../components/pages/CreateRoom";
 import Lobby from "../components/pages/Lobby";
+import PrivateRoute from "./PrivateRoute";
+import AuthRoute from "./AuthRoute";
 
 const Router: FC = () => {
   return (
     <BrowserRouter>
-      <Switch>
-        <Route exact path="/" component={Home}/>
+      <Routes>
+        <Route index element={<Home/>}/>
 
-        <AuthRoute exact path="/login" component={Login}/>
-        <AuthRoute exact path="/register" component={Register}/>
+        <Route path="/" element={<PrivateRoute withHeader/>}>
+          <Route path="lobby" element={<Lobby/>}/>
+          <Route path="join" element={<JoinRoom/>}/>
+          <Route path="create" element={<CreateRoom/>}/>
+          {/*<Route path="browser" element={<Browser/>}/>*/}
+          {/*<Route path="profile" element={<Profile/>}/>*/}
+        </Route>
 
-        <PrivateRoute exact path="/lobby" component={Lobby}/>
+        <Route path="/" element={<AuthRoute/>}>
+          <Route path="login" element={<Login/>}/>
+          <Route path="register" element={<Register/>}/>
+        </Route>
 
-        {/*<PrivateRoute exact path="/browser" component={Browser}/>*/}
-        {/*<PrivateRoute exact path="/profile" component={Profile}/>*/}
+        <Route path="/" element={<PrivateRoute withHeader={false}/>}>
+          <Route path="room/:code" element={<Room/>}/>
+        </Route>
 
-        <PrivateRoute exact path="/join" component={JoinRoom}/>
-        <PrivateRoute exact path="/create" component={CreateRoom}/>
-
-        <PrivateRoute exact path="/room/:code" component={Room} withHeader={false}/>
-
-        <Route path="*" component={PageNotFound}/>
-      </Switch>
+        <Route path="*" element={<PageNotFound/>}/>
+      </Routes>
     </BrowserRouter>
   );
 };

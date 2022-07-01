@@ -1,35 +1,27 @@
-import {ComponentType, FC, ReactNode} from "react";
-import {Redirect, Route} from "react-router";
+import {FC} from "react";
+import {Outlet} from "react-router";
 import WrapWithHeader from "../components/layout/WrapWithHeader";
+import {Navigate} from "react-router";
 
 interface PrivateRouteProps {
-  component: ComponentType,
-  path: string,
-  exact?: boolean,
-  withHeader?: boolean,
-  children?: ReactNode,
+  withHeader?: boolean
 }
 
-const PrivateRoute: FC<PrivateRouteProps> = ({component, children, path, exact, withHeader = true}) => {
+const PrivateRoute: FC<PrivateRouteProps> = ({withHeader = true}) => {
   const isAuthenticated = localStorage.getItem('token') !== null;
 
   if (isAuthenticated) {
     if (withHeader) {
       return (
         <WrapWithHeader>
-          <Route path={path} exact component={component}>
-            {children}
-          </Route>
+          <Outlet/>
         </WrapWithHeader>
-
       );
     } else return (
-      <Route path={path} exact component={component}>
-        {children}
-      </Route>
+      <Outlet/>
     );
   }
-  return <Redirect to="/login"/>;
+  return <Navigate to="/login"/>;
 };
 
 export default PrivateRoute;

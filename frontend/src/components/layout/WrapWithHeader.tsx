@@ -1,11 +1,12 @@
 import {FC, Fragment, ReactNode, useState} from "react";
-import {logout} from "../../api/auth";
 import logo from "../../images/logo.svg";
 import {useMediaQuery, IconButton} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import OverlayMenu from "./OverlayMenu";
 import "./WrapWithHeader.scss";
+import {Link} from "react-router-dom";
+import {logout} from "../../api/auth";
 
 
 interface WrapWithHeaderProps {
@@ -38,21 +39,21 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
   return (
     <div className="main">
       <header className="header">
-        <a href="/" className="title">
+        <Link to="/" className="title">
           <img src={logo} alt=""/>
           <span>Beerdegu</span>
-        </a>
+        </Link>
 
         {matchesForLinks && (
           <ul className="header-links">
             <li>
-              <a href="/">Home</a>
+              <Link to="/">Home</Link>
             </li>
             <li>
-              <a href="/browser">Browser</a>
+              <Link to="/browser">Browser</Link>
             </li>
             <li>
-              <a href="/lobby">Lobby</a>
+              <Link to="/lobby">Lobby</Link>
             </li>
           </ul>
         )}
@@ -73,7 +74,7 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
             {isAuthenticated ? (
               <ul className="header-links">
                 <li>
-                  <a href="/profile">Profile</a>
+                  <Link to="/profile">Profile</Link>
                 </li>
                 <li onClick={logout}>
                   <span>Logout</span>
@@ -82,10 +83,10 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
             ) : (
               <ul className="header-links">
                 <li>
-                  <a href="/login">Login</a>
+                  <Link to="/login">Login</Link>
                 </li>
                 <li>
-                  <a href="/register">Register</a>
+                  <Link to="/register">Register</Link>
                 </li>
               </ul>
             )}

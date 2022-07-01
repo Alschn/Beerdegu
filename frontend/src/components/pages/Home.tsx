@@ -1,17 +1,17 @@
 import {FC, Fragment} from "react";
 import beers from "../../images/logo.svg";
 import {Button} from "@mui/material";
-import {useHistory} from "react-router";
 import {logout} from "../../api/auth";
 import WrapWithHeader from "../layout/WrapWithHeader";
 import "./Home.scss";
+import {useNavigate} from "react-router-dom";
 
 
 const Home: FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  const redirectTo = (path: string) => history.push(path);
+  const redirectTo = (path: string) => navigate(path);
 
   return (
     <WrapWithHeader>

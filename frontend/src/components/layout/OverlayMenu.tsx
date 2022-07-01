@@ -1,4 +1,5 @@
 import {FC, Fragment, useEffect} from "react";
+import {Link} from "react-router-dom";
 import {logout} from "../../api/auth";
 import "./OverlayMenu.scss";
 
@@ -21,18 +22,18 @@ const OverlayMenu: FC<OverlayMenuProps> = ({isOpen, handleClose}) => {
     <div className={isOpen ? 'overlay open' : 'overlay'} id="overlay" onClick={handleClose}>
       <nav className="overlay-menu">
         <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/browser">Browser</a></li>
-          <li><a href="/lobby">Lobby</a></li>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/browser">Browser</Link></li>
+          <li><Link to="/lobby">Lobby</Link></li>
           {isAuthenticated ? (
             <Fragment>
-              <li><a href="/profile">Profile</a></li>
+              <li><Link to="/profile">Profile</Link></li>
               <li><span onClick={logout}>Logout</span></li>
             </Fragment>
           ) : (
             <Fragment>
-              <li><a href="/login">Login</a></li>
-              <li><a href="/register">Register</a></li>
+              <li><Link to="/login">Login</Link></li>
+              <li><Link to="/register">Register</Link></li>
             </Fragment>
           )}
         </ul>

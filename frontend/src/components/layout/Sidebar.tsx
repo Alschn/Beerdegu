@@ -4,8 +4,8 @@ import {useRoomContext} from "../../hooks/useContextHook";
 import {Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
 import logo from "../../images/logo.svg";
 import axiosClient from "../../api/axiosClient";
-import {useHistory} from "react-router";
 import {roomStateType} from "../../context/roomContext";
+import {useNavigate} from "react-router-dom";
 
 export interface SidebarProps {
   open: boolean,
@@ -14,7 +14,7 @@ export interface SidebarProps {
 
 const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
   const {code, isHost, sendMessage, roomState} = useRoomContext();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const getRoomState = () => {
     sendMessage({
@@ -26,7 +26,7 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
     sendMessage({
       command: 'load_beers',
     });
-  }
+  };
 
   const changeRoomState = (new_state: roomStateType) => {
     sendMessage({
@@ -40,7 +40,7 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
         sendMessage({
           command: 'get_users',
         });
-        history.push('/');
+        navigate('/');
       }
     ).catch(err => console.log(err));
   };
@@ -96,7 +96,7 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
 
               {roomState !== 'IN_PROGRESS' ? (
                 <ListItem button onClick={() => {
-                  changeRoomState('IN_PROGRESS')
+                  changeRoomState('IN_PROGRESS');
                 }}>
                   <ListItemText>
                     {roomState === 'WAITING' || roomState === 'STARTING' ? 'Rozpocznij' : 'Wznów'} degustację
