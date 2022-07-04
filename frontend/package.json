@@ -19,6 +19,7 @@
     "jspdf": "^2.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-query": "^3.39.1",
     "react-router-dom": "^6.3.0",
     "react-scripts": "4.0.3",
     "react-use-websocket": "^4.2.0",
