@@ -5,20 +5,20 @@ WORKDIR /app/backend
 
 # Install Python dependencies
 COPY ./backend/requirements.txt /app/backend/
-RUN pip3 install --upgrade pip -r requirements.txt
+RUN pip install --upgrade pip && pipenv install
 
 # Install frontend dependencies
 WORKDIR /app/frontend
 
 COPY ./frontend/package.json ./frontend/yarn.lock /app/frontend/
-RUN npm install
+RUN yarn install
 
 # Add the rest of the code
 COPY . /app/
 COPY ./backend/scripts/ /app/
 
 # Build static files
-RUN npm run build
+RUN yarn build
 
 # Move all static files other than index.html to root/ for whitenoise middleware
 WORKDIR /app/frontend/build
