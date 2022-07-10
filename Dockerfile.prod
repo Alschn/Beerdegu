@@ -5,7 +5,7 @@ WORKDIR /app/backend
 
 # Install Python dependencies
 COPY ./backend/requirements.txt /app/backend/
-RUN pip install --upgrade pip && pipenv install
+RUN pip install --upgrade pip && pipenv install && pipenv shell
 
 # Install frontend dependencies
 WORKDIR /app/frontend
