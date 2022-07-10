@@ -1,6 +1,6 @@
 import {Grid, useMediaQuery, useTheme} from "@mui/material";
 import {FC, useCallback, useEffect, useReducer, useState} from "react";
-import {useHistory, useParams} from "react-router";
+import {useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import {
   BeerObject,
@@ -19,16 +19,13 @@ import {HOST, WS_SCHEME} from "../../config";
 import AxiosClient from "../../api/axiosClient";
 import RoomStateComponent from "../room/RoomStateComponent";
 import "./Room.scss";
+import {useNavigate} from "react-router-dom";
 
 
 const USER_PING_INTERVAL_MS = 14_000;
 const USERS_FETCH_INTERVAL_MS = 12_000;
 
 const TRY_RECONNECT_TIMES = 5;
-
-interface RoomParamsProps {
-  code: string;
-}
 
 interface State {
   messages: ChatMessageObject[],
@@ -96,8 +93,8 @@ const roomReducer = (state = initialState, action: Action): State => {
 
 
 const Room: FC = () => {
-  const {code} = useParams<RoomParamsProps>();
-  const history = useHistory();
+  const params = useParams();
+  const navigate = useNavigate();
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));
 
@@ -105,22 +102,21 @@ const Room: FC = () => {
   const [shouldConnect, setShouldConnect] = useState<boolean>(false);
 
   const checkUserInRoom = useCallback(() => {
-    return AxiosClient.get(`/api/rooms/in?code=${code}`).then(({data}) => {
+    return AxiosClient.get(`/api/rooms/in?code=${params!.code}`).then(({data}) => {
       const {is_host} = data;
       setIsHost(Boolean(is_host));
       setShouldConnect(true);
     }).catch(() => {
       setShouldConnect(false);
-      history.push('/');
+      navigate('/');
     });
-  }, [code, history]);
+  }, [params]);
 
   useEffect(() => {
     // on mount decide if the client should connect to ws backend
     // or get directed back to home page
-    checkUserInRoom().then(() => {
-    });
-  }, [checkUserInRoom]);
+    checkUserInRoom().then();
+  }, []);
 
   // State related to data that comes via websockets
   const [state, dispatch] = useReducer(roomReducer, initialState);
@@ -128,7 +124,7 @@ const Room: FC = () => {
   const {
     sendJsonMessage,
     readyState,
-  } = useWebSocket(`${WS_SCHEME}://${HOST}/ws/room/${code}/`, {
+  } = useWebSocket(`${WS_SCHEME}://${HOST}/ws/room/${params!.code}/`, {
     onOpen: () => console.log('Websocket open'),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
@@ -207,7 +203,7 @@ const Room: FC = () => {
 
   return (
     <RoomContext.Provider value={{
-      code: code,
+      code: params!.code as string,
       isHost: isHost,
       wsState: connectionStatus,
       sendMessage: sendJsonMessage,

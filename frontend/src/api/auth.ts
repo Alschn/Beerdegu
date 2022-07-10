@@ -1,4 +1,5 @@
 import axiosClient from "./axiosClient"
+import {Response} from "./types";
 
 interface LoginData {
   username: string,
@@ -12,16 +13,16 @@ interface RegisterData {
   password2: string,
 }
 
-export const onLogin = (request_body: LoginData): Promise<any> => {
+export const onLogin = (request_body: LoginData): Promise<Response<any>> => {
   return axiosClient.post('/auth/login/', {...request_body});
 };
 
 
-export const onRegister = (request_body: RegisterData): Promise<any> => {
+export const onRegister = (request_body: RegisterData): Promise<Response<any>> => {
   return axiosClient.post('/auth/register/', {...request_body});
 };
 
-export const onLogout = (): Promise<any> => {
+export const onLogout = (): Promise<Response<any>> => {
   return axiosClient.post('/auth/logout/', {});
 };
 

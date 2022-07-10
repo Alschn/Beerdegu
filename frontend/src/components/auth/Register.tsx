@@ -1,11 +1,11 @@
-import React, {FC, useState} from 'react';
-import {Avatar, Button, TextField, Link, Grid, Typography, Container} from '@mui/material';
+import {FC, useState} from 'react';
+import {Avatar, Button, Container, Grid, Link, TextField, Typography} from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import {onRegister} from "../../api/auth";
-import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {onSubmit, submitWithEnter} from '../../utils/forms';
 import "./Auth.scss";
+import {useNavigate} from "react-router-dom";
 
 
 const validateEmail = (email: string): boolean => {
@@ -14,7 +14,7 @@ const validateEmail = (email: string): boolean => {
 };
 
 const Register: FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -36,7 +36,7 @@ const Register: FC = () => {
         message: 'Created account! Redirecting to login page...',
         severity: 'success',
       });
-      setTimeout(() => history.push("/login"), 1000);
+      setTimeout(() => navigate("/login"), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

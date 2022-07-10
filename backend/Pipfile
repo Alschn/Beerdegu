@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+django-cors-headers = "*"
+django-stubs-ext = "*"
+djangorestframework-stubs = "*"
+django-extensions = "*"
+django-filter = "*"
+dj-rest-auth = "*"
+django-allauth = "*"
+django-import-export = "*"
+channels = "*"
+python-dotenv = "*"
+psycopg2 = "*"
+dj-database-url = "*"
+whitenoise = "*"
+daphne = "*"
+channels-redis = "*"
+
+[dev-packages]
+coverage = "*"
+
+[requires]
+python_version = "3.10"

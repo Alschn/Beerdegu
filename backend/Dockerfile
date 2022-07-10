@@ -1,30 +1,30 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9.6-alpine as build-image
+# Use an official Python runtime as a parent image - Build stage
+FROM python:3.10.5-alpine as build-image
 
-# Setup venv in build image
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+ENV PIPENV_VENV_IN_PROJECT=1
 
 WORKDIR /app/backend
 
-# Install dependencies and packages only needed in build stage
-COPY requirements.txt .
+COPY Pipfile .
 
+# Install packages only needed in build stage
 RUN  \
     apk update && \
     apk upgrade && \
-    apk add --virtual .deps gcc musl-dev postgresql-libs postgresql-dev libressl-dev musl-dev libffi-dev cargo && \
-    pip3 install --upgrade pip -r requirements.txt && \
-    apk --purge del .deps
+    apk add --virtual .build-deps gcc musl-dev postgresql-libs postgresql-dev libressl-dev libffi-dev cargo && \
+    pip3 install pipenv && \
+    pipenv install --dev --deploy --python 3.10 && \
+    apk --purge del .build-deps
 
 # Use an official Python runtime as a parent image - Run stage
-FROM python:3.9.6-alpine as runtime
+FROM python:3.10.5-alpine as runtime
 
 ENV PYTHONUNBUFFERED=1
 
 # Copy venv from build stage
-COPY --from=build-image /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+COPY --from=build-image /app/backend/.venv /.venv
+ENV PATH="/.venv/bin:$PATH"
 
 # Install packages that are only needed runtime
 RUN  \
@@ -38,9 +38,10 @@ COPY . /app/backend
 COPY ./scripts/ /app/
 
 # Make port 8000 available for the app
-ENV PORT=8000
+ENV PORT 8000
 EXPOSE 8000
 
+# Change directory so that scripts could locate manage.py
 WORKDIR /app/backend
 
 # Be sure to use 0.0.0.0 for the host within the Docker container,

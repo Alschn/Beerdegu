@@ -18,6 +18,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import {removeBeerFromRoom} from "../../api/room";
 import "./SearchAPI.scss";
+import {getBeers} from "../../api/beers";
 
 
 const SearchAPI: FC = () => {
@@ -51,8 +52,17 @@ const SearchAPI: FC = () => {
   }, [sendMessage]);
 
   useEffect(() => {
+    // load beers in room on load
     loadBeers();
   }, [loadBeers]);
+
+  useEffect(() => {
+    if (isHost) {
+      // load beers from API on load
+      getBeers().then(res => setResults(res.data));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderHostView = (): JSX.Element => {
     return (

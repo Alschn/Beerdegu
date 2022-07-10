@@ -1,11 +1,11 @@
-import React, {FC, useState} from "react";
-import {useHistory} from "react-router";
+import {FC, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {joinRoom} from "../../api/lobby";
 import {onSubmit, submitWithEnter} from "../../utils/forms";
 import "./JoinCreateRoom.scss";
+import {useNavigate} from "react-router-dom";
 
 interface JoinRoomProps {
   roomNameProp?: string,
@@ -13,7 +13,7 @@ interface JoinRoomProps {
 }
 
 const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [roomName, setRoomName] = useState<string>(roomNameProp != null ? String(roomNameProp) : '');
   const [password, setPassword] = useState<string>("");
 
@@ -33,7 +33,7 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
         message: `Joining room ${roomName} ...`,
         severity: 'success',
       });
-      setTimeout(() => history.push(`/room/${roomName}`), 1000);
+      setTimeout(() => navigate(`/room/${roomName}`), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

@@ -5,14 +5,14 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import {onLogin} from "../../api/auth";
-import {useHistory} from "react-router";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {onSubmit, submitWithEnter} from "../../utils/forms";
 import "./Auth.scss";
+import {useNavigate} from "react-router-dom";
 
 
 const Login: FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -32,7 +32,7 @@ const Login: FC = () => {
         {message: 'Logged in! Redirecting to home page ...', severity: 'success'}
       );
       localStorage.setItem('token', key);
-      setTimeout(() => history.push("/"), 800);
+      setTimeout(() => navigate("/"), 800);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

@@ -26,7 +26,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-    command: npm start
+      - WATCHPACK_POLLING=true
 
   db:
     container_name: db
