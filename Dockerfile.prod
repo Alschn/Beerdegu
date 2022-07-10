@@ -15,7 +15,7 @@ ENV PATH="/app/backend/.venv/bin:$PATH"
 WORKDIR /app/frontend
 
 COPY ./frontend/package.json ./frontend/yarn.lock /app/frontend/
-RUN yarn install
+RUN yarn install --production
 
 # Add the rest of the code
 COPY . /app/
