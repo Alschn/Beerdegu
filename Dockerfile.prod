@@ -1,11 +1,15 @@
 # Use image with both python and node installed
 FROM nikolaik/python-nodejs:python3.10-nodejs14
 
+ENV PIPENV_VENV_IN_PROJECT=1
+
 WORKDIR /app/backend
 
 # Install Python dependencies
 COPY ./backend/Pipfile ./backend/Pipfile.lock /app/backend/
 RUN pip install --upgrade pip && pipenv install
+
+ENV PATH="/app/backend/.venv/bin:$PATH"
 
 # Install frontend dependencies
 WORKDIR /app/frontend
