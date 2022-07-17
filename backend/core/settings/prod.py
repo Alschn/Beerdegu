@@ -82,3 +82,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = int(os.environ['EMAIL_PORT'])
 EMAIL_HOST_USER = os.environ['EMAIL_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_PASSWORD']
+
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{os.environ["PRODUCTION_HOST"]}'
+]
