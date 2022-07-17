@@ -3,9 +3,9 @@ import Participants from "../room/Participants";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
 import logo from "../../images/logo.svg";
-import axiosClient from "../../api/axiosClient";
 import {roomStateType} from "../../context/roomContext";
 import {useNavigate} from "react-router-dom";
+import {leaveRoom} from "../../api/room";
 
 export interface SidebarProps {
   open: boolean,
@@ -35,8 +35,8 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
     });
   };
 
-  const leaveRoom = () => {
-    axiosClient.delete(`/api/rooms/${code}/leave`).then(() => {
+  const handleLeaveRoom = () => {
+    leaveRoom(code).then((res) => {
         sendMessage({
           command: 'get_users',
         });
@@ -123,7 +123,7 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
             </>
           )}
 
-          <ListItem button onClick={() => leaveRoom()}>
+          <ListItem button onClick={() => handleLeaveRoom()}>
             <ListItemText>Wyjdź</ListItemText>
           </ListItem>
           <Divider/>

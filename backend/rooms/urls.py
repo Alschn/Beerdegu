@@ -1,18 +1,15 @@
-from django.urls import path, include
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from rooms.views import (
-    RoomsViewSet, UserIsInRoom,
-    JoinRoom, LeaveRoom, BeersInRoom,
+    RoomsViewSet,
+    BeersInRoomView
 )
 
 router = DefaultRouter()
 router.register(r'rooms', RoomsViewSet, basename='rooms')
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('rooms/in', UserIsInRoom.as_view(), name='user_in_room'),
-    path('rooms/<str:room_name>/join', JoinRoom.as_view(), name='join_room'),
-    path('rooms/<str:room_name>/leave', LeaveRoom.as_view(), name='leave_room'),
-    path('rooms/<str:room_name>/beers', BeersInRoom.as_view(), name='beers_in_room')
+    *router.urls,
+    path('rooms/<str:room_name>/beers/', BeersInRoomView.as_view(), name='rooms-detail-beers')
 ]
