@@ -17,3 +17,8 @@ run:
     command:
       - cd backend && daphne -b 0.0.0.0 -p $PORT core.asgi:application -v2
     image: web
+
+  worker:
+    command:
+      - cd backend && python manage.py qcluster
+    image: web

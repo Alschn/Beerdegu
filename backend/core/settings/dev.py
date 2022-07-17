@@ -36,3 +36,20 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+Q_CLUSTER = {
+    'name': 'beerdegu_cluster',
+    'workers': 8,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    "redis": {
+        'host': os.environ.get('REDIS_HOST', 'redis_db'),
+        'port': os.environ.get('REDIS_PORT', 6379),
+        'db': 0,
+    }
+}

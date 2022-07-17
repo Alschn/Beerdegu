@@ -10,10 +10,12 @@ from core.settings.base import *
 ROOT_DIR = BASE_DIR.parent.parent
 
 # set SECRET_KEY for production
-SECRET_KEY = os.environ.get("SECRET_KEY", "")
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # add heroku app url or create env var with url
-ALLOWED_HOSTS = [os.environ.get("PRODUCTION_HOST")]
+ALLOWED_HOSTS = [
+    os.environ["PRODUCTION_HOST"]
+]
 
 # debug has to be false in production
 DEBUG = False
@@ -43,7 +45,7 @@ STATIC_URL = "/static/"
 WHITENOISE_ROOT = os.path.join(ROOT_DIR, "frontend", "build", "root")
 
 # database url set at env variable in Heroku
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ['DATABASE_URL']
 
 # db config
 db_from_env = dj_database_url.config(
@@ -56,7 +58,27 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [os.environ.get('REDIS_URL', ('127.0.0.1', 6379))],
+            "hosts": [os.environ['REDIS_URL']],
         },
     },
 }
+
+Q_CLUSTER = {
+    'name': 'beerdegu_cluster',
+    'workers': 8,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    "redis": os.environ['REDIS_URL']
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ['EMAIL_HOST']
+EMAIL_USE_TLS = True
+EMAIL_PORT = int(os.environ['EMAIL_PORT'])
+EMAIL_HOST_USER = os.environ['EMAIL_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_PASSWORD']

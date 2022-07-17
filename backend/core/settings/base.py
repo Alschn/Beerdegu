@@ -39,8 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     # django utils
+    'django_extensions',
     'django_filters',
     'import_export',
+    # task queue
+    'django_q',
     # cors headers
     'corsheaders',
     # rest framework
@@ -178,3 +181,24 @@ CORS_ALLOW_ALL_ORIGINS = True
 SITE_ID = 1
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
+
+# Django Q configuration
+# https://django-q.readthedocs.io/en/latest/configure.html
+
+Q_CLUSTER = {
+    'name': 'beerdegu_cluster',
+    'workers': 8,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    # if not using Docker, you have to run Redis server by yourself
+    'redis': {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0,
+    }
+}

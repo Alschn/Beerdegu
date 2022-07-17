@@ -129,6 +129,9 @@ First define environmental variables in `.env` in root directory:
 DB_NAME
 DB_USERNAME
 DB_PASSWORD
+
+REDIS_HOST
+REDIS_PORT
 ```
 
 Make sure Docker Engine is running.
@@ -184,7 +187,7 @@ docker-compose build CONTAINER_NAME --no-cache
    ```  
    Variables to set: `DJANGO_SETTINGS_MODULE=core.settings.prod` `DJANGO_SUPERUSER_EMAIL`,
    `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `PRODUCTION_HOST=<app name>.herokuapp.com`,
-   `SECRET_KEY`,
+   `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
 5) Run: `heroku stack:set container` so Heroku knows this is a containerized application
 6) Run: `heroku addons:create heroku-postgresql:hobby-dev` which creates the postgres add-on for Heroku
 7) Run: `heroku addons:create heroku-redis:hobby-dev` which creates the redis add-on for Heroku
@@ -212,5 +215,5 @@ This repository uses Github Actions to run test pipeline.
 - [ ] Export ratings tables to CSV (PDF kinda done), server-side export
 - [ ] Additional statistics in room (e.g. best/worst beer, group by votes, the longest opinion, similar ratings etc.)
 - [ ] Better responsiveness on bigger displays (right now using Mobile First Approach)
-- [ ] Password recovery endpoint
+- [ ] Password recovery, password change endpoint
 - [ ] Task queue with Django Q - e.g. removing inactive users in rooms
