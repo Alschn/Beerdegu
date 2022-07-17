@@ -76,12 +76,14 @@ Q_CLUSTER = {
     "redis": os.environ['REDIS_URL']
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
+DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_HOST = os.environ['EMAIL_HOST']
-EMAIL_USE_TLS = True
 EMAIL_PORT = int(os.environ['EMAIL_PORT'])
 EMAIL_HOST_USER = os.environ['EMAIL_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_PASSWORD']
+EMAIL_USE_TLS = True
 
 CSRF_TRUSTED_ORIGINS = [
     f'https://{os.environ["PRODUCTION_HOST"]}'

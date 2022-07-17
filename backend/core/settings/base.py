@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Load environmental variables
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -212,3 +217,9 @@ Q_CLUSTER = {
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1'
 ]
+
+# Sending emails (+ Django Q integration)
+# https://docs.djangoproject.com/en/4.0/topics/email/
+
+EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
+DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
