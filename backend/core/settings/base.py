@@ -155,17 +155,21 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Rest Framework config - Authentication, filtering
+# Rest Framework config - Authentication, filtering...
+# https://www.django-rest-framework.org/api-guide/settings/
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         ('rest_framework.permissions.AllowAny',)
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        ('rest_framework.authentication.TokenAuthentication',)
+        'rest_framework.authentication.TokenAuthentication',
     ),
+
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',)
+        'django_filters.rest_framework.DjangoFilterBackend',
+    )
 }
 
 # Static files (CSS, JavaScript, Images)
@@ -180,7 +184,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 # required by django.contrib.sites
 SITE_ID = 1
 
+# https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_EMAIL_VERIFICATION = "none"
+OLD_PASSWORD_FIELD_ENABLED = True
 
 # Django Q configuration
 # https://django-q.readthedocs.io/en/latest/configure.html

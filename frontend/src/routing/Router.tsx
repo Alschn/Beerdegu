@@ -10,6 +10,7 @@ import CreateRoom from "../components/pages/CreateRoom";
 import Lobby from "../components/pages/Lobby";
 import PrivateRoute from "./PrivateRoute";
 import AuthRoute from "./AuthRoute";
+import PasswordReset from "../components/auth/PasswordReset";
 
 const Router: FC = () => {
   return (
@@ -23,6 +24,7 @@ const Router: FC = () => {
           <Route path="create" element={<CreateRoom/>}/>
           {/*<Route path="browser" element={<Browser/>}/>*/}
           {/*<Route path="profile" element={<Profile/>}/>*/}
+          <Route path="password-change" element={<PasswordReset/>}/>
         </Route>
 
         <Route path="/" element={<AuthRoute/>}>
