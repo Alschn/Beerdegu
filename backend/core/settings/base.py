@@ -202,3 +202,8 @@ Q_CLUSTER = {
         'db': 0,
     }
 }
+
+# https://docs.djangoproject.com/en/4.0/ref/settings/#csrf-trusted-origins
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1'
+]
