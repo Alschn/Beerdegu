@@ -214,7 +214,7 @@ class RoomsAPIViewsTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
-            {'message': 'User is already a host of another room. Leave it and try again!'}
+            {'message': 'User is already a host of another room, which is not in FINISHED state!'}
         )
 
     def test_get_room_by_id(self):
