@@ -48,6 +48,16 @@ services:
     ports:
       - "6379:6379"
 
+  django_q:
+    container_name: django_q
+    build: ./backend
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.dev
+    depends_on:
+      - backend
+      - redis_db
+    entrypoint: ["sh", "-c", "python manage.py qcluster"]
+
 volumes:
   postgres-data:
   redis-data:

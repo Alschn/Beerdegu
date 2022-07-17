@@ -1,4 +1,7 @@
+from typing import Any
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q, QuerySet
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -18,7 +21,7 @@ class UserIsInRoom(APIView):
     """GET api/rooms/in?code=<str:name>"""
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request: Request, *args: Any, **kwargs: Any)  -> Response:
         sender = request.user
         room_code = request.query_params.get('code')
 
@@ -70,14 +73,14 @@ class RoomsViewSet(viewsets.ModelViewSet):
             return CreateRoomSerializer
         return super().get_serializer_class()
 
-    def create(self, request: Request, *args, **kwargs) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         sender = request.user
 
-        rooms = Room.objects.filter(host=sender)
+        not_finished_hosted_rooms = Room.objects.filter(host=sender).exclude(state=Room.State.FINISHED)
 
-        if rooms.exists():
+        if not_finished_hosted_rooms.exists():
             return Response(
-                {'message': 'User is already a host of another room. Leave it and try again!'},
+                {'message': 'User is already a host of another room, which is not in FINISHED state!'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -96,7 +99,7 @@ class JoinRoom(APIView):
     """PUT api/rooms/<str:name>/join"""
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, room_name):
+    def put(self, request: Request, room_name: str) -> Response:
         room_query = Room.objects.filter(name=room_name)
         sender = request.user
 
@@ -132,7 +135,7 @@ class LeaveRoom(APIView):
     """DELETE api/rooms/<str:name>/leave"""
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, room_name):
+    def delete(self, request: Request, room_name: str, **kwargs: Any) -> Response:
         room_query = Room.objects.filter(name=room_name)
         sender = request.user
 
@@ -149,6 +152,10 @@ class LeaveRoom(APIView):
         return Response({'message': f'{sender.username} is not inside this room!'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+def check_if_room_exists(room_name: str):
+    return Room.objects.filter(name=room_name).exists()
+
+
 class BeersInRoom(APIView):
     """
     GET     api/rooms/<str:name>/beers - Lists all beers in this room
@@ -158,17 +165,12 @@ class BeersInRoom(APIView):
     lookup_url_kwarg = 'room_name'
     permission_classes = [IsAuthenticated, IsHostOrListOnly]
 
-    # seems a bit over-engineered - rewrite it later
-
-    def _room_exists_predicate(self, room_name):
-        return Room.objects.filter(name=room_name).exists()
-
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[BeerInRoom]:
         room_name = self.kwargs.get(self.lookup_url_kwarg)
         return BeerInRoom.objects.filter(room__name=room_name)
 
-    def get(self, request, room_name, **kwargs):
-        if not self._room_exists_predicate(room_name):
+    def get(self, request: Request, room_name: str, **kwargs: Any) -> Response:
+        if not check_if_room_exists(room_name):
             return Response(
                 {'message': 'Room with given name does not exist!'},
                 status=status.HTTP_404_NOT_FOUND
@@ -180,8 +182,8 @@ class BeersInRoom(APIView):
             'beers': BeerSerializer(qs, many=True).data
         }, status.HTTP_200_OK)
 
-    def put(self, request, room_name, **kwargs):
-        if not self._room_exists_predicate(room_name):
+    def put(self, request: Request, room_name: str, **kwargs: Any) -> Response:
+        if not check_if_room_exists(room_name):
             return Response(
                 {'message': 'Room with given name does not exist!'},
                 status=status.HTTP_404_NOT_FOUND
@@ -206,8 +208,8 @@ class BeersInRoom(APIView):
             'beers': BeerSerializer(qs, many=True).data
         }, status.HTTP_201_CREATED)
 
-    def delete(self, request, room_name, **kwargs):
-        if not self._room_exists_predicate(room_name):
+    def delete(self, request: Request, room_name: str, **kwargs: Any) -> Response:
+        if not check_if_room_exists(room_name):
             return Response(
                 {'message': 'Room with given name does not exist!'},
                 status=status.HTTP_404_NOT_FOUND

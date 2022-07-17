@@ -8,12 +8,11 @@ from beers.models import Beer
 
 
 class Room(models.Model):
-    ROOM_STATE_CHOICES = [
-        ('WAITING', 'WAITING'),
-        ('STARTING', 'STARTING'),
-        ('IN_PROGRESS', 'IN_PROGRESS'),
-        ('FINISHED', 'FINISHED'),
-    ]
+    class State(models.TextChoices):
+        WAITING = 'WAITING', 'Waiting'
+        STARTING = 'STARTING', 'Starting'
+        IN_PROGRESS = 'IN_PROGRESS', 'In progress'
+        FINISHED = 'FINISHED', 'Finished'
 
     name = models.CharField(unique=True, max_length=8)
     password = models.CharField(max_length=20, null=True, blank=True)
@@ -22,7 +21,7 @@ class Room(models.Model):
         MinValueValidator(1),
         MaxValueValidator(10),
     ])
-    state = models.CharField(max_length=11, choices=ROOM_STATE_CHOICES, default='WAITING')
+    state = models.CharField(max_length=11, choices=State.choices, default=State.WAITING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     users = models.ManyToManyField(User, through='UserInRoom', blank=True)
