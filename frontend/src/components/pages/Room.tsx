@@ -1,5 +1,5 @@
 import {Grid, useMediaQuery, useTheme} from "@mui/material";
-import {FC, useCallback, useEffect, useReducer, useState} from "react";
+import {BaseSyntheticEvent, FC, useEffect, useReducer, useState} from "react";
 import {useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
 import {
@@ -16,10 +16,10 @@ import Header from "../layout/Header";
 import ChatSidebar from "../layout/ChatSidebar";
 import DesktopChat from "../room/DesktopChat";
 import {HOST, WS_SCHEME} from "../../config";
-import AxiosClient from "../../api/axiosClient";
 import RoomStateComponent from "../room/RoomStateComponent";
-import "./Room.scss";
 import {useNavigate} from "react-router-dom";
+import {checkUserInRoom} from "../../api/room";
+import "./Room.scss";
 
 
 const USER_PING_INTERVAL_MS = 14_000;
@@ -101,22 +101,21 @@ const Room: FC = () => {
   const [isHost, setIsHost] = useState<boolean>(false);
   const [shouldConnect, setShouldConnect] = useState<boolean>(false);
 
-  const checkUserInRoom = useCallback(() => {
-    return AxiosClient.get(`/api/rooms/in?code=${params!.code}`).then(({data}) => {
-      const {is_host} = data;
-      setIsHost(Boolean(is_host));
-      setShouldConnect(true);
-    }).catch(() => {
-      setShouldConnect(false);
-      navigate('/');
-    });
-  }, [params]);
-
   useEffect(() => {
     // on mount decide if the client should connect to ws backend
     // or get directed back to home page
-    checkUserInRoom().then();
-  }, []);
+    if (params) {
+      checkUserInRoom(`${params!.code}`).then(({data}) => {
+        const {is_host} = data;
+        setIsHost(Boolean(is_host));
+        setShouldConnect(true);
+      }).catch(() => {
+        setShouldConnect(false);
+        navigate('/');
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   // State related to data that comes via websockets
   const [state, dispatch] = useReducer(roomReducer, initialState);
@@ -144,7 +143,7 @@ const Room: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [openSidebarChat, setOpenSidebarChat] = useState<boolean>(false);
 
-  const handleChange = (e: React.BaseSyntheticEvent): void => setMessage(e.target.value);
+  const handleChange = (e: BaseSyntheticEvent): void => setMessage(e.target.value);
 
   const handleSendMessage = (): void => {
     if (message) {

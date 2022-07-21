@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Load environmental variables
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,7 +62,6 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     # apps
     'core',
-    'api',
     'users',
     'rooms',
     'beers',
@@ -155,17 +159,21 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Rest Framework config - Authentication, filtering
+# Rest Framework config - Authentication, filtering...
+# https://www.django-rest-framework.org/api-guide/settings/
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         ('rest_framework.permissions.AllowAny',)
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        ('rest_framework.authentication.TokenAuthentication',)
+        'rest_framework.authentication.TokenAuthentication',
     ),
+
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',)
+        'django_filters.rest_framework.DjangoFilterBackend',
+    )
 }
 
 # Static files (CSS, JavaScript, Images)
@@ -180,7 +188,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 # required by django.contrib.sites
 SITE_ID = 1
 
+# https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_EMAIL_VERIFICATION = "none"
+OLD_PASSWORD_FIELD_ENABLED = True
 
 # Django Q configuration
 # https://django-q.readthedocs.io/en/latest/configure.html
@@ -207,3 +217,9 @@ Q_CLUSTER = {
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1'
 ]
+
+# Sending emails (+ Django Q integration)
+# https://docs.djangoproject.com/en/4.0/topics/email/
+
+EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
+DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

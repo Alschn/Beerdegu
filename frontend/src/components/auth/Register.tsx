@@ -1,11 +1,10 @@
-import {FC, useState} from 'react';
-import {Avatar, Button, Container, Grid, Link, TextField, Typography} from '@mui/material';
+import {FC, FormEvent, useState} from 'react';
+import {Avatar, Button, Container, Grid, Link as MuiLink, TextField, Typography} from '@mui/material';
+import {Link, useNavigate} from "react-router-dom";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import {onRegister} from "../../api/auth";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import {onSubmit, submitWithEnter} from '../../utils/forms';
 import "./Auth.scss";
-import {useNavigate} from "react-router-dom";
 
 
 const validateEmail = (email: string): boolean => {
@@ -25,7 +24,9 @@ const Register: FC = () => {
     message: '',
   });
 
-  const submitForm = (): void => {
+  const submitForm = (e: FormEvent): void => {
+    e.preventDefault();
+
     onRegister({
       username: username,
       email: email,
@@ -47,8 +48,6 @@ const Register: FC = () => {
 
   const passwordsMatch = (): boolean => password1 === password2;
 
-  const onEnterKeyDown = (e: React.KeyboardEvent): void => submitWithEnter(e, submitForm);
-
   return (
     <Container component="main" maxWidth="xs">
       <div className="auth">
@@ -61,7 +60,7 @@ const Register: FC = () => {
         <div className="auth-alert">
           <CollapsableAlert content={response}/>
         </div>
-        <form className="auth-form" noValidate onSubmit={(e) => onSubmit(e, submitForm)}>
+        <form className="auth-form" onSubmit={submitForm}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
@@ -74,7 +73,6 @@ const Register: FC = () => {
                 label="User Name"
                 autoFocus
                 onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={onEnterKeyDown}
               />
             </Grid>
             <Grid item xs={12}>
@@ -92,7 +90,6 @@ const Register: FC = () => {
                 helperText={
                   email !== "" && !validateEmail(email) && "Invalid email format"
                 }
-                onKeyDown={onEnterKeyDown}
               />
             </Grid>
             <Grid item xs={12}>
@@ -110,7 +107,6 @@ const Register: FC = () => {
                 helperText={
                   !passwordsMatch() && "Passwords don't match"
                 }
-                onKeyDown={onEnterKeyDown}
               />
             </Grid>
             <Grid item xs={12}>
@@ -128,7 +124,6 @@ const Register: FC = () => {
                 helperText={
                   !passwordsMatch() && "Passwords don't match"
                 }
-                onKeyDown={onEnterKeyDown}
               />
             </Grid>
           </Grid>
@@ -143,8 +138,10 @@ const Register: FC = () => {
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link href="/login/" variant="body2">
-                Already have an account? Sign in
+              <Link to="/login/">
+                <MuiLink variant="body2">
+                  Already have an account? Sign in
+                </MuiLink>
               </Link>
             </Grid>
           </Grid>
@@ -152,7 +149,6 @@ const Register: FC = () => {
       </div>
     </Container>
   );
-
 };
 
 export default Register;

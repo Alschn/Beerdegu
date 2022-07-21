@@ -6,8 +6,7 @@ export const getRooms = (): Promise<Response<any>> => {
 };
 
 export const joinRoom = (roomName: string, password: string): Promise<Response<any>> => {
-  return AxiosClient.put(`/api/rooms/${roomName}/join`, {
-    name: roomName,
+  return AxiosClient.put(`/api/rooms/${roomName}/join/`, {
     password: password,
   });
 };

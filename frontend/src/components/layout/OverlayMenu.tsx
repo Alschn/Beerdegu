@@ -23,17 +23,19 @@ const OverlayMenu: FC<OverlayMenuProps> = ({isOpen, handleClose}) => {
       <nav className="overlay-menu">
         <ul>
           <li><Link to="/">Home</Link></li>
-          <li><Link to="/browser">Browser</Link></li>
+          {/*<li><Link to="/browser">Browser</Link></li>*/}
           <li><Link to="/lobby">Lobby</Link></li>
           {isAuthenticated ? (
             <Fragment>
-              <li><Link to="/profile">Profile</Link></li>
+              <li><Link to="/password/change">Change Password</Link></li>
+              {/*<li><Link to="/profile">Profile</Link></li>*/}
               <li><span onClick={logout}>Logout</span></li>
             </Fragment>
           ) : (
             <Fragment>
               <li><Link to="/login">Login</Link></li>
               <li><Link to="/register">Register</Link></li>
+              <li><Link to="/password/reset">Reset Password</Link></li>
             </Fragment>
           )}
         </ul>

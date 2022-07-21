@@ -49,9 +49,9 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
             <li>
               <Link to="/">Home</Link>
             </li>
-            <li>
-              <Link to="/browser">Browser</Link>
-            </li>
+            {/*<li>*/}
+            {/*  <Link to="/browser">Browser</Link>*/}
+            {/*</li>*/}
             <li>
               <Link to="/lobby">Lobby</Link>
             </li>
@@ -73,8 +73,11 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
 
             {isAuthenticated ? (
               <ul className="header-links">
+                {/*<li>*/}
+                {/*  <Link to="/profile">Profile</Link>*/}
+                {/*</li>*/}
                 <li>
-                  <Link to="/profile">Profile</Link>
+                  <Link to="/password/change">Change Password</Link>
                 </li>
                 <li onClick={logout}>
                   <span>Logout</span>
