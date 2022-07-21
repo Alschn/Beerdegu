@@ -77,7 +77,7 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
                 {/*  <Link to="/profile">Profile</Link>*/}
                 {/*</li>*/}
                 <li>
-                  <Link to="/password-change">Change Password</Link>
+                  <Link to="/password/change">Change Password</Link>
                 </li>
                 <li onClick={logout}>
                   <span>Logout</span>

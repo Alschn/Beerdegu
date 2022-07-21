@@ -1,5 +1,6 @@
 import React, {FC, useState} from "react";
-import {Button, Container, Grid, Link} from "@mui/material";
+import {Button, Container, Grid, Link as MuiLink} from "@mui/material";
+import {Link, useNavigate} from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -7,8 +8,6 @@ import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import {onLogin} from "../../api/auth";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {onSubmit, submitWithEnter} from "../../utils/forms";
-import "./Auth.scss";
-import {useNavigate} from "react-router-dom";
 
 
 const Login: FC = () => {
@@ -104,10 +103,20 @@ const Login: FC = () => {
             >
               Sign In
             </Button>
-            <Grid container justifyContent="flex-end">
+            <Grid container justifyContent="space-between">
               <Grid item>
-                <Link href="/register/" variant="body2">
-                  Don't have an account? Sign Up
+                <Link to="/password/reset/">
+                  <MuiLink variant="body2">
+                    Forgot Password?
+                  </MuiLink>
+                </Link>
+              </Grid>
+
+              <Grid item>
+                <Link to="/register/">
+                  <MuiLink variant="body2">
+                    Don't have an account? Sign Up
+                  </MuiLink>
                 </Link>
               </Grid>
             </Grid>
