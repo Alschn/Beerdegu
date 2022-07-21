@@ -76,6 +76,8 @@ Q_CLUSTER = {
     "redis": os.environ['REDIS_URL']
 }
 
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
 EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
 DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 

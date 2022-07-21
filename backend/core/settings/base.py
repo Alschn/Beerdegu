@@ -191,6 +191,7 @@ SITE_ID = 1
 # https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_EMAIL_VERIFICATION = "none"
 OLD_PASSWORD_FIELD_ENABLED = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 
 # Django Q configuration
 # https://django-q.readthedocs.io/en/latest/configure.html
