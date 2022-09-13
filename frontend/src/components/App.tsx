@@ -2,6 +2,7 @@ import Router from "../routing/Router";
 import theme from "../theme";
 import {ThemeProvider} from '@mui/material/styles';
 import {QueryClient, QueryClientProvider} from "react-query";
+// import 'react-toastify/dist/ReactToastify.css';
 
 const queryClient = new QueryClient();
 
