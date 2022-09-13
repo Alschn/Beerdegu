@@ -1,5 +1,5 @@
 import {createContext, Dispatch} from "react";
-import {BeerObject, ChatMessageObject, RatingsObject, UserObject} from "../utils/ws";
+import {BeerObject, ChatMessageObject, RatingsObject, UserObject} from "../api/ws";
 
 export type roomStateType = 'WAITING' | 'STARTING' | 'IN_PROGRESS' | 'FINISHED';
 

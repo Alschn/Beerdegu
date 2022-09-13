@@ -11,7 +11,7 @@ import {
   Tooltip
 } from "@mui/material";
 import {getBeersByQuery} from "../../api/search";
-import {BeerObject} from "../../utils/ws";
+import {BeerObject} from "../../api/ws";
 import BeerCard from "../utils/BeerCard";
 import {useRoomContext} from "../../hooks/useContextHook";
 import DeleteIcon from '@mui/icons-material/Delete';

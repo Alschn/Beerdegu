@@ -9,7 +9,7 @@ import {
   UserObject,
   WebsocketConnectionState,
   WebsocketMessage
-} from "../../utils/ws";
+} from "../../api/ws";
 import RoomContext, {roomStateType} from "../../context/roomContext";
 import Sidebar from "../layout/Sidebar";
 import Header from "../layout/Header";
