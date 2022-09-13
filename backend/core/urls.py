@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
+from django.conf import settings
 
 admin.site.site_title = "Beerdegu Admin"
 admin.site.site_header = "Beerdegu Admin"
@@ -26,5 +27,11 @@ urlpatterns = [
     path('api/', include('beers.urls')),
     path('auth/', include('users.urls')),
     # frontend urls
-    re_path(".*", TemplateView.as_view(template_name="index.html")),
+    # re_path(".*", TemplateView.as_view(template_name="index.html")),
 ]
+
+if not settings.DEBUG:
+    urlpatterns += [
+        # frontend urls
+        re_path(".*", TemplateView.as_view(template_name="index.html")),
+    ]
