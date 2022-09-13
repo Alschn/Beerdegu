@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import React, {FC, FormEvent, useMemo, useState} from "react";
+import React, {BaseSyntheticEvent, FC, FormEvent, useMemo, useState} from "react";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {changePassword} from "../../api/auth";
 import {Button, Container} from "@mui/material";
@@ -44,7 +44,7 @@ const PasswordChange: FC = () => {
     });
   };
 
-  const handleChange = (e: React.BaseSyntheticEvent) => {
+  const handleChange = (e: BaseSyntheticEvent) => {
     switch (e.target.id) {
       case 'old_password':
         setOldPassword(e.target.value);

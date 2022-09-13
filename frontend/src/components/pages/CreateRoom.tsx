@@ -1,10 +1,9 @@
-import {BaseSyntheticEvent, FC, KeyboardEvent, useState} from "react";
+import {BaseSyntheticEvent, FC, FormEvent, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
 import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded';
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import type {createRoomForm} from "../../api/lobby";
 import {createRoom} from "../../api/lobby";
-import {onSubmit, submitWithEnter} from "../../utils/forms";
 import {useNavigate} from "react-router-dom";
 
 interface CreateRoomProps {
@@ -33,8 +32,9 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
     });
   };
 
-  const submitForm = (): void => {
-    if (!formState.name || !formState.slots) return;
+  const submitForm = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+
     createRoom(formState).then(() => {
       setResponse({
         message: `Created room ${formState.name}! Redirecting ...`,
@@ -49,8 +49,6 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
     });
   };
 
-  const onEnterKeyDown = (e: KeyboardEvent): void => submitWithEnter(e, submitForm);
-
   return (
     <Container component="main" maxWidth="xs">
       <div className={isRoute ? 'room room-route' : 'room room-embedded'}>
@@ -63,7 +61,7 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
         <div className="room-alert">
           <CollapsableAlert content={response}/>
         </div>
-        <form noValidate onSubmit={(e) => onSubmit(e, submitForm)}>
+        <form onSubmit={submitForm}>
           <div className="room-form">
             <TextField
               variant="outlined"
@@ -75,7 +73,6 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
               name="name"
               autoFocus
               onChange={handleChange}
-              onKeyDown={onEnterKeyDown}
             />
             <TextField
               variant="outlined"
@@ -86,7 +83,6 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
               type="password"
               id="password"
               onChange={handleChange}
-              onKeyDown={onEnterKeyDown}
             />
             <TextField
               variant="outlined"
@@ -105,7 +101,6 @@ const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
                 inputProps: {min: 1, max: 10}
               }}
               onChange={handleChange}
-              onKeyDown={onEnterKeyDown}
             />
             <Button
               type="submit"
