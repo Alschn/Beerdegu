@@ -1,8 +1,8 @@
 import Router from "../routing/Router";
-import {ThemeProvider, createTheme} from '@mui/material/styles';
+import theme from "../theme";
+import {ThemeProvider} from '@mui/material/styles';
 import {QueryClient, QueryClientProvider} from "react-query";
 
-const theme = createTheme();
 const queryClient = new QueryClient();
 
 function App() {
