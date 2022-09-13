@@ -14,7 +14,7 @@ DJANGO_Q_EMAIL_USE_DICTS = getattr(settings, 'DJANGO_Q_EMAIL_USE_DICTS', True)
 class DjangoQBackend(BaseEmailBackend):
     use_dicts = DJANGO_Q_EMAIL_USE_DICTS
 
-    def send_messages(self, email_messages):
+    def send_messages(self, email_messages) -> int:
         num_sent = 0
         for email_message in email_messages:
             if self.use_dicts:
@@ -24,7 +24,7 @@ class DjangoQBackend(BaseEmailBackend):
         return num_sent
 
 
-def send_message(email_message):
+def send_message(email_message) -> None:
     """
     Sends the specified email synchronously.
     See DjangoQBackend for sending in the background.
@@ -45,7 +45,7 @@ def send_message(email_message):
         email_error_handler(email_message, ex)
 
 
-def to_dict(email_message):
+def to_dict(email_message) -> dict:
     """
     Converts the specified email message to a dictionary representation.
     """

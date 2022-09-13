@@ -1,17 +1,22 @@
-import json
+import logging
+from typing import Any
 
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
+from django.utils import timezone
 
 from rooms.async_db import (
-    get_users_in_room, bump_users_last_active_field,
-    save_user_form, get_beers_in_room, get_user_form_data,
-    get_current_room, change_room_state_to, get_final_beers_ratings,
-    get_final_user_beer_ratings,
+    async_get_users_in_room, async_get_beers_in_room,
+    async_get_user_form_data, async_bump_users_last_active_field,
+    async_save_user_form, async_get_current_room,
+    async_change_room_state_to, async_get_final_beers_ratings,
+    async_get_final_user_beer_ratings
 )
 
+logger = logging.getLogger('rooms.consumers.room')
 
-class RoomConsumer(AsyncWebsocketConsumer):
+
+class RoomConsumer(AsyncJsonWebsocketConsumer):
     room_name: str
     room_group_name: str
     private_group_name: str
@@ -70,14 +75,13 @@ class RoomConsumer(AsyncWebsocketConsumer):
             self.room_group_name, {'type': 'get_room_state'},
         )
 
-    async def receive(self, text_data=None, bytes_data=None):
-        data = json.loads(text_data)  # parsed object
-        data_content = data.get('data')
+    async def receive_json(self, content: dict, **kwargs: Any):
+        data_content = content.get('data')
 
         if settings.DEBUG:
-            print(f"\nReceived:\n{data}\nFrom: {self.scope.get('user')}")
+            print(f"\nReceived:\n{content}\nFrom: {self.scope.get('user')}")
 
-        if not (command := data.get('command')):
+        if not (command := content.get('command')):
             return
 
         if command in self.private_commands:
@@ -91,7 +95,7 @@ class RoomConsumer(AsyncWebsocketConsumer):
         else:
             if command == "get_new_message":
                 data_content = {
-                    'message': data.get('data'),
+                    'message': content.get('data'),
                     'user': str(self.scope.get('user')),
                 }
 
@@ -130,102 +134,129 @@ class RoomConsumer(AsyncWebsocketConsumer):
     - invalid_command
     """
 
-    async def get_new_message(self, event):
+    async def get_new_message(self, event: dict):
         """
         Receive message => Broadcast it to others and update client
         'get_new_message' => 'set_new_message'
         """
         content: dict = event.get('data')
 
-        await self.send(text_data=json.dumps({
-            'data': content,
-            'command': 'set_new_message'
-        }))
+        await self.send_json(
+            {
+                'data': content,
+                'command': 'set_new_message',
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def get_users(self, event):
+    async def get_users(self, event: dict):
         """
         Receive get_users command => Broadcast list of users and update client
         'get_users' => 'set_users'
         """
-        users = await get_users_in_room(room_name=self.room_name)
-        await self.send(text_data=json.dumps({
-            'data': users,
-            'command': 'set_users',
-        }))
+        users = await async_get_users_in_room(room_name=self.room_name)
+        await self.send_json(
+            {
+                'data': users,
+                'command': 'set_users',
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def get_beers(self, event):
-        beers = await get_beers_in_room(room_name=self.room_name)
-        await self.send(text_data=json.dumps({
-            'data': beers,
-            'command': 'set_beers',
-        }))
+    async def get_beers(self, event: dict):
+        beers = await async_get_beers_in_room(room_name=self.room_name)
+        await self.send_json(
+            {
+                'data': beers,
+                'command': 'set_beers',
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def load_beers(self, event):
-        beers = await get_beers_in_room(room_name=self.room_name)
-        await self.send(text_data=json.dumps({
-            'data': beers,
-            'command': 'set_beers',
-        }))
+    async def load_beers(self, event: dict):
+        beers = await async_get_beers_in_room(room_name=self.room_name)
+        await self.send_json(
+            {
+                'data': beers,
+                'command': 'set_beers',
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def get_form_data(self, event):
+    async def get_form_data(self, event: dict):
         beer_id = event.get('data')
-        form_data = await get_user_form_data(
+        form_data = await async_get_user_form_data(
             room_name=self.room_name,
             user=self.scope['user'],
             beer_id=beer_id
         )
-        await self.send(text_data=json.dumps({
-            'command': 'set_form_data',
-            'data': form_data,
-        }))
+        await self.send_json(
+            {
+                'command': 'set_form_data',
+                'data': form_data,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def user_active(self, event):
+    async def user_active(self, event: dict):
         """
         Client reports that they are active by sending command 'user_active'
         Server updates last_active field.
         """
         user = self.scope['user']
-        await bump_users_last_active_field(room_name=self.room_name, user=user)
+        await async_bump_users_last_active_field(room_name=self.room_name, user=user)
 
-    async def user_form_save(self, event):
+    async def user_form_save(self, event: dict):
         user = self.scope['user']
         received_data = event.get('data')
         beer_id = received_data.get('beer_id')
-        await save_user_form(
+        await async_save_user_form(
             room_name=self.room_name, user=user,
             beer_id=beer_id, data=received_data
         )
 
-    async def get_room_state(self, event):
-        room = await get_current_room(room_name=self.room_name)
-        await self.send(text_data=json.dumps({
-            'command': 'set_room_state',
-            'data': room,
-        }))
+    async def get_room_state(self, event: dict):
+        room = await async_get_current_room(room_name=self.room_name)
+        await self.send_json(
+            {
+                'command': 'set_room_state',
+                'data': room,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def change_room_state(self, event):
+    async def change_room_state(self, event: dict):
         state = event.get('data')
-        updated_room = await change_room_state_to(state=state, room_name=self.room_name)
-        await self.send(text_data=json.dumps({
-            'command': 'set_room_state',
-            'data': updated_room
-        }))
+        updated_room = await async_change_room_state_to(state=state, room_name=self.room_name)
+        await self.send_json(
+            {
+                'command': 'set_room_state',
+                'data': updated_room,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def get_final_ratings(self, event):
-        final = await get_final_beers_ratings(room_name=self.room_name)
-        await self.send(text_data=json.dumps({
-            'command': 'set_final_results',
-            'data': final,
-        }))
+    async def get_final_ratings(self, event: dict):
+        final = await async_get_final_beers_ratings(room_name=self.room_name)
+        await self.send_json(
+            {
+                'command': 'set_final_results',
+                'data': final,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def get_user_ratings(self, event):
+    async def get_user_ratings(self, event: dict):
         user = self.scope['user']
-        final = await get_final_user_beer_ratings(room_name=self.room_name, user=user)
-        await self.send(text_data=json.dumps({
-            'command': 'set_user_results',
-            'data': final,
-        }))
+        final = await async_get_final_user_beer_ratings(room_name=self.room_name, user=user)
+        await self.send_json(
+            {
+                'command': 'set_user_results',
+                'data': final,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
 
-    async def invalid_command(self, event):
+    async def invalid_command(self, event: dict):
         if settings.DEBUG:
             print(f'Received an invalid command!\n')

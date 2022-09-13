@@ -11,10 +11,9 @@ from django.utils import timezone
 from beers.serializers import BeerRepresentationalSerializer, BeerWithResultsSerializer
 from rooms.models import Room, UserInRoom, BeerInRoom, Rating
 from rooms.serializers import RatingSerializer, RoomSerializer
-from users.serializers import UserSerializer
+from users.serializers.user import UserSerializer
 
 
-@database_sync_to_async
 def get_users_in_room(room_name: str):
     try:
         room = Room.objects.get(name=room_name)
@@ -38,8 +37,7 @@ def get_users_in_room(room_name: str):
         return []
 
 
-@database_sync_to_async
-def bump_users_last_active_field(room_name: str, user: User):
+def bump_users_last_active_field(room_name: str, user: User) -> None:
     if user.is_anonymous:
         return
 
@@ -53,8 +51,7 @@ def bump_users_last_active_field(room_name: str, user: User):
         return
 
 
-@database_sync_to_async
-def save_user_form(room_name: str, user: User, beer_id: str, data):
+def save_user_form(room_name: str, user: User, beer_id: str, data: dict) -> None:
     if user.is_anonymous or not beer_id or not data:
         return
 
@@ -91,7 +88,6 @@ def save_user_form(room_name: str, user: User, beer_id: str, data):
         return
 
 
-@database_sync_to_async
 def get_user_form_data(room_name: str, user: User, beer_id: str):
     if user.is_anonymous or not beer_id:
         return
@@ -112,7 +108,6 @@ def get_user_form_data(room_name: str, user: User, beer_id: str):
         return
 
 
-@database_sync_to_async
 def get_beers_in_room(room_name: str):
     try:
         room = Room.objects.get(name=room_name)
@@ -123,7 +118,6 @@ def get_beers_in_room(room_name: str):
         return []
 
 
-@database_sync_to_async
 def get_current_room(room_name: str):
     try:
         room = Room.objects.get(name=room_name)
@@ -133,7 +127,6 @@ def get_current_room(room_name: str):
         return
 
 
-@database_sync_to_async
 def change_room_state_to(state: str, room_name: str):
     try:
         room = Room.objects.get(name=room_name)
@@ -146,7 +139,6 @@ def change_room_state_to(state: str, room_name: str):
         return
 
 
-@database_sync_to_async
 def get_final_user_beer_ratings(room_name: str, user: User):
     if user.is_anonymous:
         return
@@ -177,7 +169,6 @@ def get_final_user_beer_ratings_sync(room_name: str, user: User):
         return []
 
 
-@database_sync_to_async
 def get_final_beers_ratings(room_name: str):
     try:
         beer_in_room = Room.beers.through  # intersection table
@@ -189,18 +180,15 @@ def get_final_beers_ratings(room_name: str):
         return BeerWithResultsSerializer(beers_with_ratings, many=True).data
 
     except ObjectDoesNotExist:
-        return
-
-
-def get_final_beers_ratings_sync(room_name: str):
-    try:
-        beer_in_room = Room.beers.through  # intersection table
-        beers = beer_in_room.objects.filter(room__name=room_name)
-
-        beers_with_ratings = beers.annotate(
-            average_rating=Avg('ratings__note', output_field=DecimalField())
-        ).order_by('beer')
-        return BeerWithResultsSerializer(beers_with_ratings, many=True).data
-
-    except ObjectDoesNotExist:
         return []
+
+
+async_get_users_in_room = database_sync_to_async(get_users_in_room)
+async_bump_users_last_active_field = database_sync_to_async(bump_users_last_active_field)
+async_save_user_form = database_sync_to_async(save_user_form)
+async_get_user_form_data = database_sync_to_async(get_user_form_data)
+async_get_beers_in_room = database_sync_to_async(get_beers_in_room)
+async_get_current_room = database_sync_to_async(get_current_room)
+async_change_room_state_to = database_sync_to_async(change_room_state_to)
+async_get_final_user_beer_ratings = database_sync_to_async(get_final_user_beer_ratings)
+async_get_final_beers_ratings = database_sync_to_async(get_final_beers_ratings)

@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 from beers.models import Beer, BeerStyle, Hop, Brewery
 from beers.serializers import (
     DetailedBeerSerializer, BeerSerializer,
-    HopSerializer, StyleSerializer, BrewerySerializer,
+    HopSerializer, BrewerySerializer, BeerStyleSerializer,
 )
 
 
@@ -155,7 +155,7 @@ class BeersAPIViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             first=response.json(),
-            second=StyleSerializer(BeerStyle.objects.all(), many=True).data
+            second=BeerStyleSerializer(BeerStyle.objects.all(), many=True).data
         )
 
     def test_create_beer_style(self):
@@ -166,7 +166,7 @@ class BeersAPIViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             first=response.json(),
-            second=StyleSerializer(BeerStyle.objects.get(name='DDH Hazy IPA')).data
+            second=BeerStyleSerializer(BeerStyle.objects.get(name='DDH Hazy IPA')).data
         )
 
     def test_create_beer_style_no_name(self):
@@ -195,7 +195,7 @@ class BeersAPIViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             first=response.json(),
-            second=StyleSerializer(self.style_apa).data
+            second=BeerStyleSerializer(self.style_apa).data
         )
 
     def test_update_beer_style_by_id(self):
@@ -206,7 +206,7 @@ class BeersAPIViewsTest(TestCase):
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.style_apa.refresh_from_db()
-        self.assertEqual(response.json(), StyleSerializer(self.style_apa).data)
+        self.assertEqual(response.json(), BeerStyleSerializer(self.style_apa).data)
 
     def test_update_beer_style_invalid_data(self):
         self._require_login_and_auth()
