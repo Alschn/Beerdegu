@@ -1,5 +1,6 @@
 import AxiosClient from "./axiosClient";
 import {Response} from "./types";
+import {AxiosRequestConfig} from "axios";
 
 interface CheckUserInRoomData {
   is_host: boolean;
@@ -27,4 +28,11 @@ export const checkUserInRoom = (roomName: string): Promise<Response<CheckUserInR
 
 export const leaveRoom = (roomName: string): Promise<Response<LeaveRoomData>> => {
   return AxiosClient.delete(`/api/rooms/${roomName}/leave/`);
+};
+
+export const generateReport = (roomName: string, options?: AxiosRequestConfig): Promise<Response<Blob>> => {
+  return AxiosClient.get(`/api/rooms/${roomName}/report/`, {
+    responseType: 'blob',
+    ...options
+  });
 };

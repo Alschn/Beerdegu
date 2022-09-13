@@ -162,10 +162,25 @@ def get_final_user_beer_ratings(room_name: str, user: User):
         return
 
 
+def get_final_user_beer_ratings_sync(room_name: str, user: User):
+    if user.is_anonymous:
+        return
+
+    try:
+        ratings = Rating.objects.filter(
+            added_by=user, belongs_to__room__name=room_name
+        ).annotate(beer=F('belongs_to__beer'))
+        serialized = RatingSerializer(ratings, many=True).data
+        return serialized
+
+    except ObjectDoesNotExist:
+        return []
+
+
 @database_sync_to_async
 def get_final_beers_ratings(room_name: str):
     try:
-        beer_in_room = Room.beers.through   # intersection table
+        beer_in_room = Room.beers.through  # intersection table
         beers = beer_in_room.objects.filter(room__name=room_name)
 
         beers_with_ratings = beers.annotate(
@@ -175,3 +190,17 @@ def get_final_beers_ratings(room_name: str):
 
     except ObjectDoesNotExist:
         return
+
+
+def get_final_beers_ratings_sync(room_name: str):
+    try:
+        beer_in_room = Room.beers.through  # intersection table
+        beers = beer_in_room.objects.filter(room__name=room_name)
+
+        beers_with_ratings = beers.annotate(
+            average_rating=Avg('ratings__note', output_field=DecimalField())
+        ).order_by('beer')
+        return BeerWithResultsSerializer(beers_with_ratings, many=True).data
+
+    except ObjectDoesNotExist:
+        return []

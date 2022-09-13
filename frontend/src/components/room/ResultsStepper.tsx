@@ -1,15 +1,16 @@
-import React, {FC, useRef, useState} from 'react';
+import {FC, useRef, useState} from 'react';
 import {Button, MobileStepper} from '@mui/material';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import UserRatingsTable from "./UserRatingsTable";
 import BeerRatingsTable from "./BeerRatingsTable";
 import {useRoomContext} from "../../hooks/useContextHook";
-import exportToPdf from "../../utils/exportToPDF";
+import {useMutation} from "react-query";
+import {generateReport} from "../../api/room";
 import "./ResultsStepper.scss";
 
 const ResultsStepper: FC = () => {
-  const {results} = useRoomContext();
+  const {code, results} = useRoomContext();
 
   const [activeStep, setActiveStep] = useState<number>(0);
 
@@ -17,6 +18,30 @@ const ResultsStepper: FC = () => {
   const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
 
   const tableRef = useRef(null);
+
+  const mutation = useMutation(
+    () => generateReport(code), {
+      onSuccess: (response) => {
+        const contentDisposition = response.headers['content-disposition'];
+        const filename = contentDisposition.split(';')[1].split('=')[1];
+        const cleanedFilename = filename.replace(/"/g, '');
+
+        // create file link in browser's memory
+        const href = URL.createObjectURL(response.data);
+
+        // create "a" HTLM element with href to file & click
+        const link = document.createElement('a');
+        link.href = href;
+        link.setAttribute('download', cleanedFilename);
+        document.body.appendChild(link);
+        link.click();
+
+        // clean up "a" element & remove ObjectURL
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+      }
+    }
+  );
 
   return (
     <div className="results-stepper">
@@ -59,11 +84,11 @@ const ResultsStepper: FC = () => {
 
       <div className="results-pdf-button">
         <Button
-          onClick={() => exportToPdf(tableRef)}
+          onClick={() => mutation.mutate()}
           variant="contained"
           color="primary"
         >
-          Export to PDF
+          Zapisz wyniki
         </Button>
       </div>
     </div>

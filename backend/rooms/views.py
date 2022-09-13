@@ -1,8 +1,10 @@
+from datetime import datetime
 from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
-from rest_framework import status, viewsets
+from django.http import FileResponse
+from rest_framework import status, viewsets, renderers
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -13,9 +15,19 @@ from beers.models import Beer
 from beers.serializers import BeerSerializer
 from rooms.models import Room, BeerInRoom
 from rooms.permissions import IsHostOrListCreateOnly, IsHostOrListOnly
+from rooms.reports import generate_excel_report
 from rooms.serializers import (
     RoomSerializer, DetailedRoomSerializer, CreateRoomSerializer
 )
+
+
+class FileOrJSONRenderer(renderers.JSONRenderer):
+    def render(
+        self, data: Any, accepted_media_type: str | None = None, renderer_context: Any = None
+    ) -> Any:
+        if (response := renderer_context.get('response')) and response.status_code != status.HTTP_200_OK:
+            return super().render(data, accepted_media_type, renderer_context)
+        return data
 
 
 class RoomsViewSet(viewsets.ModelViewSet):
@@ -30,6 +42,8 @@ class RoomsViewSet(viewsets.ModelViewSet):
     GET     api/rooms/<str:name>/in/    - check if current user is in the room
     PUT     api/rooms/<str:name>/join/  - handle current user join the room
     DELETE  api/rooms/<str:name>/leave  - handle current user room leave the room
+
+    GET     api/rooms/<str:name>/report/ - generate excel report with results of a session
     """
     serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
@@ -146,6 +160,43 @@ class RoomsViewSet(viewsets.ModelViewSet):
             return Response({'message': f'{sender.username} has left room {room.name}!'}, status=status.HTTP_200_OK)
 
         return Response({'message': f'{sender.username} is not inside this room!'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True, methods=['GET'], url_path='report',
+        permission_classes=[IsAuthenticated],
+        renderer_classes=[FileOrJSONRenderer]
+    )
+    def download_report(self, request: Request, *args: Any, **kwargs: Any) -> Response | FileResponse:
+        """GET api/rooms/<str:name>/report/"""
+
+        room: Room = self.get_object()
+        user = self.request.user
+
+        if not room.users.filter(id=user.id).exists():
+            return Response(
+                {'message': 'User is not part of this room!'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if room.state != Room.State.FINISHED:
+            return Response(
+                {'message': 'Room is not in FINISHED state! Cannot generate report!'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        file_buffer = generate_excel_report(room.name, user)
+
+        today = datetime.today().strftime('%d_%m_%Y')
+        file_name = f"beerdegu_degustacja_{today}.xlsx"
+
+        response = FileResponse(
+            file_buffer,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            status=status.HTTP_200_OK
+        )
+        response['Content-Length'] = file_buffer.getbuffer().nbytes
+        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+        return response
 
 
 def check_if_room_exists(room_name: str):
