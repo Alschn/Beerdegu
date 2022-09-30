@@ -9,13 +9,13 @@ import {
   UserObject,
   WebsocketConnectionState,
   WebsocketMessage
-} from "../../utils/ws";
+} from "../../api/ws";
 import RoomContext, {roomStateType} from "../../context/roomContext";
 import Sidebar from "../layout/Sidebar";
 import Header from "../layout/Header";
 import ChatSidebar from "../layout/ChatSidebar";
 import DesktopChat from "../room/DesktopChat";
-import {HOST, WS_SCHEME} from "../../config";
+import {WEBSOCKET_URL} from "../../config";
 import RoomStateComponent from "../room/RoomStateComponent";
 import {useNavigate} from "react-router-dom";
 import {checkUserInRoom} from "../../api/room";
@@ -123,7 +123,7 @@ const Room: FC = () => {
   const {
     sendJsonMessage,
     readyState,
-  } = useWebSocket(`${WS_SCHEME}://${HOST}/ws/room/${params!.code}/`, {
+  } = useWebSocket(`${WEBSOCKET_URL}/ws/room/${params!.code}/`, {
     onOpen: () => console.log('Websocket open'),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {

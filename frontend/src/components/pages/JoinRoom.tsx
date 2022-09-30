@@ -1,11 +1,11 @@
-import {FC, useState} from "react";
+import {ChangeEvent, FC, FormEvent, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {joinRoom} from "../../api/lobby";
-import {onSubmit, submitWithEnter} from "../../utils/forms";
-import "./JoinCreateRoom.scss";
 import {useNavigate} from "react-router-dom";
+import "./JoinCreateRoom.scss";
+
 
 interface JoinRoomProps {
   roomNameProp?: string,
@@ -22,12 +22,13 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
     severity: 'error',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     e.target.id === 'roomName' ? setRoomName(e.target.value) : setPassword(e.target.value);
   };
 
-  const submitForm = (): void => {
-    if (!roomName) return;
+  const submitForm = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    
     joinRoom(roomName, password).then(() => {
       setResponse({
         message: `Joining room ${roomName} ...`,
@@ -42,8 +43,6 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
     });
   };
 
-  const onEnterKeyDown = (e: React.KeyboardEvent): void => submitWithEnter(e, submitForm);
-
   return (
     <Container component="main" maxWidth="xs">
       <div className={isRoute ? 'room room-route' : 'room room-embedded'}>
@@ -56,7 +55,7 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
         <div className="auth-alert">
           <CollapsableAlert content={response}/>
         </div>
-        <form noValidate onSubmit={(e) => onSubmit(e, submitForm)}>
+        <form onSubmit={submitForm}>
           <div className="room-form">
             <TextField
               variant="outlined"
@@ -69,7 +68,6 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
               autoFocus
               value={roomName}
               onChange={handleChange}
-              onKeyDown={onEnterKeyDown}
             />
             <TextField
               variant="outlined"
@@ -80,7 +78,6 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
               type="password"
               id="password"
               onChange={handleChange}
-              onKeyDown={onEnterKeyDown}
             />
             <Button
               type="submit"

@@ -1,4 +1,4 @@
-import React, {FC, useState} from "react";
+import {BaseSyntheticEvent, FC, FormEvent, useState} from "react";
 import {Button, Container, Grid, Link as MuiLink} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
@@ -7,7 +7,6 @@ import TextField from "@mui/material/TextField";
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import {onLogin} from "../../api/auth";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import {onSubmit, submitWithEnter} from "../../utils/forms";
 
 
 const Login: FC = () => {
@@ -21,7 +20,9 @@ const Login: FC = () => {
     severity: "error",
   });
 
-  const submitForm = (): void => {
+  const submitForm = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+
     onLogin({
       username: username,
       password: password,
@@ -40,7 +41,7 @@ const Login: FC = () => {
     });
   };
 
-  const handleChange = (e: React.BaseSyntheticEvent) => {
+  const handleChange = (e: BaseSyntheticEvent) => {
     switch (e.target.id) {
       case 'username':
         setUsername(e.target.value);
@@ -52,8 +53,6 @@ const Login: FC = () => {
         break;
     }
   };
-
-  const onEnterKeyDown = (e: React.KeyboardEvent): void => submitWithEnter(e, submitForm);
 
   return (
     <Container component="main" maxWidth="xs">
@@ -67,7 +66,7 @@ const Login: FC = () => {
         <div className="auth-alert">
           <CollapsableAlert content={response}/>
         </div>
-        <form noValidate onSubmit={(e) => onSubmit(e, submitForm)}>
+        <form onSubmit={submitForm}>
           <div className="auth-form">
             <TextField
               variant="outlined"
@@ -91,7 +90,6 @@ const Login: FC = () => {
               id="password"
               autoComplete="current-password"
               onChange={handleChange}
-              onKeyDown={onEnterKeyDown}
             />
             <Button
               type="submit"
@@ -99,7 +97,6 @@ const Login: FC = () => {
               variant="contained"
               color="primary"
               className="auth-button"
-              onKeyDown={onEnterKeyDown}
             >
               Sign In
             </Button>

@@ -8,8 +8,8 @@ from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
 from rooms.async_db import (
-    get_final_user_beer_ratings_sync,
-    get_final_beers_ratings_sync
+    get_final_user_beer_ratings,
+    get_final_beers_ratings
 )
 
 MAIN_HEADERS = [
@@ -75,7 +75,7 @@ def format_columns_width(sheet, headers: list[str]) -> None:
 
 
 def collect_user_ratings(room_name: str, user: User) -> list[UserRatingRow]:
-    user_ratings = get_final_user_beer_ratings_sync(room_name=room_name, user=user)
+    user_ratings = get_final_user_beer_ratings(room_name=room_name, user=user)
 
     ratings = []
     for index, rating in enumerate(user_ratings):
@@ -85,7 +85,7 @@ def collect_user_ratings(room_name: str, user: User) -> list[UserRatingRow]:
 
 
 def collect_beer_ratings(room_name) -> list[BeerRatingRow]:
-    final_ratings = get_final_beers_ratings_sync(room_name)
+    final_ratings = get_final_beers_ratings(room_name)
 
     ratings = []
     for index, rating in enumerate(final_ratings):

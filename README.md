@@ -43,7 +43,6 @@ This setup has been tested with Python 3.10 and Node 14.
 - React 18
 - Typescript
 - `react-use-websocket` - websocket client, connects with ws backend
-- `html2canvas`, `jspdf` - converting html to canvas and saving to pdf
 - `@mui/material`, `@mui/icons-material`, `@mui/lab`, - Material UI library
 - `sass` - enables scss/sass support
 - `axios` - for making http requests
@@ -89,6 +88,8 @@ python manage.py createsuper user
 
 ### Frontend
 
+You need to provide `REACT_APP_WEBSOCKET_URL` and `REACT_APP_BACKEND_URL` environment variables.
+
 Install node dependencies.
 
 ```shell script
@@ -123,15 +124,32 @@ coverage report -m
 
 ## With Docker
 
-First define environmental variables in `.env` in root directory:
+First define environmental variables in `.env` in **root directory**:
 
+```dotenv
+# credentials to postgres database
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# redis service name and port
+REDIS_HOST=redis_db
+REDIS_PORT=6379
+
+# if you want to test mailing functionality e.g with smtp backend
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_USER=
+EMAIL_PASSWORD=
 ```
-DB_NAME
-DB_USERNAME
-DB_PASSWORD
 
-REDIS_HOST
-REDIS_PORT
+Then define frontend environmental variables in `frontend/.env`:
+
+```dotenv
+# in format:  PROTOCOL://HOST:PORT without trailing slash
+# variable names have to be prefixed with REACT_APP_
+REACT_APP_WEBSOCKET_URL=ws://127.0.0.1:8000
+REACT_APP_BACKEND_URL=http://127.0.0.1:8000
 ```
 
 Make sure Docker Engine is running.
@@ -182,12 +200,13 @@ docker-compose build CONTAINER_NAME --no-cache
    - After install, log into Heroku CLI: `heroku login`
 3) Run: `heroku create <app name>` to create the Heroku application
 4) Set your environment variables for your production environment by running:  
-   ```
+   ```bash
    heroku config:set VARIABLE=value
-   ```  
+   ```
+   Or in the Heroku dashboard, go to Settings > Config Vars and add the variables there.  
    Variables to set: `DJANGO_SETTINGS_MODULE=core.settings.prod` `DJANGO_SUPERUSER_EMAIL`,
    `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `PRODUCTION_HOST=<app name>.herokuapp.com`,
-   `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
+   `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`, `REACT_APP_WEBSOCKET_URL`, `REACT_APP_BACKEND_URL`
 5) Run: `heroku stack:set container` so Heroku knows this is a containerized application
 6) Run: `heroku addons:create heroku-postgresql:hobby-dev` which creates the postgres add-on for Heroku
 7) Run: `heroku addons:create heroku-redis:hobby-dev` which creates the redis add-on for Heroku
@@ -212,8 +231,7 @@ This repository uses Github Actions to run test pipeline.
 - [ ] Browsing api (beers, breweries etc.)
 - [ ] User profile with list of past beer tasting sessions and statistics
 - [ ] Test async db utils and consumer (+ get GitHub Actions Postgres connection to work with async stuff)
-- [ ] Export ratings tables to CSV (PDF kinda done), server-side export
 - [ ] Additional statistics in room (e.g. best/worst beer, group by votes, the longest opinion, similar ratings etc.)
 - [ ] Better responsiveness on bigger displays (right now using Mobile First Approach)
-- [ ] Password recovery, password change endpoint
 - [ ] Task queue with Django Q - e.g. removing inactive users in rooms
+- [ ] Improve xlsx reports (headers styling, better formatting, etc.)
