@@ -2,7 +2,6 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://backend:8000",
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
@@ -30,7 +29,8 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^14.2.1",
-    "@types/jest": "^28.1.4"
+    "@types/jest": "^28.1.4",
+    "react-error-overlay": "^6.0.9"
   },
   "scripts": {
     "start": "react-scripts start",

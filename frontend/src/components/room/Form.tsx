@@ -3,7 +3,7 @@ import React, {FC, Fragment, useEffect, useReducer} from "react";
 import useWebSocket from "react-use-websocket";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {UserRatingsObject, WebsocketMessage} from "../../api/ws";
-import {HOST, WS_SCHEME} from "../../config";
+import {WEBSOCKET_URL} from "../../config";
 import usePrevious from "../../hooks/usePrevious";
 import "./Form.scss";
 
@@ -56,7 +56,7 @@ const BeerForm: FC<BeerFormProps> = ({beerID}) => {
 
   const {
     sendJsonMessage,
-  } = useWebSocket(`${WS_SCHEME}://${HOST}/ws/room/${code}/`, {
+  } = useWebSocket(`${WEBSOCKET_URL}/ws/room/${code}/`, {
     shouldReconnect: () => true,
     share: true,
     onMessage: (event) => {

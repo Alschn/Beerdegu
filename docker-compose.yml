@@ -25,6 +25,8 @@ services:
       - node-modules:/app/frontend/node_modules
     ports:
       - "3000:3000"
+    env_file:
+      - ./frontend/.env
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
