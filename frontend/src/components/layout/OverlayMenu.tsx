@@ -1,7 +1,7 @@
 import {FC, Fragment, useEffect} from "react";
 import {Link} from "react-router-dom";
-import {logout} from "../../api/auth";
 import "./OverlayMenu.scss";
+import {useAuth} from "../../context/authContext";
 
 interface OverlayMenuProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface OverlayMenuProps {
 const toggleScroll = (open: boolean) => document.body.style.overflow = open ? 'hidden' : 'auto';
 
 const OverlayMenu: FC<OverlayMenuProps> = ({isOpen, handleClose}) => {
-  const isAuthenticated = localStorage.getItem('token') != null;
+  const {isAuthenticated, logout} = useAuth();
 
   useEffect(() => {
     // toggle body scroll when closing/opening menu

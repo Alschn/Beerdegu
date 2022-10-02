@@ -25,7 +25,6 @@ class BeersAPIViewsTest(TestCase):
             username='Test',
             password='!@#$%'
         )
-        cls.token = Token.objects.get_or_create(user=cls.user)
         cls.style_ipa = BeerStyle.objects.create(name='India Pale Ale')
         cls.style_apa = BeerStyle.objects.create(name='American Pale Ale')
         cls.hop_simcoe = Hop.objects.create(name='Simcoe', country='USA')

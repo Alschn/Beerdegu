@@ -5,11 +5,15 @@ import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
-import {onLogin} from "../../api/auth";
+import {onJWTLogin} from "../../api/auth";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
+import {JWTContent, useAuth} from "../../context/authContext";
+import jwtDecode from "jwt-decode";
+import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY} from "../../config";
 
 
 const Login: FC = () => {
+  const {setToken} = useAuth();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState<string>("");
@@ -23,15 +27,23 @@ const Login: FC = () => {
   const submitForm = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    onLogin({
+    onJWTLogin({
       username: username,
       password: password,
     }).then(({data}) => {
-      const {key} = data;
+      const {access, refresh} = data;
       setResponse(
         {message: 'Logged in! Redirecting to home page ...', severity: 'success'}
       );
-      localStorage.setItem('token', key);
+
+      // set raw token to local storage
+      localStorage.setItem(ACCESS_TOKEN_KEY, access);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+
+      // set decoded access token and refresh token to context state
+      const token = jwtDecode<JWTContent>(access);
+      setToken(token);
+
       setTimeout(() => navigate("/"), 800);
     }).catch(err => {
       if (err.response) setResponse({

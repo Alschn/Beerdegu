@@ -1,17 +1,15 @@
 import {FC, Fragment} from "react";
 import beers from "../../images/logo.svg";
 import {Button} from "@mui/material";
-import {logout} from "../../api/auth";
 import WrapWithHeader from "../layout/WrapWithHeader";
-import "./Home.scss";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "../../context/authContext";
+import "./Home.scss";
 
 
 const Home: FC = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-
-  const redirectTo = (path: string) => navigate(path);
+  const {isAuthenticated, logout} = useAuth();
 
   return (
     <WrapWithHeader>
@@ -23,13 +21,13 @@ const Home: FC = () => {
           </div>
 
           <div className="App-button-group">
-            {token !== null ? (
+            {isAuthenticated ? (
               <Fragment>
-                <Button variant="contained" color="primary" onClick={() => redirectTo('/join')}>
+                <Button variant="contained" color="primary" onClick={() => navigate('/join')}>
                   Join Room
                 </Button>
 
-                <Button variant="contained" color="error" onClick={() => redirectTo('/create')}>
+                <Button variant="contained" color="error" onClick={() => navigate('/create')}>
                   Create Room
                 </Button>
 
@@ -42,11 +40,11 @@ const Home: FC = () => {
               </Fragment>
             ) : (
               <Fragment>
-                <Button variant="contained" color="primary" onClick={() => redirectTo('/login')}>
+                <Button variant="contained" color="primary" onClick={() => navigate('/login')}>
                   Login
                 </Button>
 
-                <Button variant="contained" color="error" onClick={() => redirectTo('/register')}>
+                <Button variant="contained" color="error" onClick={() => navigate('/register')}>
                   Register
                 </Button>
               </Fragment>

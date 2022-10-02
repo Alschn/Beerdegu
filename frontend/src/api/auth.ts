@@ -30,39 +30,53 @@ interface ConfirmPasswordResetData {
   token: string,
 }
 
-export const onLogin = (request_body: LoginData): Promise<Response<any>> => {
-  return axiosClient.post('/auth/login/', {...request_body});
+
+interface JWTLoginResponseData {
+  access: string,
+  refresh: string,
+}
+
+interface RegisterResponseData {
+  id: number,
+  username: string,
+}
+
+interface LogoutResponseData {
+  message: string;
+}
+
+interface PasswordChangeResponseData {
+  // todo
+}
+
+interface ResetPasswordResponseData {
+  // todo
+}
+
+interface ConfirmPasswordResetResponseData {
+  // todo
+}
+
+export const onJWTLogin = (request_body: LoginData): Promise<Response<JWTLoginResponseData>> => {
+  return axiosClient.post('/api/auth/token/', {...request_body});
 };
 
-
-export const onRegister = (request_body: RegisterData): Promise<Response<any>> => {
-  return axiosClient.post('/auth/register/', {...request_body});
+export const onRegister = (request_body: RegisterData): Promise<Response<RegisterResponseData>> => {
+  return axiosClient.post('/api/auth/register/', {...request_body});
 };
 
-export const onLogout = (): Promise<Response<any>> => {
-  return axiosClient.post('/auth/logout/', {});
+export const onLogout = (): Promise<Response<LogoutResponseData>> => {
+  return axiosClient.post('/api/auth/logout/', {});
 };
 
-export const changePassword = (request_body: PasswordChangeData): Promise<Response<any>> => {
-  return axiosClient.post(`/auth/password/change/`, {...request_body});
+export const changePassword = (request_body: PasswordChangeData): Promise<Response<PasswordChangeResponseData>> => {
+  return axiosClient.post(`/api/auth/password/change/`, {...request_body});
 };
 
-export const resetPassword = (request_body: ResetPasswordData): Promise<Response<any>> => {
-  return axiosClient.post(`/auth/password/reset/`, {...request_body});
+export const resetPassword = (request_body: ResetPasswordData): Promise<Response<ResetPasswordResponseData>> => {
+  return axiosClient.post(`/api/auth/password/reset/`, {...request_body});
 };
 
-export const confirmResetPassword = (uid: string, token: string, request_body: ConfirmPasswordResetData): Promise<Response<any>> => {
-  return axiosClient.post(`/auth/password/reset/confirm/${uid}/${token}/`, {...request_body});
-};
-
-export const logout = () => {
-  return onLogout().then(() => {
-    localStorage.removeItem('token');
-    window.location.reload();
-  }).catch(err => {
-    // remove token and reload either way;
-    // even though user might still be logged on the backend with old creds
-    localStorage.removeItem('token');
-    window.location.reload();
-  });
+export const confirmResetPassword = (uid: string, token: string, request_body: ConfirmPasswordResetData): Promise<Response<ConfirmPasswordResetResponseData>> => {
+  return axiosClient.post(`/api/auth/password/reset/confirm/${uid}/${token}/`, {...request_body});
 };

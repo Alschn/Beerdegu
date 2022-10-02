@@ -15,4 +15,12 @@ if (!WEBSOCKET_URL) {
   throw new Error('Missing `REACT_APP_WEBSOCKET_URL` environment variable. Example: `ws://127.0.0.1:8000`');
 }
 
-export {WEBSOCKET_URL, BACKEND_URL};
+const ACCESS_TOKEN_KEY = 'token';
+const REFRESH_TOKEN_KEY = 'refresh';
+
+export {
+  WEBSOCKET_URL,
+  BACKEND_URL,
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+};

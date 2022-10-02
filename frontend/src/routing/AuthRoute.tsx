@@ -2,6 +2,7 @@ import {FC} from "react";
 import {Outlet} from "react-router";
 import {Navigate} from "react-router-dom";
 import WrapWithHeader from "../components/layout/WrapWithHeader";
+import {useAuth} from "../context/authContext";
 
 
 interface PrivateRouteProps {
@@ -9,7 +10,7 @@ interface PrivateRouteProps {
 }
 
 const AuthRoute: FC<PrivateRouteProps> = () => {
-  const isAuthenticated = localStorage.getItem('token') !== null;
+  const {isAuthenticated} = useAuth();
 
   return isAuthenticated ? (
     <Navigate to=""/>
