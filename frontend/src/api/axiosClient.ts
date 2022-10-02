@@ -8,11 +8,13 @@ const axiosConfig: AxiosRequestConfig = {
 
 const AxiosClient = axios.create(axiosConfig);
 
+const AUTH_HEADER_TYPE = 'Bearer';
+
 // before sending request attach auth token
 AxiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    config!.headers!.Authorization = token ? `Token ${token}` : '';
+    config!.headers!.Authorization = token ? `${AUTH_HEADER_TYPE} ${token}` : '';
     return config;
   },
   error => {

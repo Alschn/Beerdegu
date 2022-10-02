@@ -5,6 +5,6 @@ from users.serializers.auth import UserPasswordResetSerializer
 
 class PasswordResetAPIView(PasswordResetView):
     """
-    POST /auth/password/reset/
+    POST /api/auth/password/reset/
     """
     serializer_class = UserPasswordResetSerializer

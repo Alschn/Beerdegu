@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+from django.utils.timezone import timedelta
+
 from dotenv import load_dotenv
 
 # Load environmental variables
@@ -53,7 +55,10 @@ INSTALLED_APPS = [
     'corsheaders',
     # rest framework
     'rest_framework',
+    # todo: deprecate drf token authentication
     'rest_framework.authtoken',
+    # simplejwt
+    'rest_framework_simplejwt.token_blacklist',
     # auth
     'dj_rest_auth',
     'allauth',
@@ -74,6 +79,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'users.middleware.AccessCookieToAuthorizationHeaderMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -168,7 +174,9 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # todo: deprecate drf token authentication
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (
@@ -224,3 +232,26 @@ CSRF_TRUSTED_ORIGINS = [
 
 EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
 DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# JWT settings
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+
+# rest framework auth token will be deprecated in favour of JWT in the future
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+
+    # custom settings related to jwt
+    'ACCESS_TOKEN_COOKIE': 'access',
+    'REFRESH_TOKEN_COOKIE': 'refresh',
+
+    # toggle if using cookies for JWT
+    'SHOULD_SET_COOKIES': False,
+}
+
+# needed only if using cookies for JWT
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", "localhost")

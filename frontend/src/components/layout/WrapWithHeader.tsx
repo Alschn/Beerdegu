@@ -6,7 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import OverlayMenu from "./OverlayMenu";
 import "./WrapWithHeader.scss";
 import {Link} from "react-router-dom";
-import {logout} from "../../api/auth";
+import {useAuth} from "../../context/authContext";
 
 
 interface WrapWithHeaderProps {
@@ -15,7 +15,7 @@ interface WrapWithHeaderProps {
 
 
 const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
-  const isAuthenticated = localStorage.getItem('token') !== null;
+  const {isAuthenticated, logout} = useAuth();
 
   const matchesForHamburgerMenu = useMediaQuery('(max-width: 679px)');
   const matchesForLinks = useMediaQuery('(min-width: 525px)');
