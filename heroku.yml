@@ -6,9 +6,6 @@
 build:
   docker:
     web: Dockerfile.prod
-  config:
-    REACT_APP_BACKEND_URL: https://beerdegu.herokuapp.com
-    REACT_APP_WEBSOCKET_URL: wss://beerdegu.herokuapp.com
 
 release:
   command:
