@@ -25,6 +25,9 @@ RUN yarn install --production
 COPY . /app/
 COPY ./backend/scripts/ /app/
 
+ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+ENV REACT_APP_WEBSOCKET_URL=$REACT_APP_WEBSOCKET_URL
+
 # Build static files
 RUN yarn build
 
