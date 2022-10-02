@@ -1,3 +1,7 @@
+# Pass env variables to the container from heroku.yml
+ARG REACT_APP_BACKEND_URL
+ARG REACT_APP_WEBSOCKET_URL
+
 # Use image with both python and node installed
 FROM nikolaik/python-nodejs:python3.10-nodejs14
 
