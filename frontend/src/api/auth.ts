@@ -30,9 +30,6 @@ interface ConfirmPasswordResetData {
   token: string,
 }
 
-interface LoginResponseData {
-  key: string,
-}
 
 interface JWTLoginResponseData {
   access: string,
@@ -59,10 +56,6 @@ interface ResetPasswordResponseData {
 interface ConfirmPasswordResetResponseData {
   // todo
 }
-
-export const onLogin = (request_body: LoginData): Promise<Response<LoginResponseData>> => {
-  return axiosClient.post('/api/auth/login/', {...request_body});
-};
 
 export const onJWTLogin = (request_body: LoginData): Promise<Response<JWTLoginResponseData>> => {
   return axiosClient.post('/api/auth/token/', {...request_body});

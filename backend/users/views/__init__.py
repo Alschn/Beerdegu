@@ -1,4 +1,3 @@
-from .login import LoginAPIView
 from .logout import LogoutAPIView
 from .password_change import PasswordChangeAPIView
 from .password_reset import PasswordResetAPIView

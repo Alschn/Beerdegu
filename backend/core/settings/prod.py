@@ -22,6 +22,9 @@ DEBUG = False
 
 # cors headers configuration
 CORS_ALLOW_ALL_ORIGINS = False
+CORS_EXPOSE_HEADERS = [
+    'Content-Disposition',
+]
 
 INSTALLED_APPS.extend(["whitenoise.runserver_nostatic"])
 

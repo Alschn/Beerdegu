@@ -55,9 +55,8 @@ INSTALLED_APPS = [
     'corsheaders',
     # rest framework
     'rest_framework',
-    # todo: deprecate drf token authentication
-    'rest_framework.authtoken',
     # simplejwt
+    'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     # auth
     'dj_rest_auth',
@@ -174,8 +173,6 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # todo: deprecate drf token authentication
-        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
@@ -192,6 +189,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS headers
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_EXPOSE_HEADERS = [
+    'Content-Disposition',
+]
 
 # required by django.contrib.sites
 SITE_ID = 1
@@ -200,6 +200,7 @@ SITE_ID = 1
 ACCOUNT_EMAIL_VERIFICATION = "none"
 OLD_PASSWORD_FIELD_ENABLED = True
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+REST_AUTH_TOKEN_MODEL = None
 
 # Django Q configuration
 # https://django-q.readthedocs.io/en/latest/configure.html
@@ -239,7 +240,7 @@ DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # rest framework auth token will be deprecated in favour of JWT in the future
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'AUTH_HEADER_TYPES': ('Bearer',),

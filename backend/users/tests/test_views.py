@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.test import TestCase
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from users.serializers.user import UserSerializer
@@ -61,23 +60,22 @@ class AuthViewsTests(TestCase):
         self.assertEqual(response.json(), {'username': ['A user with that username already exists.']})
 
     def test_login_success(self):
-        response = self.client.post(reverse('auth-login'), {
+        response = self.client.post(reverse('auth-jwt-login'), {
             'username': 'Test',
             'password': 'abcdefg',
         })
-        token = Token.objects.get(user__username='Test')
-        res_to_json = response.json()
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue('key' in res_to_json)
-        self.assertEqual(token.key, res_to_json['key'])
+        self.assertTrue('access' in response_json)
+        self.assertTrue('refresh' in response_json)
 
     def test_login_invalid_data(self):
-        response = self.client.post(reverse('auth-login'), {
+        response = self.client.post(reverse('auth-jwt-login'), {
             'username': 'Test',
             'password': 'xd',
         })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'non_field_errors': ['Unable to log in with provided credentials.']})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.json(), {'detail': 'No active account found with the given credentials'})
 
     def test_logout(self):
         self.client.login(username='Test', password='abcdefg')

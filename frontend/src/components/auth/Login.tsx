@@ -9,6 +9,7 @@ import {onJWTLogin} from "../../api/auth";
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {JWTContent, useAuth} from "../../context/authContext";
 import jwtDecode from "jwt-decode";
+import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY} from "../../config";
 
 
 const Login: FC = () => {
@@ -30,18 +31,18 @@ const Login: FC = () => {
       username: username,
       password: password,
     }).then(({data}) => {
-      const {access} = data;
+      const {access, refresh} = data;
       setResponse(
         {message: 'Logged in! Redirecting to home page ...', severity: 'success'}
       );
 
       // set raw token to local storage
-      localStorage.setItem('token', access);
+      localStorage.setItem(ACCESS_TOKEN_KEY, access);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
 
       // set decoded access token and refresh token to context state
       const token = jwtDecode<JWTContent>(access);
       setToken(token);
-      // setRefreshToken(refresh);
 
       setTimeout(() => navigate("/"), 800);
     }).catch(err => {
