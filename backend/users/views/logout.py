@@ -1,4 +1,5 @@
 from dj_rest_auth.views import LogoutView
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
@@ -8,7 +9,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.utils import (
-    get_delete_cookie_args, REFRESH_TOKEN_KEY
+    get_delete_cookie_args, REFRESH_TOKEN_KEY, SHOULD_SET_COOKIES
 )
 
 
@@ -29,18 +30,16 @@ class LogoutAPIView(LogoutView):
             pass
 
         # custom behaviour when using JWT authentication
-        try:
-            refresh = RefreshToken.for_user(request.user)
-            refresh.blacklist()
-        except TokenError:
-            # if refresh token has already been blacklisted, then just delete refresh cookie
-            pass
+        if not SHOULD_SET_COOKIES:
+            refresh_tokens = OutstandingToken.objects.filter(user=request.user)
+            for refresh in refresh_tokens:
+                BlacklistedToken.objects.get_or_create(token=refresh)
 
         # default django logout to get rid of session, uncomment if needed
         # django_logout(request)
 
         # custom behaviour when cookies are enabled
-        if settings.SIMPLE_JWT['SHOULD_SET_COOKIES']:
+        elif SHOULD_SET_COOKIES:
             return self.jwt_cookies_logout(request)
 
         return Response(

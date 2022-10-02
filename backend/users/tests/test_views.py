@@ -26,11 +26,9 @@ class AuthViewsTests(TestCase):
             'password1': 'verysecretpassword123',
             'password2': 'verysecretpassword123',
         })
-        token = Token.objects.get(user__username='Test2')
         user = User.objects.get(username='Test2')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.json(), UserSerializer(user).data)
-        self.assertEqual(token.user, user)
 
     def test_register_invalid_email(self):
         response = self.client.post(reverse('auth-register'), {
