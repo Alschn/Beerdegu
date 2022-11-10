@@ -246,6 +246,10 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 
+    'ALGORITHM': 'HS256',
+    'JTI_CLAIM': 'jti',
+    'USER_ID_CLAIM': 'user_id',
+
     # custom settings related to jwt
     'ACCESS_TOKEN_COOKIE': 'access',
     'REFRESH_TOKEN_COOKIE': 'refresh',

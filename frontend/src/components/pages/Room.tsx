@@ -124,6 +124,9 @@ const Room: FC = () => {
     sendJsonMessage,
     readyState,
   } = useWebSocket(`${WEBSOCKET_URL}/ws/room/${params!.code}/`, {
+    queryParams: {
+      token: localStorage.getItem('token') || ''
+    },
     onOpen: () => console.log('Websocket open'),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
