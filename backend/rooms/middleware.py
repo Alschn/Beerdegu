@@ -2,14 +2,18 @@ import jwt
 from channels.db import database_sync_to_async
 from channels.middleware import BaseMiddleware
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
-
-User = get_user_model()
 
 
 @database_sync_to_async
-def get_user_by_jwt(token: str):
+def get_user_by_jwt(token: str | None):
+    from django.contrib.auth import get_user_model
+    from django.contrib.auth.models import AnonymousUser
+
+    if not token:
+        return AnonymousUser()
+
+    User = get_user_model()
+
     try:
         decoded_jwt = jwt.decode(
             token,
@@ -39,5 +43,5 @@ class JWTAuthMiddleware(BaseMiddleware):
         except ValueError:
             token_key = None
 
-        scope['user'] = AnonymousUser() if token_key is None else await get_user_by_jwt(token_key)
+        scope['user'] = await get_user_by_jwt(token_key)
         return await super().__call__(scope, receive, send)
