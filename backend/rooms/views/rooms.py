@@ -3,54 +3,64 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.http import FileResponse
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from core.shared.pagination import page_number_pagination_factory
 from core.shared.renderers import FileOrJSONRenderer
-from rooms.models import Room, BeerInRoom
+from rooms.models import Room
 from rooms.permissions import IsHostOrListCreateOnly
 from rooms.reports import generate_excel_report
 from rooms.serializers import (
-    RoomSerializer, DetailedRoomSerializer, CreateRoomSerializer
+    RoomSerializer,
+    DetailedRoomSerializer,
+    CreateRoomSerializer
 )
 
+RoomsPagination = page_number_pagination_factory(page_size=100)
 
-class RoomsViewSet(viewsets.ModelViewSet):
+
+class RoomsViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
     """
-    GET     api/rooms/          - list all rooms
-    POST    api/rooms/          - create new room
-    GET     api/rooms/<str:name>/ - retrieve room
-    PUT     api/rooms/<str:name>/ - update room
-    PATCH   api/rooms/<str:name>/ - partially update room
-    DELETE  api/rooms/<str:name>/ - delete room
+    GET     /api/rooms/                     - list all rooms
+    POST    /api/rooms/                     - create new room
+    GET     /api/rooms/<str:name>/          - retrieve room
 
-    GET     api/rooms/<str:name>/in/    - check if current user is in the room
-    PUT     api/rooms/<str:name>/join/  - handle current user join the room
-    DELETE  api/rooms/<str:name>/leave  - handle current user room leave the room
+    GET     /api/rooms/<str:name>/in/       - check if current user is in the room
+    PUT     /api/rooms/<str:name>/join/     - handle current user join the room
+    DELETE  /api/rooms/<str:name>/leave/    - handle current user room leave the room
 
-    GET     api/rooms/<str:name>/report/ - generate excel report with results of a session
+    GET     /api/rooms/<str:name>/report/   - generate excel report with results of a session
     """
-    serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
+    pagination_class = RoomsPagination
+    serializer_class = RoomSerializer
     lookup_field = 'name'
 
     def get_queryset(self) -> QuerySet[Room]:
         if self.action in ["user_in", "user_join", "user_leave"]:
-            return Room.objects.all().prefetch_related('users')
+            return Room.objects.order_by('id').prefetch_related('users')
 
-        elif self.action in ["list_beers", "add_beer", "remove_beer"]:
-            return BeerInRoom.objects.filter(room__name=self.kwargs['name'])
+        # elif self.action in ["list_beers", "add_beer", "remove_beer"]:
+        #     return BeerInRoom.objects.filter(room__name=self.kwargs['name'])
 
-        return Room.objects.all().prefetch_related('users', 'beers')
+        return Room.objects.order_by('id').prefetch_related('users', 'beers')
 
     def get_serializer_class(self):
-        if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve']:
             return DetailedRoomSerializer
-        if hasattr(self, 'action') and self.action == 'create':
+
+        if self.action == 'create':
             return CreateRoomSerializer
+
         return super().get_serializer_class()
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:

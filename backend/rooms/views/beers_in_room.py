@@ -17,17 +17,19 @@ from rooms.views.helpers import check_if_room_exists
 
 class BeersInRoomView(APIView):
     """
-    GET     api/rooms/<str:name>/beers - Lists all beers in this room
-    PUT     api/rooms/<str:name>/beers - Adds beer with given id to beers in this room
-    DELETE  api/rooms/<str:name>/beers/?id=<int:id> - Removes beer with given id from this room
+    GET     /api/rooms/<str:name>/beers                 - Lists all beers in this room
+    PUT     /api/rooms/<str:name>/beers                 - Adds beer with given id to beers in this room
+    DELETE  /api/rooms/<str:name>/beers/?id=<int:id>    - Removes beer with given id from this room
     """
-    lookup_url_kwarg = 'room_name'
     permission_classes = [IsAuthenticated, IsHostOrListOnly]
+    lookup_url_kwarg = 'room_name'
     serializer_class = None
+
+    # todo pagination and refactor
 
     def get_queryset(self) -> QuerySet[BeerInRoom]:
         room_name = self.kwargs.get(self.lookup_url_kwarg)
-        return BeerInRoom.objects.filter(room__name=room_name)
+        return BeerInRoom.objects.filter(room__name=room_name).order_by('id')
 
     def get(self, request: Request, room_name: str, **kwargs: Any) -> Response:
         if not check_if_room_exists(room_name):
