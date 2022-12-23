@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'dj_rest_auth.registration',
+    # open api schema
+    'drf_spectacular',
     # apps
     'core',
     'users',
@@ -178,7 +180,23 @@ REST_FRAMEWORK = {
 
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
-    )
+    ),
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# drf-spectacular settings
+# https://drf-spectacular.readthedocs.io/en/latest/settings.html
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Beerdegu API',
+    'DESCRIPTION': 'Beerdegu API provided by Alschn',
+    'VERSION': '1.0.0',
+    'CONTACT': {
+        'name': 'Alschn',
+        'url': 'https://github.com/Alschn/',
+    },
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
 }
 
 # Static files (CSS, JavaScript, Images)
