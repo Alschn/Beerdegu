@@ -20,7 +20,7 @@ urlpatterns = [
     # password reset with email
     path('auth/password/reset/', PasswordResetAPIView.as_view(), name='auth-password-reset'),
     path(
-        'auth/password/reset/confirm/<uidb64>/<token>/',
+        'auth/password/reset/confirm/<str:uidb64>/<str:token>/',
         PasswordResetConfirmAPIView.as_view(), name='password_reset_confirm'
     ),
 

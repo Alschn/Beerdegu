@@ -18,6 +18,7 @@ class LogoutAPIView(LogoutView):
     POST /api/auth/logout/
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = None
 
     def logout(self, request) -> Response:
         # default behaviour from dj_rest_auth

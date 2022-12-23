@@ -23,6 +23,7 @@ class BeersInRoomView(APIView):
     """
     lookup_url_kwarg = 'room_name'
     permission_classes = [IsAuthenticated, IsHostOrListOnly]
+    serializer_class = None
 
     def get_queryset(self) -> QuerySet[BeerInRoom]:
         room_name = self.kwargs.get(self.lookup_url_kwarg)
