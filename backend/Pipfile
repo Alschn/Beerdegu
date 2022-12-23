@@ -24,6 +24,7 @@ daphne = "*"
 channels-redis = "*"
 django-q = "*"
 openpyxl = "*"
+drf-spectacular = "*"
 
 [dev-packages]
 coverage = "*"
