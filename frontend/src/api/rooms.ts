@@ -1,5 +1,5 @@
 import AxiosClient from "./axiosClient";
-import {Response} from "./types";
+import {PaginatedResponse, Response} from "./types";
 import {AxiosRequestConfig} from "axios";
 
 interface CheckUserInRoomData {
@@ -9,6 +9,27 @@ interface CheckUserInRoomData {
 interface LeaveRoomData {
   message: string;
 }
+
+export const getRooms = (): Promise<PaginatedResponse<any>> => {
+  return AxiosClient.get('/api/rooms/');
+};
+
+export const joinRoom = (roomName: string, password: string): Promise<Response<any>> => {
+  return AxiosClient.put(`/api/rooms/${roomName}/join/`, {
+    password: password,
+  });
+};
+
+export type createRoomForm = {
+  name: string,
+  password: string,
+  slots: undefined | number
+}
+
+export const createRoom = (formState: createRoomForm): Promise<Response<any>> => {
+  return AxiosClient.post('/api/rooms/', {...formState});
+};
+
 
 export const addBeerToRoom = (room_name: string, beer_id: number): Promise<Response<any>> => {
   return AxiosClient.put(`/api/rooms/${room_name}/beers/`, {

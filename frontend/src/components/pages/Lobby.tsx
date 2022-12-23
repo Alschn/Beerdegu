@@ -11,7 +11,7 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import {getRooms} from "../../api/lobby";
+import {getRooms} from "../../api/rooms";
 import CreateRoomDialog from "../lobby/CreateRoomDialog";
 import JoinRoomDialog from "../lobby/JoinRoomDialog";
 import "./Lobby.scss";
@@ -102,7 +102,7 @@ const Lobby: FC = () => {
   useEffect(() => {
     // get initial data
     getRooms().then((res) => {
-      setRooms(res.data);
+      setRooms(res.data.results);
     }).catch(err => console.log(err));
   }, []);
 
@@ -110,7 +110,7 @@ const Lobby: FC = () => {
     // refresh data every n seconds
     const interval = setInterval(() => {
       getRooms().then((res) => {
-        setRooms(res.data);
+        setRooms(res.data.results);
       }).catch(err => console.log(err));
     }, REFRESH_DATA_INTERVAL_MS);
 

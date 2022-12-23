@@ -2,7 +2,7 @@ import {ChangeEvent, FC, FormEvent, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import {joinRoom} from "../../api/lobby";
+import {joinRoom} from "../../api/rooms";
 import {useNavigate} from "react-router-dom";
 import "./JoinCreateRoom.scss";
 
