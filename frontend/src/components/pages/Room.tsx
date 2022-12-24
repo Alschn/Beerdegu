@@ -18,7 +18,7 @@ import DesktopChat from "../room/DesktopChat";
 import {WEBSOCKET_URL} from "../../config";
 import RoomStateComponent from "../room/RoomStateComponent";
 import {useNavigate} from "react-router-dom";
-import {checkUserInRoom} from "../../api/room";
+import {checkUserInRoom} from "../../api/rooms";
 import "./Room.scss";
 
 

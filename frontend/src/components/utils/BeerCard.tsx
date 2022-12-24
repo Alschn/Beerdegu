@@ -1,7 +1,7 @@
 import {FC} from 'react';
 import {Box, Button, Card, CardActions, CardContent, Tooltip, Typography} from '@mui/material';
 import {useRoomContext} from "../../hooks/useContextHook";
-import {addBeerToRoom} from "../../api/room";
+import {addBeerToRoom} from "../../api/rooms";
 
 
 interface MediaCardProps {
