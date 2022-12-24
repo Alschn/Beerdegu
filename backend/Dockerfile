@@ -4,7 +4,7 @@ FROM python:3.10.5-alpine as build-image
 ENV PYTHONUNBUFFERED=1
 ENV PIPENV_VENV_IN_PROJECT=1
 
-COPY Pipfile .
+COPY Pipfile Pipfile.lock ./
 
 # Install packages only needed in build stage
 RUN  \
