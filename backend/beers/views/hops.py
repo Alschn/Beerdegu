@@ -19,9 +19,11 @@ class HopsViewSet(
 ):
     """
     GET     /api/hops/              - list all hops
+
     GET     /api/hops/<int:id>/     - retrieve hop
     """
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = HopsPagination
     serializer_class = HopSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_class = None
