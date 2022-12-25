@@ -1,4 +1,4 @@
-import {FC, MouseEvent, useEffect, useReducer, useState} from 'react';
+import {FC, MouseEvent, useMemo, useReducer, useState} from 'react';
 import {
   Button,
   Container,
@@ -14,6 +14,7 @@ import {
 import {getRooms} from "../../api/rooms";
 import CreateRoomDialog from "../lobby/CreateRoomDialog";
 import JoinRoomDialog from "../lobby/JoinRoomDialog";
+import {useQuery} from "react-query";
 import "./Lobby.scss";
 
 
@@ -63,7 +64,7 @@ const getFormattedValue = (row: any, column: Column) => {
   }
 };
 
-const REFRESH_DATA_INTERVAL_MS = 10_000;
+const REFRESH_DATA_INTERVAL_MS = 20_000;
 
 type State = {
   isJoinDialogOpen: boolean,
@@ -94,29 +95,19 @@ const dialogReducer = (state: State = initialState, action: Action) => {
 };
 
 const Lobby: FC = () => {
-  const [rooms, setRooms] = useState<RoomData[]>([]);
+  const {isLoading: isLoadingRooms, data: roomsData} = useQuery(
+    ['rooms'], getRooms, {
+      refetchInterval: REFRESH_DATA_INTERVAL_MS,
+    }
+  );
+
+  const rooms = useMemo(() => {
+    if (!roomsData || !roomsData.data) return [];
+    return roomsData.data.results;
+  }, [roomsData]);
 
   const [selected, setSelected] = useState<string | null>(null);
   const [{isJoinDialogOpen, isCreateDialogOpen}, dispatch] = useReducer(dialogReducer, initialState);
-
-  useEffect(() => {
-    // get initial data
-    getRooms().then((res) => {
-      setRooms(res.data.results);
-    }).catch(err => console.log(err));
-  }, []);
-
-  useEffect(() => {
-    // refresh data every n seconds
-    const interval = setInterval(() => {
-      getRooms().then((res) => {
-        setRooms(res.data.results);
-      }).catch(err => console.log(err));
-    }, REFRESH_DATA_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, []);
-
 
   const handleRowClick = (e: MouseEvent<HTMLTableRowElement>) => {
     const roomName = e.currentTarget.getAttribute('data-room-name');
