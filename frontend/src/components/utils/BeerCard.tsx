@@ -38,9 +38,9 @@ const BeerCard: FC<MediaCardProps> = (
 
     return (
       <Card sx={(theme) => ({
-        maxWidth: 345, minWidth: 200,
-        [theme.breakpoints.down('sm')]: {
-          maxWidth: 225,
+        minWidth: 200,
+        [theme.breakpoints.down('md')]: {
+          maxWidth: 200,
         },
         [theme.breakpoints.up('md')]: {
           maxWidth: 225,

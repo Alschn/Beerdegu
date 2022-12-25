@@ -1,4 +1,4 @@
-import {BaseSyntheticEvent, FC, KeyboardEvent, useCallback, useEffect, useState} from "react";
+import {BaseSyntheticEvent, FC, useCallback, useEffect, useMemo, useState} from "react";
 import {
   Avatar,
   Grid,
@@ -10,33 +10,51 @@ import {
   ListItemText,
   Tooltip
 } from "@mui/material";
-import {getBeers, getBeersByQuery} from "../../api/beers";
-import {BeerObject} from "../../api/ws";
+import {getBeersByQuery} from "../../api/beers";
 import BeerCard from "../utils/BeerCard";
 import {useRoomContext} from "../../hooks/useContextHook";
 import DeleteIcon from '@mui/icons-material/Delete';
-import SearchIcon from '@mui/icons-material/Search';
 import {removeBeerFromRoom} from "../../api/rooms";
 import "./SearchAPI.scss";
+import useDebounce from "../../hooks/useDebounce";
+import {useInfiniteQuery} from "react-query";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 
 const HostView: FC = () => {
-  const [results, setResults] = useState<BeerObject[]>([]);
-  const [query, setQuery] = useState<string>("");
 
   const {beers, sendMessage, code, isHost} = useRoomContext();
 
+
+  const [query, setQuery] = useState<string>("");
+  const debouncedQuery = useDebounce(query, 1_000);
+
+  const {
+    isFetching: isFetchingBeers,
+    isSuccess: isSuccessBeers,
+    data: beersData,
+    hasNextPage: hasNextPageBeers,
+    fetchNextPage: fetchNextPageBeers,
+  } = useInfiniteQuery(
+    ["beers", debouncedQuery],
+    ({pageParam = 1, queryKey}) => getBeersByQuery(queryKey[1], pageParam), {
+      enabled: isHost,
+      refetchOnWindowFocus: false,
+      getNextPageParam: (lastPage) => {
+        if (lastPage.data.next !== null) {
+          return lastPage.data.next.split('page=').pop();
+        }
+        return undefined;
+      }
+    }
+  );
+
+  const results = useMemo(() => {
+    if (!beersData || !beersData.pages) return [];
+    return beersData.pages.map(page => page.data.results).flat();
+  }, [beersData]);
+
   const handleQueryChange = (e: BaseSyntheticEvent): void => setQuery(e.target.value);
-
-  const handleSubmit = (): void => {
-    getBeersByQuery(query).then(
-      res => setResults(res.data.results)
-    ).catch(err => console.log(err));
-  };
-
-  const handleSubmitWithEnter = (e: KeyboardEvent): void => {
-    e.key === 'Enter' && handleSubmit();
-  };
 
   const loadBeers = useCallback(() => {
     sendMessage({command: 'load_beers'});
@@ -48,14 +66,6 @@ const HostView: FC = () => {
     }).catch(err => console.log(err));
   };
 
-  useEffect(() => {
-    if (isHost) {
-      // load beers from API on load
-      getBeers().then(res => setResults(res.data.results));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <>
       <Grid item xs={12} sm={6} md={8} lg={9}>
@@ -64,25 +74,34 @@ const HostView: FC = () => {
         </Grid>
 
         <Grid item xs={12} className="search-api__inputs">
-          <input value={query} onChange={handleQueryChange} onKeyDown={handleSubmitWithEnter}/>
-          <button onClick={handleSubmit}>
-            <SearchIcon/>
-          </button>
+          <input
+            value={query}
+            onChange={handleQueryChange}
+            placeholder="Wpisz nazwę piwa, by wyszukać..."
+          />
         </Grid>
 
-        <Grid container className="search-api__results">
-          {results.length > 0 && results.map((beer) => (
-            <BeerCard
-              beerId={beer.id}
-              name={beer.name}
-              description={beer.description}
-              image={beer.image}
-              brewery={beer.brewery.name}
-              casual={false}
-              key={`beer-${beer.id}`}
-            />
-          ))}
-        </Grid>
+        <InfiniteScroll
+          next={fetchNextPageBeers}
+          hasMore={Boolean(hasNextPageBeers)}
+          loader={<></>}
+          dataLength={beersData ? beersData.pages[0].data.count : 0}
+          scrollableTarget={"root"}
+        >
+          <Grid container className="search-api__results">
+            {results.map((beer) => (
+              <BeerCard
+                beerId={beer.id}
+                name={beer.name}
+                description={beer.description}
+                image={beer.image}
+                brewery={beer.brewery.name}
+                casual={false}
+                key={`beer-${beer.id}`}
+              />
+            ))}
+          </Grid>
+        </InfiniteScroll>
       </Grid>
 
       <Grid item xs={12} sm={6} md={4} lg={3}>

@@ -9,7 +9,7 @@ from beers.serializers import (
 )
 from core.shared.pagination import page_number_pagination_factory
 
-BeersPagination = page_number_pagination_factory(page_size=100)
+BeersPagination = page_number_pagination_factory(page_size=30)
 
 
 class BeersViewSet(
