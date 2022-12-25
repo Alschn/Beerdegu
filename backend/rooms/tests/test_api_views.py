@@ -243,10 +243,6 @@ class RoomsAPIViewsTests(TestCase):
         })
         self.assertEqual(self.room.state, 'WAITING')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json(),
-            {'detail': 'You do not have permission to perform this action.'}
-        )
 
     @unittest.skip('Currently disabled')
     def test_delete_room_by_name(self):
@@ -259,10 +255,6 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(user=self.user1)
         response = self.client.delete(f'/api/rooms/{self.room_with_pass.name}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json(),
-            {'detail': 'You do not have permission to perform this action.'}
-        )
 
     def test_get_update_delete_room_doesnt_exist(self):
         self._require_login_and_auth(user=self.user1)
@@ -282,53 +274,47 @@ class RoomsAPIViewsTests(TestCase):
     def test_list_beers_in_room(self):
         self._require_login_and_auth(self.user3)
         response = self.client.get('/api/rooms/abcdefgh/beers/')
+        queryset = Beer.objects.filter(room__name='abcdefgh').order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
-            {
-                'room': 'abcdefgh',
-                'beers': BeerSerializer(Beer.objects.filter(room__name='abcdefgh'), many=True).data
-            }
+            BeerSerializer(queryset, many=True).data
         )
 
     def test_list_beers_in_room_user_not_host(self):
         self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)
         response = self.client.get('/api/rooms/abcdefgh/beers/')
+        queryset = Beer.objects.filter(room__name='abcdefgh').order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
-            {
-                'room': 'abcdefgh',
-                'beers': BeerSerializer(Beer.objects.filter(room__name='abcdefgh'), many=True).data
-            }
+            BeerSerializer(queryset, many=True).data
         )
 
     def test_list_beers_in_room_which_doesnt_exist(self):
         self._require_login_and_auth(self.user3)
         response = self.client.get('/api/rooms/xdddddd/beers/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'message': 'Room with given name does not exist!'})
 
     def test_add_beer_no_id_in_request(self):
         self._require_login_and_auth(self.user3)
         response = self.client.put('/api/rooms/abcdefgh/beers/', {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'message': 'Beer id not found in request body!'})
+        self.assertIn('beer_id', response.json())
 
     def test_add_beer_which_doesnt_exist(self):
         self._require_login_and_auth(self.user3)
         response = self.client.put('/api/rooms/abcdefgh/beers/', {
             'beer_id': 10000,
         })
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'message': 'Beer with given id does not exist!'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('beer_id', response.json())
 
     def test_add_beer_room_doesnt_exist(self):
         self._require_login_and_auth(self.user3)
         response = self.client.put('/api/rooms/XDDDD/beers/', {})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'message': 'Room with given name does not exist!'})
 
     def test_add_beer_already_in_room(self):
         self._require_login_and_auth(self.user3)
@@ -336,7 +322,7 @@ class RoomsAPIViewsTests(TestCase):
             'beer_id': 50,
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'message': 'Beer with given is already in this room!'})
+        self.assertIn('beer_id', response.json())
 
     def test_add_beer_user_not_host(self):
         self._require_login_and_auth(self.user2)
@@ -346,24 +332,20 @@ class RoomsAPIViewsTests(TestCase):
             'beer_id': beer.id
         })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.json(), {'detail': 'You do not have permission to perform this action.'})
 
     def test_add_beer_success(self):
         self._require_login_and_auth(self.user3)
         beer_to_add = Beer.objects.create(name='test', percentage=5, volume_ml=500)
-        beers_before = Beer.objects.filter(room__name='abcdefgh')
+        beers_before = Beer.objects.filter(room__name='abcdefgh').order_by('id')
         self.assertEqual(beers_before.count(), 4)
         response = self.client.put('/api/rooms/abcdefgh/beers/', {
             'beer_id': beer_to_add.id
         })
-        beers_after = Beer.objects.filter(room__name='abcdefgh')
+        beers_after = Beer.objects.filter(room__name='abcdefgh').order_by('id')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             response.json(),
-            {
-                'room': 'abcdefgh',
-                'beers': BeerSerializer(beers_after, many=True).data
-            }
+            BeerSerializer(beers_after, many=True).data
         )
         self.assertEqual(beers_after.count(), 5)
 
@@ -371,29 +353,25 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(self.user3)
         response = self.client.delete('/api/rooms/abcdefgh/beers/')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'message': 'Beer id not found in request parameters!'})
 
     def test_delete_beer_room_doesnt_exist(self):
         self._require_login_and_auth(self.user3)
         response = self.client.delete('/api/rooms/XDDDD/beers/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'message': 'Room with given name does not exist!'})
 
     def test_delete_beer_not_found_in_room(self):
         self._require_login_and_auth(self.user3)
         response = self.client.delete('/api/rooms/abcdefgh/beers/?id=100')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'message': 'Beer with given id was not found in this room!'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('beer_id', response.json())
 
     def test_delete_beer_user_not_host(self):
         self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)
         response = self.client.delete('/api/rooms/abcdefgh/beers/?id=50')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.json(), {'detail': 'You do not have permission to perform this action.'})
 
     def test_delete_beer_success(self):
         self._require_login_and_auth(self.user3)
-        response = self.client.delete('/api/rooms/abcdefgh/beers/?id=53')
+        response = self.client.delete('/api/rooms/abcdefgh/beers/?beer_id=53')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'message': 'Successfully removed beer from room!'})

@@ -1,6 +1,7 @@
 import AxiosClient from "./axiosClient";
 import {PaginatedResponse, Response} from "./types";
 import {AxiosRequestConfig} from "axios";
+import {BeerObject} from "./ws";
 
 interface CheckUserInRoomData {
   is_host: boolean;
@@ -26,19 +27,30 @@ export type createRoomForm = {
   slots: undefined | number
 }
 
-export const createRoom = (formState: createRoomForm): Promise<Response<any>> => {
+interface CreateRoomData {
+
+}
+
+interface RemoveBeerData {
+  message: string;
+}
+
+export const createRoom = (formState: createRoomForm): Promise<Response<CreateRoomData>> => {
   return AxiosClient.post('/api/rooms/', {...formState});
 };
 
+export const getBeersInRoom = (room_name: string): Promise<Response<BeerObject[]>> => {
+  return AxiosClient.get(`/api/rooms/${room_name}/beers/`);
+};
 
-export const addBeerToRoom = (room_name: string, beer_id: number): Promise<Response<any>> => {
+export const addBeerToRoom = (room_name: string, beer_id: number): Promise<Response<BeerObject[]>> => {
   return AxiosClient.put(`/api/rooms/${room_name}/beers/`, {
     beer_id: beer_id
   });
 };
 
-export const removeBeerFromRoom = (room_name: string, beer_id: number): Promise<Response<any>> => {
-  return AxiosClient.delete(`/api/rooms/${room_name}/beers/?id=${beer_id}`);
+export const removeBeerFromRoom = (room_name: string, beer_id: number): Promise<Response<RemoveBeerData>> => {
+  return AxiosClient.delete(`/api/rooms/${room_name}/beers/?beer_id=${beer_id}`);
 };
 
 
