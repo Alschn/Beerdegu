@@ -57,6 +57,9 @@ const BeerForm: FC<BeerFormProps> = ({beerID}) => {
   const {
     sendJsonMessage,
   } = useWebSocket(`${WEBSOCKET_URL}/ws/room/${code}/`, {
+    queryParams: {
+      token: localStorage.getItem('token') || ''
+    },
     shouldReconnect: () => true,
     share: true,
     onMessage: (event) => {
