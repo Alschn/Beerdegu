@@ -25,3 +25,7 @@ class Room(models.Model):
 
     def __str__(self):
         return f"'{self.name}' {self.users.all().count()}/{self.slots} - {self.state.lower()}"
+
+    @property
+    def has_password(self) -> bool:
+        return bool(self.password)

@@ -80,9 +80,8 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_join_room_already_in(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.put('/api/rooms/12345678/join/', data={})
+        response = self.client.put('/api/rooms/12345678/join/', data={'password': ''})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'message': 'User is already in this room!'})
 
     def test_join_room_full(self):
         room = Room.objects.create(
@@ -92,17 +91,16 @@ class RoomsAPIViewsTests(TestCase):
         )
         self._require_login_and_auth(user=self.user1)
         self.assertEqual(room.slots, room.users.count())
-        response = self.client.put('/api/rooms/FULL/join/', data={})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.json(), {'message': f'Room FULL is full!'})
+        response = self.client.put('/api/rooms/FULL/join/', data={'password': ''})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('slots', response.json())
 
     def test_join_room_success(self):
         self._require_login_and_auth(user=self.user2)
         r = Room.objects.get(name='12345678')
         self.assertEqual(r.users.count(), 1)
-        response = self.client.put('/api/rooms/12345678/join/', data={})
+        response = self.client.put('/api/rooms/12345678/join/', data={'password': ''})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'message': f'Joined room 12345678'})
         self.assertEqual(r.users.count(), 2)
         self.assertIn(self.user2, r.users.all())
 
@@ -110,14 +108,14 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(user=self.user1)
         response = self.client.put('/api/rooms/abcdefgh/join/', data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'message': 'Room abcdefgh is protected. No password found in body'})
+        self.assertIn('password', response.json())
         self.assertNotIn(self.user1, self.room_with_pass.users.all())
 
     def test_join_room_password_invalid(self):
         self._require_login_and_auth(user=self.user1)
         response = self.client.put('/api/rooms/abcdefgh/join/', data={'password': '12345'})
-        self.assertEqual(response.json(), {'message': 'Invalid password!'})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn('password', response.json())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn(self.user1, self.room_with_pass.users.all())
 
     def test_join_room_with_password_success(self):
@@ -126,7 +124,6 @@ class RoomsAPIViewsTests(TestCase):
         self.assertEqual(r.users.count(), 1)
         response = self.client.put('/api/rooms/abcdefgh/join/', data={'password': 'password'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'message': f'Joined room abcdefgh'})
         self.assertEqual(r.users.count(), 2)
         self.assertIn(self.user1, r.users.all())
 
@@ -205,12 +202,11 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_create_room_but_user_already_host_in_other_room(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.post('/api/rooms/', data={})
+        response = self.client.post('/api/rooms/', data={
+            'name': 'Blahblah',
+        })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {'message': 'User is already a host of another room, which is not in FINISHED state!'}
-        )
+        self.assertIn('host', response.json())
 
     def test_get_room_by_name(self):
         self._require_login_and_auth(user=self.user1)
