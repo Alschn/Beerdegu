@@ -2,10 +2,9 @@ from django.db.models import QuerySet
 from rest_framework import filters, mixins, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+from beers.filters.breweries import BreweriesFilterSet
 from beers.models import Brewery
-from beers.serializers import (
-    BrewerySerializer,
-)
+from beers.serializers import BrewerySerializer
 from core.shared.pagination import page_number_pagination_factory
 
 BreweriesPagination = page_number_pagination_factory(page_size=100)
@@ -24,6 +23,7 @@ class BreweriesViewSet(
     pagination_class = BreweriesPagination
     serializer_class = BrewerySerializer
     filter_backends = [filters.SearchFilter]
+    filterset_class = BreweriesFilterSet
     search_fields = ('name', 'city', 'country')
 
     def get_queryset(self) -> QuerySet[Brewery]:

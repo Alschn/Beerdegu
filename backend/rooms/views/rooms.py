@@ -3,6 +3,7 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.http import FileResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 
 from core.shared.pagination import page_number_pagination_factory
 from core.shared.renderers import FileOrJSONRenderer
+from rooms.filters.rooms import RoomsFilterSet
 from rooms.models import Room
 from rooms.permissions import IsHostOrListCreateOnly
 from rooms.reports import generate_excel_report
@@ -49,14 +51,13 @@ class RoomsViewSet(
     permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
     pagination_class = RoomsPagination
     serializer_class = RoomSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RoomsFilterSet
     lookup_field = 'name'
 
     def get_queryset(self) -> QuerySet[Room]:
         if self.action in ["user_in", "user_join", "user_leave"]:
             return Room.objects.order_by('id').prefetch_related('users')
-
-        # elif self.action in ["list_beers", "add_beer", "remove_beer"]:
-        #     return BeerInRoom.objects.filter(room__name=self.kwargs['name'])
 
         return Room.objects.order_by('id').prefetch_related('users', 'beers')
 
