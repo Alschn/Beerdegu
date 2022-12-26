@@ -1,4 +1,4 @@
-import {Grid, useMediaQuery, useTheme} from "@mui/material";
+import {Box, CircularProgress, Grid, useMediaQuery, useTheme} from "@mui/material";
 import {BaseSyntheticEvent, FC, useEffect, useReducer, useState} from "react";
 import {useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
@@ -18,8 +18,9 @@ import DesktopChat from "../room/DesktopChat";
 import {WEBSOCKET_URL} from "../../config";
 import RoomStateComponent from "../room/RoomStateComponent";
 import {useNavigate} from "react-router-dom";
-import {checkUserInRoom} from "../../api/room";
+import {checkUserInRoom} from "../../api/rooms";
 import "./Room.scss";
+import {useQuery} from "react-query";
 
 
 const USER_PING_INTERVAL_MS = 14_000;
@@ -101,21 +102,25 @@ const Room: FC = () => {
   const [isHost, setIsHost] = useState<boolean>(false);
   const [shouldConnect, setShouldConnect] = useState<boolean>(false);
 
-  useEffect(() => {
-    // on mount decide if the client should connect to ws backend
-    // or get directed back to home page
-    if (params) {
-      checkUserInRoom(`${params!.code}`).then(({data}) => {
-        const {is_host} = data;
-        setIsHost(Boolean(is_host));
+  // on mount decide if the client should connect to ws backend
+  // or get directed back to home page
+  const {isLoading: isLoadingCheckUser} = useQuery(
+    ['userInRoom', params!.code],
+    () => checkUserInRoom(params.code as string), {
+      onSuccess: ({data}) => {
+        setIsHost(Boolean(data.is_host));
         setShouldConnect(true);
-      }).catch(() => {
+      },
+      onError: () => {
         setShouldConnect(false);
         navigate('/');
-      });
+      },
+      enabled: Boolean(params),
+      cacheTime: 0,
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
+  );
 
   // State related to data that comes via websockets
   const [state, dispatch] = useReducer(roomReducer, initialState);
@@ -149,14 +154,14 @@ const Room: FC = () => {
   const handleChange = (e: BaseSyntheticEvent): void => setMessage(e.target.value);
 
   const handleSendMessage = (): void => {
-    if (message) {
-      sendJsonMessage({
-        data: message,
-        command: 'get_new_message',
-      });
-      // clear input after sending message
-      setMessage('');
-    }
+    if (!message) return;
+
+    sendJsonMessage({
+      data: message,
+      command: 'get_new_message',
+    });
+    // clear input after sending message
+    setMessage('');
   };
 
   useEffect(() => {
@@ -202,6 +207,17 @@ const Room: FC = () => {
       });
     }
   }, [state.roomState, sendJsonMessage]);
+
+  if (isLoadingCheckUser) return (
+    <Box sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+    }}>
+      <CircularProgress/>
+    </Box>
+  );
 
   return (
     <RoomContext.Provider value={{

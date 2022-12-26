@@ -2,8 +2,8 @@ import {BaseSyntheticEvent, FC, FormEvent, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
 import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded';
 import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import type {createRoomForm} from "../../api/lobby";
-import {createRoom} from "../../api/lobby";
+import type {createRoomForm} from "../../api/rooms";
+import {createRoom} from "../../api/rooms";
 import {useNavigate} from "react-router-dom";
 
 interface CreateRoomProps {

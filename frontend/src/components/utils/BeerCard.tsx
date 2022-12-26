@@ -1,7 +1,7 @@
 import {FC} from 'react';
 import {Box, Button, Card, CardActions, CardContent, Tooltip, Typography} from '@mui/material';
 import {useRoomContext} from "../../hooks/useContextHook";
-import {addBeerToRoom} from "../../api/room";
+import {addBeerToRoom} from "../../api/rooms";
 
 
 interface MediaCardProps {
@@ -38,9 +38,9 @@ const BeerCard: FC<MediaCardProps> = (
 
     return (
       <Card sx={(theme) => ({
-        maxWidth: 345, minWidth: 200,
-        [theme.breakpoints.down('sm')]: {
-          maxWidth: 225,
+        minWidth: 200,
+        [theme.breakpoints.down('md')]: {
+          maxWidth: 200,
         },
         [theme.breakpoints.up('md')]: {
           maxWidth: 225,

@@ -1,22 +1,32 @@
-from rest_framework import viewsets
+from django.db.models import QuerySet
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, mixins, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from beers.models import BeerStyle
 from beers.serializers import (
     BeerStyleSerializer,
 )
+from core.shared.pagination import page_number_pagination_factory
+
+BeerStylesPagination = page_number_pagination_factory(page_size=100)
 
 
-class BeerStylesViewSet(viewsets.ModelViewSet):
+class BeerStylesViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
     """
-    GET     api/styles/          - list all beer styles
-    POST    api/styles/          - create new beer style
-    GET     api/styles/<int:id>/ - retrieve beer style
-    PUT     api/styles/<int:id>/ - update beer style
-    PATCH   api/styles/<int:id>/ - partially update beer style
-    DELETE  api/styles/<int:id>/ - delete beer style
+    GET     /api/styles/            - list all beer styles
+    GET     /api/styles/<int:id>/   - retrieve beer style
     """
-    queryset = BeerStyle.objects.all()
-    serializer_class = BeerStyleSerializer
-    lookup_field = 'id'
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = BeerStylesPagination
+    serializer_class = BeerStyleSerializer
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    filterset_class = None
+    search_fields = ('name',)
+
+    def get_queryset(self) -> QuerySet[BeerStyle]:
+        return BeerStyle.objects.order_by('-id')

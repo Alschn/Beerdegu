@@ -3,77 +3,83 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.http import FileResponse
-from rest_framework import status, viewsets
+from drf_spectacular.utils import extend_schema
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from core.shared.pagination import page_number_pagination_factory
 from core.shared.renderers import FileOrJSONRenderer
-from rooms.models import Room, BeerInRoom
+from rooms.models import Room
 from rooms.permissions import IsHostOrListCreateOnly
 from rooms.reports import generate_excel_report
 from rooms.serializers import (
-    RoomSerializer, DetailedRoomSerializer, CreateRoomSerializer
+    RoomSerializer,
+    DetailedRoomSerializer,
+    RoomCreateSerializer
 )
+from rooms.serializers.room import RoomJoinSerializer
+
+RoomsPagination = page_number_pagination_factory(page_size=100)
 
 
-class RoomsViewSet(viewsets.ModelViewSet):
+class RoomsViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
     """
-    GET     api/rooms/          - list all rooms
-    POST    api/rooms/          - create new room
-    GET     api/rooms/<str:name>/ - retrieve room
-    PUT     api/rooms/<str:name>/ - update room
-    PATCH   api/rooms/<str:name>/ - partially update room
-    DELETE  api/rooms/<str:name>/ - delete room
+    GET     /api/rooms/                     - list all rooms
 
-    GET     api/rooms/<str:name>/in/    - check if current user is in the room
-    PUT     api/rooms/<str:name>/join/  - handle current user join the room
-    DELETE  api/rooms/<str:name>/leave  - handle current user room leave the room
+    POST    /api/rooms/                     - create new room
 
-    GET     api/rooms/<str:name>/report/ - generate excel report with results of a session
+    GET     /api/rooms/<str:name>/          - retrieve room
+
+    GET     /api/rooms/<str:name>/in/       - check if current user is in the room
+
+    PUT     /api/rooms/<str:name>/join/     - handle current user join the room
+
+    DELETE  /api/rooms/<str:name>/leave/    - handle current user room leave the room
+
+    GET     /api/rooms/<str:name>/report/   - generate excel report with results of a session
     """
-    serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
+    pagination_class = RoomsPagination
+    serializer_class = RoomSerializer
     lookup_field = 'name'
 
     def get_queryset(self) -> QuerySet[Room]:
         if self.action in ["user_in", "user_join", "user_leave"]:
-            return Room.objects.all().prefetch_related('users')
+            return Room.objects.order_by('id').prefetch_related('users')
 
-        elif self.action in ["list_beers", "add_beer", "remove_beer"]:
-            return BeerInRoom.objects.filter(room__name=self.kwargs['name'])
+        # elif self.action in ["list_beers", "add_beer", "remove_beer"]:
+        #     return BeerInRoom.objects.filter(room__name=self.kwargs['name'])
 
-        return Room.objects.all().prefetch_related('users', 'beers')
+        return Room.objects.order_by('id').prefetch_related('users', 'beers')
 
     def get_serializer_class(self):
-        if hasattr(self, 'action') and self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve']:
             return DetailedRoomSerializer
-        if hasattr(self, 'action') and self.action == 'create':
-            return CreateRoomSerializer
+
+        if self.action == 'create':
+            return RoomCreateSerializer
+
+        if self.action == 'user_join':
+            return RoomJoinSerializer
+
         return super().get_serializer_class()
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        sender = request.user
+        return super().create(request, *args, **kwargs)
 
-        not_finished_hosted_rooms = Room.objects.filter(host=sender).exclude(state=Room.State.FINISHED)
-
-        if not_finished_hosted_rooms.exists():
-            return Response(
-                {'message': 'User is already a host of another room, which is not in FINISHED state!'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        serializer = self.get_serializer_class()(data=request.data, context={'request': request})
-
-        if serializer.is_valid():
-            self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def perform_create(self, serializer) -> None:
-        serializer.save(host=self.request.user)
-
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: None,  # todo: add response schema
+        }
+    )
     @action(
         detail=True, methods=['GET'], url_path='in',
         permission_classes=[IsAuthenticated]
@@ -99,6 +105,9 @@ class RoomsViewSet(viewsets.ModelViewSet):
             status=status.HTTP_403_FORBIDDEN
         )
 
+    @extend_schema(
+        request=RoomJoinSerializer
+    )
     @action(
         detail=True, methods=['PUT'], url_path='join',
         permission_classes=[IsAuthenticated]
@@ -107,31 +116,19 @@ class RoomsViewSet(viewsets.ModelViewSet):
         """PUT api/rooms/<str:name>/join/"""
 
         room = self.get_object()
-        room_name = room.name
-        sender = request.user
-        password = request.data.get('password')
+        serializer = self.get_serializer(data=request.data, instance=room)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {'message': f'{request.user.username} is in the room.'},
+            status=status.HTTP_200_OK
+        )
 
-        if room.password and not password:
-            return Response(
-                {'message': f'Room {room_name} is protected. No password found in body'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        users_in_room = room.users
-
-        if not users_in_room.filter(id=sender.id).exists():
-            if users_in_room.count() >= room.slots:
-                return Response({'message': f'Room {room_name} is full!'}, status=status.HTTP_403_FORBIDDEN)
-
-            if room.password and room.password != password:
-                return Response({'message': 'Invalid password!'}, status=status.HTTP_403_FORBIDDEN)
-
-            users_in_room.add(sender)
-
-            return Response({'message': f'Joined room {room_name}'}, status=status.HTTP_200_OK)
-
-        return Response({'message': 'User is already in this room!'}, status=status.HTTP_200_OK)
-
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: None,  # todo: add response schema
+        }
+    )
     @action(
         detail=True, methods=['DELETE'], url_path='leave',
         permission_classes=[IsAuthenticated]
@@ -143,12 +140,23 @@ class RoomsViewSet(viewsets.ModelViewSet):
         sender = request.user
         users_in_room = room.users
 
-        if users_in_room.filter(id=sender.id).exists():
-            users_in_room.remove(sender)
-            return Response({'message': f'{sender.username} has left room {room.name}!'}, status=status.HTTP_200_OK)
+        if not users_in_room.filter(id=sender.id).exists():
+            return Response(
+                {'message': f'{sender.username} is not inside this room!'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        return Response({'message': f'{sender.username} is not inside this room!'}, status=status.HTTP_400_BAD_REQUEST)
+        users_in_room.remove(sender)
+        return Response(
+            {'message': f'{sender.username} has left room {room.name}!'},
+            status=status.HTTP_200_OK
+        )
 
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: bytes,
+        }
+    )
     @action(
         detail=True, methods=['GET'], url_path='report',
         permission_classes=[IsAuthenticated],

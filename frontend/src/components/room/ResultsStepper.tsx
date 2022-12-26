@@ -6,7 +6,7 @@ import UserRatingsTable from "./UserRatingsTable";
 import BeerRatingsTable from "./BeerRatingsTable";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {useMutation} from "react-query";
-import {generateReport} from "../../api/room";
+import {generateReport} from "../../api/rooms";
 import "./ResultsStepper.scss";
 
 const ResultsStepper: FC = () => {
