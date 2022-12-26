@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+from beers.filters.beers import BeerFilterSet
 from beers.models import Beer
 from beers.serializers import (
     BeerSerializer, DetailedBeerSerializer,
@@ -25,7 +26,7 @@ class BeersViewSet(
     pagination_class = BeersPagination
     serializer_class = BeerSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    filterset_class = None
+    filterset_class = BeerFilterSet
     search_fields = ('name', 'brewery__name', 'style__name')
 
     def get_queryset(self) -> QuerySet[Beer]:
