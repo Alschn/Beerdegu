@@ -1,7 +1,14 @@
 import {createContext, Dispatch} from "react";
 import {BeerObject, ChatMessageObject, RatingsObject, UserObject} from "../api/ws";
 
-export type roomStateType = 'WAITING' | 'STARTING' | 'IN_PROGRESS' | 'FINISHED';
+const RoomState = {
+  WAITING: "WAITING",
+  STARTING: "STARTING",
+  IN_PROGRESS: "IN_PROGRESS",
+  FINISHED: "FINISHED",
+} as const;
+
+export type RoomStateType = typeof RoomState[keyof typeof RoomState];
 
 interface RoomContextProps {
   code: string,
@@ -12,7 +19,7 @@ interface RoomContextProps {
   messages: ChatMessageObject[],
   beers: BeerObject[],
   users: UserObject[],
-  roomState: roomStateType,
+  roomState: RoomStateType,
   results: RatingsObject[],
   userResults: any[],
   dispatch: Dispatch<any>,

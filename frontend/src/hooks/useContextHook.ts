@@ -1,6 +1,4 @@
-import RoomContext from "../context/roomContext";
+import RoomContext from "../context/RoomContext";
 import {useContext} from "react";
 
-export function useRoomContext() {
-  return useContext(RoomContext);
-}
+export const useRoomContext = () => useContext(RoomContext);

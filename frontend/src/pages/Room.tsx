@@ -19,7 +19,7 @@ import DesktopChat from "../components/room/DesktopChat";
 import Header from "../components/layout/Header";
 import RoomStateComponent from "../components/room/RoomStateComponent";
 import {useQuery} from "@tanstack/react-query";
-import RoomContext, {roomStateType} from "../context/roomContext";
+import RoomContext, {RoomStateType} from "../context/RoomContext";
 import Sidebar from "../components/layout/Sidebar";
 
 const USER_PING_INTERVAL_MS = 14_000;
@@ -31,7 +31,7 @@ interface State {
   messages: ChatMessageObject[],
   beers: BeerObject[],
   users: UserObject[],
-  roomState: roomStateType,
+  roomState: RoomStateType,
   results: RatingsObject[],
   userResults: any[],
 }
@@ -40,7 +40,7 @@ type Action =
   | { type: 'set_new_message', payload: ChatMessageObject }
   | { type: 'set_beers', payload: BeerObject[] }
   | { type: 'set_users', payload: UserObject[] }
-  | { type: 'set_room_state', payload: roomStateType }
+  | { type: 'set_room_state', payload: RoomStateType }
   | { type: 'set_final_results', payload: RatingsObject[] }
   | { type: 'set_user_results', payload: any[] }
   | { type: string, payload: any } // handles any other case which will not affect state
