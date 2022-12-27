@@ -1,23 +1,23 @@
 import {FC} from "react";
 import {Outlet} from "react-router";
 import {Navigate} from "react-router-dom";
-import WrapWithHeader from "../components/layout/WrapWithHeader";
+import MainLayout from "../components/layout/MainLayout";
 import {useAuth} from "../context/authContext";
 
 
-interface PrivateRouteProps {
+interface AuthRouteProps {
 
 }
 
-const AuthRoute: FC<PrivateRouteProps> = () => {
+const AuthRoute: FC<AuthRouteProps> = () => {
   const {isAuthenticated} = useAuth();
 
   return isAuthenticated ? (
     <Navigate to=""/>
   ) : (
-    <WrapWithHeader>
+    <MainLayout>
       <Outlet/>
-    </WrapWithHeader>
+    </MainLayout>
   );
 };
 

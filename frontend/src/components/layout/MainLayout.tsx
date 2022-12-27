@@ -1,10 +1,10 @@
 import {FC, Fragment, ReactNode, useState} from "react";
-import logo from "../../images/logo.svg";
-import {useMediaQuery, IconButton} from "@mui/material";
+import logo from "../../assets/logo.svg";
+import {IconButton, useMediaQuery} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import OverlayMenu from "./OverlayMenu";
-import "./WrapWithHeader.scss";
+import "./MainLayout.scss";
 import {Link} from "react-router-dom";
 import {useAuth} from "../../context/authContext";
 
@@ -14,7 +14,7 @@ interface WrapWithHeaderProps {
 }
 
 
-const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
+const MainLayout: FC<WrapWithHeaderProps> = ({children}) => {
   const {isAuthenticated, logout} = useAuth();
 
   const matchesForHamburgerMenu = useMediaQuery('(max-width: 679px)');
@@ -104,4 +104,4 @@ const WrapWithHeader: FC<WrapWithHeaderProps> = ({children}) => {
   );
 };
 
-export default WrapWithHeader;
+export default MainLayout;

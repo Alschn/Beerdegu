@@ -11,11 +11,11 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import {getRooms} from "../../api/rooms";
-import CreateRoomDialog from "../lobby/CreateRoomDialog";
-import JoinRoomDialog from "../lobby/JoinRoomDialog";
-import {useQuery} from "react-query";
 import "./Lobby.scss";
+import CreateRoomDialog from "../components/lobby/CreateRoomDialog";
+import JoinRoomDialog from "../components/lobby/JoinRoomDialog";
+import {useQuery} from "@tanstack/react-query";
+import {getRooms} from "../api/rooms";
 
 
 interface Column {

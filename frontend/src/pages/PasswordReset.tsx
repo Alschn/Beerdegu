@@ -3,10 +3,10 @@ import {Button, Container} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import LockResetIcon from '@mui/icons-material/LockReset';
 import Typography from "@mui/material/Typography";
-import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import TextField from "@mui/material/TextField";
-import {resetPassword} from "../../api/auth";
 import "./Auth.scss";
+import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
+import {resetPassword} from "../api/auth";
 
 
 const PasswordReset: FC = () => {

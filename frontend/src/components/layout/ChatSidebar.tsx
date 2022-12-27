@@ -1,7 +1,7 @@
 import {BaseSyntheticEvent, FC} from "react";
 import {SidebarProps} from "./Sidebar";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {Button, List, ListItem, TextField, Drawer} from "@mui/material";
+import {Button, Drawer, List, ListItem, TextField} from "@mui/material";
 import "./Sidebar.scss";
 
 

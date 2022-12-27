@@ -1,7 +1,6 @@
 import {FC} from "react";
-import {Outlet} from "react-router";
-import WrapWithHeader from "../components/layout/WrapWithHeader";
-import {Navigate} from "react-router";
+import {Navigate, Outlet} from "react-router";
+import MainLayout from "../components/layout/MainLayout";
 import {useAuth} from "../context/authContext";
 
 interface PrivateRouteProps {
@@ -11,18 +10,17 @@ interface PrivateRouteProps {
 const PrivateRoute: FC<PrivateRouteProps> = ({withHeader = true}) => {
   const {isAuthenticated} = useAuth();
 
-  if (isAuthenticated) {
-    if (withHeader) {
-      return (
-        <WrapWithHeader>
-          <Outlet/>
-        </WrapWithHeader>
-      );
-    } else return (
-      <Outlet/>
+  if (!isAuthenticated) return (<Navigate to="/login"/>);
+
+  if (withHeader) {
+    return (
+      <MainLayout>
+        <Outlet/>
+      </MainLayout>
     );
   }
-  return <Navigate to="/login"/>;
+
+  return (<Outlet/>);
 };
 
 export default PrivateRoute;

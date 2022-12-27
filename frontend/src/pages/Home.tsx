@@ -1,10 +1,10 @@
 import {FC, Fragment} from "react";
-import beers from "../../images/logo.svg";
+import beers from "../assets/logo.svg";
 import {Button} from "@mui/material";
-import WrapWithHeader from "../layout/WrapWithHeader";
 import {useNavigate} from "react-router-dom";
-import {useAuth} from "../../context/authContext";
 import "./Home.scss";
+import MainLayout from "../components/layout/MainLayout";
+import {useAuth} from "../context/authContext";
 
 
 const Home: FC = () => {
@@ -12,7 +12,7 @@ const Home: FC = () => {
   const {isAuthenticated, logout} = useAuth();
 
   return (
-    <WrapWithHeader>
+    <MainLayout>
       <div className="App">
         <div className="App-body">
           <div className="App-logo-wrapper">
@@ -52,7 +52,7 @@ const Home: FC = () => {
           </div>
         </div>
       </div>
-    </WrapWithHeader>
+    </MainLayout>
   );
 };
 

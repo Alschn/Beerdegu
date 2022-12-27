@@ -2,7 +2,7 @@ import {FC} from "react";
 import Participants from "../room/Participants";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
-import logo from "../../images/logo.svg";
+import logo from "../../assets/logo.svg";
 import {roomStateType} from "../../context/roomContext";
 import {useNavigate} from "react-router-dom";
 import {leaveRoom} from "../../api/rooms";

@@ -5,7 +5,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import UserRatingsTable from "./UserRatingsTable";
 import BeerRatingsTable from "./BeerRatingsTable";
 import {useRoomContext} from "../../hooks/useContextHook";
-import {useMutation} from "react-query";
+import {useMutation} from "@tanstack/react-query";
 import {generateReport} from "../../api/rooms";
 import "./ResultsStepper.scss";
 
@@ -22,7 +22,7 @@ const ResultsStepper: FC = () => {
   const mutation = useMutation(
     () => generateReport(code), {
       onSuccess: (response) => {
-        const contentDisposition = response.headers['content-disposition'];
+        const contentDisposition = response.headers['content-disposition']!;
         const filename = contentDisposition.split(';')[1].split('=')[1];
         const cleanedFilename = filename.replace(/"/g, '');
 

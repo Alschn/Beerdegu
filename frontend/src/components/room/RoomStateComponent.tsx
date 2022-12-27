@@ -16,7 +16,7 @@ const RoomStateComponent: FC<{ state: roomStateType }> = ({state}) => {
     case "FINISHED":
       return <ResultsStepper/>;
     default:
-      return <></>;
+      return null;
   }
 };
 

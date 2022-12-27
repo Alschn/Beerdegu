@@ -1,5 +1,5 @@
 # Use image with both python and node installed
-FROM nikolaik/python-nodejs:python3.10-nodejs14
+FROM nikolaik/python-nodejs:python3.10-nodejs16
 
 ENV PIPENV_VENV_IN_PROJECT=1
 
@@ -26,12 +26,7 @@ COPY ./backend/scripts/ /app/
 # Build static files
 RUN yarn build
 
-# Move all static files other than index.html to root/ for whitenoise middleware
-WORKDIR /app/frontend/build
-
-RUN mkdir root  \
-    && mv *.ico *.json root  \
-    && mkdir /app/backend/staticfiles
+RUN mkdir /app/backend/staticfiles
 
 # HACK: Work around a compatibility issue between Django Rest Framework and Django 4.1
 #

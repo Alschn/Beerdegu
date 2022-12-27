@@ -1,6 +1,6 @@
 import {Dialog} from "@mui/material";
 import {Dispatch, FC} from "react";
-import CreateRoom from "../pages/CreateRoom";
+import CreateRoom from "../../pages/CreateRoom";
 
 interface CreateRoomDialogProps {
   isOpen: boolean,
@@ -8,11 +8,16 @@ interface CreateRoomDialogProps {
 }
 
 const CreateRoomDialog: FC<CreateRoomDialogProps> = ({isOpen, dispatch}) => {
+  const handleClose = () => dispatch({
+    type: "CLOSE_CREATE_DIALOG",
+    payload: false,
+  });
+
   return (
-    <Dialog open={isOpen} onClose={() => dispatch({
-      type: "CLOSE_CREATE_DIALOG",
-      payload: false,
-    })}>
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+    >
       <CreateRoom isRoute={false}/>
     </Dialog>
   );

@@ -1,40 +1,45 @@
-import {ChangeEvent, FC, FormEvent, useState} from "react";
+import {BaseSyntheticEvent, FC, FormEvent, useState} from "react";
 import {Avatar, Button, Container, TextField, Typography} from "@mui/material";
-import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
-import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import {joinRoom} from "../../api/rooms";
+import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded';
 import {useNavigate} from "react-router-dom";
-import "./JoinCreateRoom.scss";
+import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
+import {createRoom, CreateRoomPayload} from "../api/rooms";
 
-
-interface JoinRoomProps {
-  roomNameProp?: string,
+interface CreateRoomProps {
   isRoute?: boolean,
 }
 
-const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
+const CreateRoom: FC<CreateRoomProps> = ({isRoute = true}) => {
   const navigate = useNavigate();
-  const [roomName, setRoomName] = useState<string>(roomNameProp != null ? String(roomNameProp) : '');
-  const [password, setPassword] = useState<string>("");
+
+  const [formState, setFormState] = useState<CreateRoomPayload>({
+    name: '',
+    password: '',
+    slots: undefined,
+  });
 
   const [response, setResponse] = useState<AlertContentObject>({
     message: '',
     severity: 'error',
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    e.target.id === 'roomName' ? setRoomName(e.target.value) : setPassword(e.target.value);
+  const handleChange = (e: BaseSyntheticEvent): void => {
+    const field = e.target.name;
+    setFormState({
+      ...formState,
+      [field]: e.target.value,
+    });
   };
 
   const submitForm = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    
-    joinRoom(roomName, password).then(() => {
+
+    createRoom(formState).then(() => {
       setResponse({
-        message: `Joining room ${roomName} ...`,
+        message: `Created room ${formState.name}! Redirecting ...`,
         severity: 'success',
       });
-      setTimeout(() => navigate(`/room/${roomName}`), 1000);
+      setTimeout(() => navigate(`/room/${formState.name}`), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,
@@ -47,12 +52,12 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
     <Container component="main" maxWidth="xs">
       <div className={isRoute ? 'room room-route' : 'room room-embedded'}>
         <Avatar className="room-icon">
-          <SupervisorAccountRoundedIcon/>
+          <GroupAddRoundedIcon/>
         </Avatar>
         <Typography component="h1" variant="h5">
-          Join Room
+          Create New Room
         </Typography>
-        <div className="auth-alert">
+        <div className="room-alert">
           <CollapsableAlert content={response}/>
         </div>
         <form onSubmit={submitForm}>
@@ -62,11 +67,10 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
               margin="normal"
               required
               fullWidth
-              id="roomName"
+              id="name"
               label="Room Name"
-              name="roomName"
+              name="name"
               autoFocus
-              value={roomName}
               onChange={handleChange}
             />
             <TextField
@@ -79,6 +83,24 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
               id="password"
               onChange={handleChange}
             />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="slots"
+              label="Slots"
+              type="number"
+              id="slots"
+              error={
+                formState.slots !== undefined &&
+                (formState.slots <= 0 || formState.slots > 10)
+              }
+              InputProps={{
+                inputProps: {min: 1, max: 10}
+              }}
+              onChange={handleChange}
+            />
             <Button
               type="submit"
               fullWidth
@@ -86,7 +108,7 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
               color="primary"
               className="room-button"
             >
-              Join
+              Create
             </Button>
           </div>
         </form>
@@ -95,4 +117,4 @@ const JoinRoom: FC<JoinRoomProps> = ({roomNameProp, isRoute = true}) => {
   );
 };
 
-export default JoinRoom;
+export default CreateRoom;

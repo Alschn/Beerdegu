@@ -2,9 +2,9 @@ import {FC, FormEvent, useState} from "react";
 import {useParams} from "react-router";
 import {Avatar, Button, Container, Grid, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import {useNavigate} from "react-router-dom";
-import {confirmResetPassword} from "../../api/auth";
+import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
+import {confirmResetPassword} from "../api/auth";
 
 
 const PasswordResetConfirm: FC = () => {

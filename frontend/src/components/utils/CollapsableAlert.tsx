@@ -16,7 +16,7 @@ const CollapsableAlert: FC<CollapsableAlertProps> = ({content}) => {
 
   useEffect(() => {
     if (content.message !== "") setOpen(true);
-  }, [content])
+  }, [content]);
 
   return (
     <Collapse in={open}>

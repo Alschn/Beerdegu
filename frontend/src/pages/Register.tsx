@@ -2,9 +2,9 @@ import {FC, FormEvent, useState} from 'react';
 import {Avatar, Button, Container, Grid, Link as MuiLink, TextField, Typography} from '@mui/material';
 import {Link, useNavigate} from "react-router-dom";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import {onRegister} from "../../api/auth";
-import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
 import "./Auth.scss";
+import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
+import {onRegister} from "../api/auth";
 
 
 const validateEmail = (email: string): boolean => {

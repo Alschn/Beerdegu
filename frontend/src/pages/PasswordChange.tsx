@@ -1,13 +1,13 @@
 import {useNavigate} from "react-router-dom";
-import React, {BaseSyntheticEvent, FC, FormEvent, useMemo, useState} from "react";
-import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import {changePassword} from "../../api/auth";
+import {BaseSyntheticEvent, FC, FormEvent, useMemo, useState} from "react";
 import {Button, Container} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import "./Auth.scss";
+import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
+import {changePassword} from "../api/auth";
 
 const MIN_PASSWORD_LENGTH = 8;  // enforced by API
 

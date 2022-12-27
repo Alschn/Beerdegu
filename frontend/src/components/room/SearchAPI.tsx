@@ -17,14 +17,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import {removeBeerFromRoom} from "../../api/rooms";
 import "./SearchAPI.scss";
 import useDebounce from "../../hooks/useDebounce";
-import {useInfiniteQuery} from "react-query";
 import InfiniteScroll from "react-infinite-scroll-component";
+import {useInfiniteQuery} from "@tanstack/react-query";
 
 
 const HostView: FC = () => {
-
   const {beers, sendMessage, code, isHost} = useRoomContext();
-
 
   const [query, setQuery] = useState<string>("");
   const debouncedQuery = useDebounce(query, 1_000);

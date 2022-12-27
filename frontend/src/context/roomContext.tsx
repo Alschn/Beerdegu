@@ -19,4 +19,5 @@ interface RoomContextProps {
 }
 
 const RoomContext = createContext<RoomContextProps>({} as RoomContextProps);
+
 export default RoomContext;
