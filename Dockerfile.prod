@@ -17,7 +17,7 @@ WORKDIR /app/frontend
 ENV NODE_ENV=production
 
 COPY ./frontend/package.json ./frontend/yarn.lock /app/frontend/
-RUN yarn install --production
+RUN yarn install
 
 # Add the rest of the code
 COPY . /app/
