@@ -18,8 +18,8 @@ COPY ./frontend/package.json ./frontend/yarn.lock /app/frontend/
 RUN yarn install
 
 # Add the rest of the code
-COPY . /app/
 COPY ./backend/scripts/ /app/
+COPY . /app/
 
 # Build static files
 RUN yarn build
