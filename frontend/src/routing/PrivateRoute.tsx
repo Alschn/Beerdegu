@@ -1,7 +1,7 @@
 import {FC} from "react";
 import {Navigate, Outlet} from "react-router";
 import MainLayout from "../components/layout/MainLayout";
-import {useAuth} from "../context/AuthContext";
+import {useAuth} from "../context/authContext";
 
 interface PrivateRouteProps {
   withHeader?: boolean;

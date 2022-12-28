@@ -6,7 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import OverlayMenu from "./OverlayMenu";
 import "./MainLayout.scss";
 import {Link} from "react-router-dom";
-import {useAuth} from "../../context/AuthContext";
+import {useAuth} from "../../context/authContext";
 
 
 interface WrapWithHeaderProps {

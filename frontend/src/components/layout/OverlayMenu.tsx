@@ -1,7 +1,7 @@
 import {FC, Fragment, useEffect} from "react";
 import {Link} from "react-router-dom";
 import "./OverlayMenu.scss";
-import {useAuth} from "../../context/AuthContext";
+import {useAuth} from "../../context/authContext";
 
 interface OverlayMenuProps {
   isOpen: boolean;

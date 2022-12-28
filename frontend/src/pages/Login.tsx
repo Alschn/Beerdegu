@@ -8,7 +8,7 @@ import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import jwtDecode from "jwt-decode";
 import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
 import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY} from "../config";
-import {JWTContent, useAuth} from "../context/AuthContext";
+import {JWTContent, useAuth} from "../context/authContext";
 import {onJWTLogin} from "../api/auth";
 
 
