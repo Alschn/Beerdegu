@@ -35,9 +35,9 @@ MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 TEMPLATES[0]["DIRS"] = [os.path.join(ROOT_DIR, "frontend", "build")]
 
 # directory where Django can find html, js, css, and other static assets
-STATICFILES_DIRS = [os.path.join(ROOT_DIR, "frontend", "build", "static")]
+STATICFILES_DIRS = [os.path.join(ROOT_DIR, "frontend", "build", "assets")]
 
-# directory to which Django will move those static assets and from which it will serve them when the app is running
+# type of static files storage
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STATIC_ROOT = os.path.join(ROOT_DIR, "staticfiles")
@@ -45,7 +45,7 @@ STATIC_ROOT = os.path.join(ROOT_DIR, "staticfiles")
 STATIC_URL = "/static/"
 
 # directory where WhiteNoise can find all non-html static assets
-WHITENOISE_ROOT = os.path.join(ROOT_DIR, "frontend", "build", "root")
+WHITENOISE_ROOT = os.path.join(ROOT_DIR, "frontend", "build")
 
 # database url set at env variable in Heroku
 DATABASE_URL = os.environ['DATABASE_URL']
