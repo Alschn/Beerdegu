@@ -21,7 +21,7 @@ export const joinRoom = (roomName: string, password: string): Promise<Response<a
   });
 };
 
-export type createRoomForm = {
+export type CreateRoomPayload = {
   name: string,
   password: string,
   slots: undefined | number
@@ -35,7 +35,7 @@ interface RemoveBeerData {
   message: string;
 }
 
-export const createRoom = (formState: createRoomForm): Promise<Response<CreateRoomData>> => {
+export const createRoom = (formState: CreateRoomPayload): Promise<Response<CreateRoomData>> => {
   return AxiosClient.post('/api/rooms/', {...formState});
 };
 

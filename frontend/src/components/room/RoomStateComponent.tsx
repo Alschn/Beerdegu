@@ -3,9 +3,9 @@ import SearchAPI from "./SearchAPI";
 import BeerFormStepper from "./BeerFormStepper";
 import ResultsStepper from "./ResultsStepper";
 import {FC} from "react";
-import {roomStateType} from "../../context/roomContext";
+import {RoomStateType} from "../../context/RoomContext";
 
-const RoomStateComponent: FC<{ state: roomStateType }> = ({state}) => {
+const RoomStateComponent: FC<{ state: RoomStateType }> = ({state}) => {
   switch (state) {
     case "WAITING":
       return <Waiting/>;
@@ -16,7 +16,7 @@ const RoomStateComponent: FC<{ state: roomStateType }> = ({state}) => {
     case "FINISHED":
       return <ResultsStepper/>;
     default:
-      return <></>;
+      return null;
   }
 };
 

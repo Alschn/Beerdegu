@@ -75,18 +75,26 @@ jobs:
 
     strategy:
       matrix:
-        node: [14]
+        node: [ 16 ]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
       - name: Install dependencies
         run: |
           npm install
-      - name: Run tests
+
+      - name: Run unit tests
         run: |
-          npm test -- --coverage
+          npm test
+
+      - name: Run coverage
+        run: |
+          npm run coverage

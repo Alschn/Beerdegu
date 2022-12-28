@@ -1,18 +1,18 @@
 import {FC} from "react";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import Home from "../components/pages/Home";
-import Room from "../components/pages/Room";
+import Home from "../pages/Home";
+import Room from "../pages/Room";
 import PageNotFound from "./PageNotFound";
-import Login from "../components/auth/Login";
-import Register from "../components/auth/Register";
-import JoinRoom from "../components/pages/JoinRoom";
-import CreateRoom from "../components/pages/CreateRoom";
-import Lobby from "../components/pages/Lobby";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import JoinRoom from "../pages/JoinRoom";
+import CreateRoom from "../pages/CreateRoom";
+import Lobby from "../pages/Lobby";
 import PrivateRoute from "./PrivateRoute";
 import AuthRoute from "./AuthRoute";
-import PasswordChange from "../components/auth/PasswordChange";
-import PasswordReset from "../components/auth/PasswordReset";
-import PasswordResetConfirm from "../components/auth/PasswordResetConfirm";
+import PasswordChange from "../pages/PasswordChange";
+import PasswordReset from "../pages/PasswordReset";
+import PasswordResetConfirm from "../pages/PasswordResetConfirm";
 
 const Router: FC = () => {
   return (

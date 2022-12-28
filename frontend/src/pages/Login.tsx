@@ -5,11 +5,11 @@ import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
-import {onJWTLogin} from "../../api/auth";
-import CollapsableAlert, {AlertContentObject} from "../utils/CollapsableAlert";
-import {JWTContent, useAuth} from "../../context/authContext";
 import jwtDecode from "jwt-decode";
-import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY} from "../../config";
+import CollapsableAlert, {AlertContentObject} from "../components/utils/CollapsableAlert";
+import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY} from "../config";
+import {JWTContent, useAuth} from "../context/AuthContext";
+import {onJWTLogin} from "../api/auth";
 
 
 const Login: FC = () => {

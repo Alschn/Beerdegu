@@ -2,8 +2,8 @@ import {FC} from "react";
 import Participants from "../room/Participants";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
-import logo from "../../images/logo.svg";
-import {roomStateType} from "../../context/roomContext";
+import logo from "../../assets/logo.svg";
+import {RoomStateType} from "../../context/RoomContext";
 import {useNavigate} from "react-router-dom";
 import {leaveRoom} from "../../api/rooms";
 
@@ -28,7 +28,7 @@ const Sidebar: FC<SidebarProps> = ({open, toggleDrawerHandler}) => {
     });
   };
 
-  const changeRoomState = (new_state: roomStateType) => {
+  const changeRoomState = (new_state: RoomStateType) => {
     sendMessage({
       command: 'change_room_state',
       data: new_state,

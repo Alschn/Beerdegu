@@ -1,5 +1,12 @@
-import React from 'react';
+import {expect} from 'vitest';
+import {render, screen} from "./utils";
+import Browser from "../pages/Browser";
 
-test('simple test', () => {
-  expect(1).toEqual(1);
+it('should add 2 numbers', () => {
+  expect(1 + 1).toEqual(2);
+});
+
+it('should render a component', () => {
+  render(<Browser/>);
+  expect(screen.getByText('Not implemented yet')).toBeDefined();
 });

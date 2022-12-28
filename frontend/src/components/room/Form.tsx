@@ -1,5 +1,5 @@
 import {Grid, MenuItem, TextField} from "@mui/material";
-import React, {FC, Fragment, useEffect, useReducer} from "react";
+import {ChangeEvent, FC, Fragment, useEffect, useReducer} from "react";
 import useWebSocket from "react-use-websocket";
 import {useRoomContext} from "../../hooks/useContextHook";
 import {UserRatingsObject, WebsocketMessage} from "../../api/ws";
@@ -73,7 +73,7 @@ const BeerForm: FC<BeerFormProps> = ({beerID}) => {
     }
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     dispatch({
       type: 'INPUT_CHANGE',
       field: e.target.name,

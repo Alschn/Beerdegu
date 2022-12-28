@@ -2,6 +2,9 @@ import {Box, CircularProgress, Grid, useMediaQuery, useTheme} from "@mui/materia
 import {BaseSyntheticEvent, FC, useEffect, useReducer, useState} from "react";
 import {useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
+import {useNavigate} from "react-router-dom";
+import "./Room.scss";
+import {checkUserInRoom} from "../api/rooms";
 import {
   BeerObject,
   ChatMessageObject,
@@ -9,19 +12,15 @@ import {
   UserObject,
   WebsocketConnectionState,
   WebsocketMessage
-} from "../../api/ws";
-import RoomContext, {roomStateType} from "../../context/roomContext";
-import Sidebar from "../layout/Sidebar";
-import Header from "../layout/Header";
-import ChatSidebar from "../layout/ChatSidebar";
-import DesktopChat from "../room/DesktopChat";
-import {WEBSOCKET_URL} from "../../config";
-import RoomStateComponent from "../room/RoomStateComponent";
-import {useNavigate} from "react-router-dom";
-import {checkUserInRoom} from "../../api/rooms";
-import "./Room.scss";
-import {useQuery} from "react-query";
-
+} from "../api/ws";
+import ChatSidebar from "../components/layout/ChatSidebar";
+import {WEBSOCKET_URL} from "../config";
+import DesktopChat from "../components/room/DesktopChat";
+import Header from "../components/layout/Header";
+import RoomStateComponent from "../components/room/RoomStateComponent";
+import {useQuery} from "@tanstack/react-query";
+import RoomContext, {RoomStateType} from "../context/RoomContext";
+import Sidebar from "../components/layout/Sidebar";
 
 const USER_PING_INTERVAL_MS = 14_000;
 const USERS_FETCH_INTERVAL_MS = 12_000;
@@ -32,7 +31,7 @@ interface State {
   messages: ChatMessageObject[],
   beers: BeerObject[],
   users: UserObject[],
-  roomState: roomStateType,
+  roomState: RoomStateType,
   results: RatingsObject[],
   userResults: any[],
 }
@@ -41,7 +40,7 @@ type Action =
   | { type: 'set_new_message', payload: ChatMessageObject }
   | { type: 'set_beers', payload: BeerObject[] }
   | { type: 'set_users', payload: UserObject[] }
-  | { type: 'set_room_state', payload: roomStateType }
+  | { type: 'set_room_state', payload: RoomStateType }
   | { type: 'set_final_results', payload: RatingsObject[] }
   | { type: 'set_user_results', payload: any[] }
   | { type: string, payload: any } // handles any other case which will not affect state

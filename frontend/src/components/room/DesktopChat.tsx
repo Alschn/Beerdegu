@@ -1,4 +1,4 @@
-import React, {FC, Fragment} from "react";
+import {BaseSyntheticEvent, KeyboardEvent, FC, Fragment} from "react";
 import {Button, List, ListItem, TextField} from "@mui/material";
 import {useRoomContext} from "../../hooks/useContextHook";
 import "./DesktopChat.scss";
@@ -6,7 +6,7 @@ import "./DesktopChat.scss";
 
 interface ChatProps {
   handleSendMessage: () => void,
-  handleChange: (e: React.BaseSyntheticEvent) => void,
+  handleChange: (e: BaseSyntheticEvent) => void,
 }
 
 const DesktopChat: FC<ChatProps> = (
@@ -14,7 +14,7 @@ const DesktopChat: FC<ChatProps> = (
 ) => {
   const {message, messages} = useRoomContext();
 
-  const handlePressEnter = (event: React.KeyboardEvent) => event.key === 'Enter' && handleSendMessage();
+  const handlePressEnter = (event: KeyboardEvent) => event.key === 'Enter' && handleSendMessage();
 
   return (
     <Fragment>
