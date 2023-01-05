@@ -8,9 +8,9 @@ class RatingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rating
-        fields = [
+        fields = (
             'color', 'foam', 'smell', 'taste', 'opinion', 'note', 'beer'
-        ]
+        )
 
     def to_representation(self, instance: Rating):
         my_fields = self.Meta.fields

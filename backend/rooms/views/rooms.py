@@ -22,7 +22,7 @@ from rooms.serializers import (
     DetailedRoomSerializer,
     RoomCreateSerializer
 )
-from rooms.serializers.room import RoomJoinSerializer
+from rooms.serializers.room import RoomJoinSerializer, RoomListSerializer
 
 RoomsPagination = page_number_pagination_factory(page_size=100)
 
@@ -62,7 +62,10 @@ class RoomsViewSet(
         return Room.objects.order_by('id').prefetch_related('users', 'beers')
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
+            return RoomListSerializer
+
+        if self.action == 'retrieve':
             return DetailedRoomSerializer
 
         if self.action == 'create':

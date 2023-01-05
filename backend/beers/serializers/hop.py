@@ -6,10 +6,10 @@ from beers.models import Hop
 class HopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hop
-        fields = '__all__'
+        fields = ('id', 'name', 'description', 'country')
 
 
 class EmbeddedHopsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hop
-        fields = ['id', 'name']
+        fields = ('id', 'name')

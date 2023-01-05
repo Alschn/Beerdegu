@@ -26,6 +26,16 @@ def get_hosted_not_finished_rooms(host: User) -> QuerySet[Room]:
     return Room.objects.filter(host=host).exclude(state=Room.State.FINISHED)
 
 
+class RoomListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = (
+            'id', 'name', 'has_password',
+            'host', 'slots', 'state',
+            'created_at', 'updated_at',
+        )
+
+
 class RoomCreateSerializer(serializers.ModelSerializer):
     host = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(),

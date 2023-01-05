@@ -13,7 +13,12 @@ from rooms.models import BeerInRoom
 class BeerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Beer
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'brewery', 'style',
+            'percentage', 'volume_ml', 'hop_rate',
+            'extract', 'IBU', 'image', 'description',
+            'hops'
+        )
 
 
 class SimplifiedBeerSerializer(serializers.ModelSerializer):
