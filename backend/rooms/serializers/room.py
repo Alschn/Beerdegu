@@ -18,7 +18,7 @@ class RoomSerializer(serializers.ModelSerializer):
             'id', 'name', 'has_password',
             'host', 'slots', 'state',
             'created_at', 'updated_at',
-            'users', 'beers',
+            'users', 'beers', 'users_count',
         )
 
 
@@ -27,12 +27,14 @@ def get_hosted_not_finished_rooms(host: User) -> QuerySet[Room]:
 
 
 class RoomListSerializer(serializers.ModelSerializer):
+    host = UserSerializer()
+
     class Meta:
         model = Room
         fields = (
             'id', 'name', 'has_password',
             'host', 'slots', 'state',
-            'created_at', 'updated_at',
+            'created_at', 'updated_at', 'users_count',
         )
 
 

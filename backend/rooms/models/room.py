@@ -29,3 +29,7 @@ class Room(models.Model):
     @property
     def has_password(self) -> bool:
         return bool(self.password)
+
+    @property
+    def users_count(self) -> int:
+        return self.users.count()

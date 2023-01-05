@@ -1,5 +1,5 @@
 import AxiosClient from "./axiosClient";
-import {PaginatedResponse, Response} from "./types";
+import {PaginatedResponse, Response, Room} from "./types";
 import {AxiosRequestConfig} from "axios";
 import {BeerObject} from "./ws";
 
@@ -11,7 +11,7 @@ interface LeaveRoomData {
   message: string;
 }
 
-export const getRooms = (): Promise<PaginatedResponse<any>> => {
+export const getRooms = (): Promise<PaginatedResponse<Room>> => {
   return AxiosClient.get('/api/rooms/');
 };
 

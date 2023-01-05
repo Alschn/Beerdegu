@@ -16,6 +16,7 @@ import CreateRoomDialog from "../components/lobby/CreateRoomDialog";
 import JoinRoomDialog from "../components/lobby/JoinRoomDialog";
 import {useQuery} from "@tanstack/react-query";
 import {getRooms} from "../api/rooms";
+import {Room} from "../api/types";
 
 
 interface Column {
@@ -38,27 +39,14 @@ interface User {
   username: string;
 }
 
-interface RoomData {
-  beers: [],
-  created_at: Date,
-  has_password: boolean,
-  host: null | User,
-  id: number,
-  name: string,
-  slots: number,
-  state: string,
-  updated_at: Date,
-  users: []
-}
-
-const getFormattedValue = (row: any, column: Column) => {
+const getFormattedValue = (row: Room, column: Column) => {
   const value = row[column.id];
   switch (column.id) {
     case "host":
-      if (value != null) return value.username;
+      if (value != null) return row.host.username;
       break;
     case "slots":
-      return `${row.users.length}/${value}`;
+      return `${row.users_count}/${row.slots}`;
     default:
       return String(value);
   }
@@ -135,7 +123,7 @@ const Lobby: FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rooms.length > 0 && rooms.map((row: any) => (
+              {rooms.length > 0 && rooms.map((row) => (
                 <TableRow
                   hover role="checkbox" tabIndex={-1} key={row.name} data-room-name={row.name}
                   onClick={handleRowClick}
