@@ -123,10 +123,7 @@ class RoomsViewSet(
         serializer = self.get_serializer(data=request.data, instance=room)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(
-            {'message': f'{request.user.username} is in the room.'},
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={

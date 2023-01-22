@@ -116,6 +116,9 @@ class RoomJoinSerializer(serializers.ModelSerializer):
 
         return self.instance
 
+    def to_representation(self, instance: Room) -> dict:
+        return RoomSerializer(instance).data
+
 
 class RoomAddBeerSerializer(serializers.Serializer):
     beer_id = serializers.IntegerField()
