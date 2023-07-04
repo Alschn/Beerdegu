@@ -5,7 +5,7 @@ from beers.models import BeerStyle
 class BeerStyleSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeerStyle
-        fields = '__all__'
+        fields = ('id', 'name', 'description')
 
 
 class EmbeddedBeerStyleSerializer(serializers.ModelSerializer):

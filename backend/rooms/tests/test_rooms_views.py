@@ -9,6 +9,7 @@ from beers.models import Beer
 from beers.serializers import BeerSerializer
 from rooms.models import Room
 from rooms.serializers import RoomSerializer, DetailedRoomSerializer
+from rooms.serializers.room import RoomListSerializer
 
 
 class RoomsAPIViewsTests(TestCase):
@@ -155,7 +156,7 @@ class RoomsAPIViewsTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             first=response.json()['results'],
-            second=DetailedRoomSerializer(Room.objects.order_by('id'), many=True).data
+            second=RoomListSerializer(Room.objects.order_by('id'), many=True).data
         )
 
     def test_create_room(self):

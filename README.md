@@ -198,6 +198,16 @@ If there are problems caused by caching, then you can use optional flag to build
 docker-compose build CONTAINER_NAME --no-cache
 ```
 
+## Accessing backend from mobile app:
+
+Add your local ip4 address to existing `ALLOWED_HOSTS` list in `backend/settings/dev.py` file.
+You can retrieve it by running `ipconfig` in terminal and looking for `IPv4 Address`.
+
+```python
+ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", 'YOUR_IP_ADDRESS']
+```
+
+
 # Production Deployment
 
 1) [Create Heroku Account](https://signup.heroku.com/dc)

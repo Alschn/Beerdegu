@@ -18,12 +18,24 @@ class RoomSerializer(serializers.ModelSerializer):
             'id', 'name', 'has_password',
             'host', 'slots', 'state',
             'created_at', 'updated_at',
-            'users', 'beers',
+            'users', 'beers', 'users_count',
         )
 
 
 def get_hosted_not_finished_rooms(host: User) -> QuerySet[Room]:
     return Room.objects.filter(host=host).exclude(state=Room.State.FINISHED)
+
+
+class RoomListSerializer(serializers.ModelSerializer):
+    host = UserSerializer()
+
+    class Meta:
+        model = Room
+        fields = (
+            'id', 'name', 'has_password',
+            'host', 'slots', 'state',
+            'created_at', 'updated_at', 'users_count',
+        )
 
 
 class RoomCreateSerializer(serializers.ModelSerializer):
@@ -103,6 +115,9 @@ class RoomJoinSerializer(serializers.ModelSerializer):
             self.instance.users.add(user)
 
         return self.instance
+
+    def to_representation(self, instance: Room) -> dict:
+        return RoomSerializer(instance).data
 
 
 class RoomAddBeerSerializer(serializers.Serializer):

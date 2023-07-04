@@ -6,10 +6,13 @@ from beers.models import Brewery
 class BrewerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Brewery
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'city', 'country',
+            'established', 'description'
+        )
 
 
 class EmbeddedBrewerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Brewery
-        fields = ['id', 'name']
+        fields = ('id', 'name')

@@ -22,9 +22,11 @@ from rooms.serializers import (
     DetailedRoomSerializer,
     RoomCreateSerializer
 )
-from rooms.serializers.room import RoomJoinSerializer
+from rooms.serializers.room import RoomJoinSerializer, RoomListSerializer
 
 RoomsPagination = page_number_pagination_factory(page_size=100)
+
+EXCEL_CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
 class RoomsViewSet(
@@ -62,7 +64,10 @@ class RoomsViewSet(
         return Room.objects.order_by('id').prefetch_related('users', 'beers')
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
+            return RoomListSerializer
+
+        if self.action == 'retrieve':
             return DetailedRoomSerializer
 
         if self.action == 'create':
@@ -120,10 +125,7 @@ class RoomsViewSet(
         serializer = self.get_serializer(data=request.data, instance=room)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(
-            {'message': f'{request.user.username} is in the room.'},
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={
@@ -188,9 +190,11 @@ class RoomsViewSet(
 
         response = FileResponse(
             file_buffer,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
+            content_type=EXCEL_CONTENT_TYPE,
+            headers={
+                'Content-Disposition': f'attachment; filename="{file_name}"',
+                'Content-Length': file_buffer.getbuffer().nbytes,
+            }
         )
-        response['Content-Length'] = file_buffer.getbuffer().nbytes
-        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
         return response

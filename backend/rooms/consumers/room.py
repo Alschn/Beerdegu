@@ -197,7 +197,8 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_form_data',
                 'data': form_data,
-                'timestamp': timezone.now().isoformat()
+                'timestamp': timezone.now().isoformat(),
+                'beer_id': beer_id
             }
         )
 
