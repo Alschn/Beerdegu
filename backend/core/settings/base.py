@@ -10,9 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
-from django.utils.timezone import timedelta
 from dotenv import load_dotenv
 
 # Load environmental variables
@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'development_without_docker')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['backend', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['backend', 'localhost', '127.0.0.1', 'host.docker.internal']
 
 # Application definition
 INSTALLED_APPS = [
@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'dj_rest_auth.registration',
+    # social auth
+    'allauth.socialaccount.providers.google',
     # open api schema
     'drf_spectacular',
     # apps
@@ -75,6 +77,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # 'django.middleware.locale.LocaleMiddleware'   # todo: in future
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -154,6 +157,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
+# https://www.django-rest-framework.org/topics/internationalization/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -168,12 +172,18 @@ USE_TZ = True
 # Rest Framework config - Authentication, filtering...
 # https://www.django-rest-framework.org/api-guide/settings/
 
+AUTHENTICATION_CLASSES_DEBUG = (
+    'rest_framework.authentication.SessionAuthentication',
+    'rest_framework.authentication.BasicAuthentication',
+) if DEBUG else ()
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         ('rest_framework.permissions.AllowAny',)
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        *AUTHENTICATION_CLASSES_DEBUG,
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
@@ -182,6 +192,54 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# Authentication backends
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'sesame.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# JWT settings
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+
+    'ALGORITHM': 'HS256',
+    'JTI_CLAIM': 'jti',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_ID_FIELD': 'id',
+
+    # custom settings related to jwt
+    'ACCESS_TOKEN_COOKIE': 'access',
+    'REFRESH_TOKEN_COOKIE': 'refresh',
+    # toggle if using cookies for JWT
+    'SHOULD_SET_COOKIES': False,
+}
+
+# needed only if using cookies for JWT
+COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', 'localhost')
+
+# django-allauth settings
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+OLD_PASSWORD_FIELD_ENABLED = True
+
+# dj-rest-auth settings
+# https://dj-rest-auth.readthedocs.io/en/latest/configuration.html#token-model
+
+REST_AUTH = {
+    'TOKEN_MODEL': None
 }
 
 # drf-spectacular settings
@@ -212,13 +270,6 @@ CORS_EXPOSE_HEADERS = [
 
 # required by django.contrib.sites
 SITE_ID = 1
-
-# https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
-
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-OLD_PASSWORD_FIELD_ENABLED = True
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
-REST_AUTH_TOKEN_MODEL = None
 
 # Django Q configuration
 # https://django-q.readthedocs.io/en/latest/configure.html
@@ -252,30 +303,3 @@ CSRF_TRUSTED_ORIGINS = [
 
 EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
 DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# JWT settings
-# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
-
-# rest framework auth token will be deprecated in favour of JWT in the future
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-
-    'ALGORITHM': 'HS256',
-    'JTI_CLAIM': 'jti',
-    'USER_ID_CLAIM': 'user_id',
-
-    # custom settings related to jwt
-    'ACCESS_TOKEN_COOKIE': 'access',
-    'REFRESH_TOKEN_COOKIE': 'refresh',
-
-    # toggle if using cookies for JWT
-    'SHOULD_SET_COOKIES': False,
-}
-
-# needed only if using cookies for JWT
-COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', 'localhost')
