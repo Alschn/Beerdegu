@@ -1,3 +1,5 @@
+.mypy_cache
+.coverage
 /venv
 venv
 /.venv
