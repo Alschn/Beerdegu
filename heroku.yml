@@ -5,7 +5,7 @@
 
 build:
   docker:
-    web: Dockerfile.prod
+    web: Dockerfile.heroku
 
 release:
   command:

@@ -1,21 +1,17 @@
-version: "3.9"
-
 services:
   backend:
     container_name: backend
     build: ./backend
-    volumes:
-      - ./backend:/app/backend
-    ports:
-      - "8000:8000"
     stdin_open: true
     tty: true
-    environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.dev
+    volumes:
+      - ./backend:/app/backend
     env_file:
-      - .env
+      - env/backend.env
     links:
       - redis_db
+    ports:
+      - "8000:8000"
 
   frontend:
     container_name: frontend
@@ -23,22 +19,16 @@ services:
     volumes:
       - ./frontend:/app/frontend
       - node-modules:/app/frontend/node_modules
+    env_file:
+      - env/frontend.env
     ports:
       - "3000:3000"
-    env_file:
-      - ./frontend/.env
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
 
-  db:
-    container_name: db
+  postgres_db:
+    container_name: postgres_db
     image: postgres:14.0-alpine
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - env/postgres.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
@@ -47,6 +37,8 @@ services:
   redis_db:
     container_name: redis_db
     image: redis:alpine
+    env_file:
+      - env/redis.env
     volumes:
       - redis-data:/data
     ports:
@@ -55,10 +47,8 @@ services:
   django_q:
     container_name: django_q
     build: ./backend
-    environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.dev
     env_file:
-      - .env
+      - env/backend.env
     volumes:
       - ./backend:/app/backend
     depends_on:

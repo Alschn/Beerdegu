@@ -3,13 +3,11 @@ Configuration for development with Docker.
 """
 from core.settings.base import *
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'development')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['backend', 'localhost', '127.0.0.1', 'host.docker.internal']
 
 DATABASES = {
     'default': {
@@ -17,8 +15,18 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
-        'HOST': os.environ.get('DB_HOST', 'db'),
+        'HOST': os.environ.get('DB_HOST', 'postgres_db'),
         'PORT': os.environ.get('DB_PORT', 5432),
+    }
+}
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis_db')
+REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
+
+CACHES = {
+    "default": {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': f'{REDIS_HOST}:{REDIS_PORT}',
     }
 }
 
@@ -26,11 +34,10 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [
+            'hosts': [
                 (
-                    # redis_db = service's name
-                    os.environ.get('REDIS_HOST', 'redis_db'),
-                    os.environ.get('REDIS_PORT', 6379)
+                    REDIS_HOST,
+                    REDIS_PORT
                 )
             ],
         },
@@ -47,9 +54,9 @@ Q_CLUSTER = {
     'queue_limit': 500,
     'cpu_affinity': 1,
     'label': 'Django Q',
-    "redis": {
-        'host': os.environ.get('REDIS_HOST', 'redis_db'),
-        'port': os.environ.get('REDIS_PORT', 6379),
+    'redis': {
+        'host': REDIS_HOST,
+        'port': REDIS_PORT,
         'db': 0,
     }
 }

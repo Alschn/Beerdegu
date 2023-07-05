@@ -10,7 +10,8 @@
     <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Docker-008FCC?style=for-the-badge&logo=docker&logoColor=white" alt=""/>
-    <img src="https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white" alt=""/>
+    <img src="https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white" alt=""/>    
+    <img src="https://img.shields.io/badge/Fly.io-7B36ED?style=for-the-badge&logo=fly.io&logoColor=white" alt=""/>&nbsp;
 </div>
 
 Beerdegu is a real-time web application meant for beer tasting sessions, when
@@ -27,9 +28,10 @@ This setup has been tested with Python 3.10 and Node 16.
 
 ### Backend
 
-- Django 4.0 + Django Rest Framework : `django` `djangorestframework`
+- Django 4.2 + Django Rest Framework : `django` `djangorestframework`
 - Django Channels 3 : `channels`- handling websockets backend
-- `django-cors-headers` - handling cross origin requests
+- `django-extensions` - django utilities
+- `django-cors-headers` - handling cross-origin requests
 - `django-filter` - filter backend for drf views
 - `django-q` - async tasks
 - `django-import-export` - handles data import/export in admin
@@ -43,15 +45,19 @@ This setup has been tested with Python 3.10 and Node 16.
 - `whitenoise` - building static files
 - `daphne` - production asgi server
 
-### Frontend
+### Frontend (deprecated)
 
 - React 18
 - Typescript
 - `react-use-websocket` - websocket client, connects with ws backend
 - `@mui/material`, `@mui/icons-material`, `@mui/lab`, - Material UI library
 - `sass` - enables scss/sass support
-- `axios` - for making http requests
-- `react-query` - client-side data fetching and caching
+- `axios` - http client
+- `@tanstack/react-query` - client-side data fetching and caching
+- `react-infinite-scroll-component` - infinite scroll
+- `react-toastify` - toast notifications
+- `vitest`, `@testing-library/react` + other packages - unit testing
+- `msw` - mocking http requests in tests
 
 # Development setup
 
@@ -129,30 +135,56 @@ coverage report -m
 
 ## With Docker
 
-First define environmental variables in `.env` in **root directory**:
+First create `env` folder in **root directory** with following env files:
+
+`env/postgres.env`
 
 ```dotenv
 # credentials to postgres database
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
+```
+
+`env/backend.env`
+
+```dotenv
+DJANGO_SETTINGS_MODULE=core.settings.dev
+SECRET_KEY=...
+# same values as in postgres.env
 DB_NAME=postgres
 DB_USER=postgres
 DB_PASSWORD=postgres
-
-# redis service name and port
+# same as in docker-compose.yml
+DB_HOST=postgres_db
+DB_PORT=5432
+# same as in docker-compose.yml
 REDIS_HOST=redis_db
 REDIS_PORT=6379
-
 # if you want to use mailing functionality e.g with smtp backend
-EMAIL_HOST=
-EMAIL_PORT=
-EMAIL_USER=
-EMAIL_PASSWORD=
+EMAIL_HOST=...
+EMAIL_PORT=...
+EMAIL_USER=...
+EMAIL_PASSWORD=...
 ```
 
-Then define frontend environmental variables in `frontend/.env`:
+`env/redis.env`
 
 ```dotenv
-# in format:  PROTOCOL://HOST:PORT without trailing slash
-# variable names have to be prefixed with REACT_APP_
+TZ=Europe/Warsaw
+```
+
+`env/frontend.env`
+
+```dotenv
+# required for hot reloading to work in docker
+CHOKIDAR_USEPOLLING=true
+WATCHPACK_POLLING=true
+
+NODE_ENV=development
+
+# in format:  PROTOCOL://HOST:PORT without trailing slash!
+# variable names have to be prefixed with VITE_
 VITE_WEBSOCKET_URL=ws://127.0.0.1:8000
 VITE_BACKEND_URL=http://127.0.0.1:8000
 ```
@@ -198,17 +230,60 @@ If there are problems caused by caching, then you can use optional flag to build
 docker-compose build CONTAINER_NAME --no-cache
 ```
 
-## Accessing backend from mobile app:
+## Accessing backend from mobile app (BeerdeguMobile):
 
-Add your local ip4 address to existing `ALLOWED_HOSTS` list in `backend/settings/dev.py` file.
+Add your local ip4 address to existing `ALLOWED_HOSTS` list in `backend/core/settings/dev.py` file.
 You can retrieve it by running `ipconfig` in terminal and looking for `IPv4 Address`.
 
 ```python
-ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", 'YOUR_IP_ADDRESS']
+ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "YOUR_IP_ADDRESS"]
 ```
 
-
 # Production Deployment
+
+## Fly.io
+
+Launch a new app
+
+```shell
+fly launch
+```
+
+Set secrets: `PRODUCTION_HOST`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`
+
+```shell
+fly secrets set KEY=VALUE
+```
+
+Create postgres and redis addons
+
+```shell
+fly pg create
+```
+
+```shell
+fly redis create
+```
+
+Attach postgres instance to the app (it will automatically set `DATABASE_URL` env variable)
+
+```shell
+fly pg attach -a <postgres_app_name>
+```
+
+Deploy the app
+
+```shell
+fly deploy
+```
+
+Connecting to app instance (e.g to create superuser)
+
+```shell
+fly ssh console
+```
+
+## Heroku (deprecated)
 
 1) [Create Heroku Account](https://signup.heroku.com/dc)
 2) [Download/Install/Setup Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#download-and-install)
@@ -236,20 +311,9 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", 'YOUR_IP_ADDRESS']
 This repository uses Github Actions to run test pipeline.  
 `tests.yml` - runs backend and frontend as separate jobs in one workflow
 
-# To do list
+# To do list (backend)
 
-### In progress:
-
-- [ ] All rooms view - CRUD (join, create, delete) - IN PROGRESS (could be improved)
-- [ ] Setup unit tests for frontend (Jest)
-- [ ] Setup integration tests (Playwright)
-
----
-
-- [ ] Browsing api (beers, breweries etc.)
 - [ ] User profile with list of past beer tasting sessions and statistics
-- [ ] Test async db utils and consumer (+ get GitHub Actions Postgres connection to work with async stuff)
-- [ ] Additional statistics in room (e.g. best/worst beer, group by votes, the longest opinion, similar ratings etc.)
-- [ ] Better responsiveness on bigger displays (right now using Mobile First Approach)
+- [ ] Test async db utils and consumer
 - [ ] Task queue with Django Q - e.g. removing inactive users in rooms
 - [ ] Improve xlsx reports (headers styling, better formatting, etc.)

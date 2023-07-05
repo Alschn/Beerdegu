@@ -13,7 +13,6 @@ import os
 from pathlib import Path
 
 from django.utils.timezone import timedelta
-
 from dotenv import load_dotenv
 
 # Load environmental variables
@@ -31,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'development_without_docker')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['backend', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -107,15 +106,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application'
 
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# Github actions database
+# GitHub actions database
 if os.environ.get('GITHUB_WORKFLOW'):
     DATABASES = {
         'default': {
@@ -130,9 +129,9 @@ if os.environ.get('GITHUB_WORKFLOW'):
 # SQLite database if not using Docker for development
 else:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR.parent, "db.sqlite3"),
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR.parent, 'db.sqlite3'),
         }
     }
 
@@ -215,9 +214,10 @@ CORS_EXPOSE_HEADERS = [
 SITE_ID = 1
 
 # https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_EMAIL_VERIFICATION = "none"
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 OLD_PASSWORD_FIELD_ENABLED = True
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 REST_AUTH_TOKEN_MODEL = None
 
 # Django Q configuration
@@ -242,6 +242,7 @@ Q_CLUSTER = {
 }
 
 # https://docs.djangoproject.com/en/4.0/ref/settings/#csrf-trusted-origins
+
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1'
 ]
@@ -277,4 +278,4 @@ SIMPLE_JWT = {
 }
 
 # needed only if using cookies for JWT
-COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", "localhost")
+COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', 'localhost')
