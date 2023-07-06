@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from sesame.utils import get_token
 
 from core.shared.pagination import page_number_pagination_factory
 from core.shared.renderers import FileOrJSONRenderer
@@ -96,19 +97,22 @@ class RoomsViewSet(
         room = self.get_object()
         sender = request.user
 
-        if room.users.filter(id=sender.id).exists():
-            is_host: bool = room.host and room.host == sender
+        if not room.users.filter(id=sender.id).exists():
             return Response(
-                {
-                    'message': f'{sender.username} is in this room.',
-                    'is_host': is_host,
-                },
-                status=status.HTTP_200_OK
+                {'message': 'User is not part of this room!'},
+                status=status.HTTP_403_FORBIDDEN
             )
 
+        is_host = room.host and room.host == sender
+        token = get_token(sender, scope=f'rooms:{room.name}')
+
         return Response(
-            {'message': 'User is not part of this room!'},
-            status=status.HTTP_403_FORBIDDEN
+            {
+                'message': f'{sender.username} is in this room.',
+                'is_host': is_host,
+                'token': token
+            },
+            status=status.HTTP_200_OK
         )
 
     @extend_schema(

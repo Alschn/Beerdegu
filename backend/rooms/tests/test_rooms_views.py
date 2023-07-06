@@ -57,10 +57,9 @@ class RoomsAPIViewsTests(TestCase):
         response = self.client.get('/api/rooms/12345678/in/')
         to_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            {'message': 'Test is in this room.', 'is_host': True},
-            to_json
-        )
+        self.assertIn('message', to_json)
+        self.assertIn('token', to_json)
+        self.assertEqual(to_json['is_host'], True)
 
     def test_user_is_in_room_not_host(self):
         self._require_login_and_auth(user=self.user2)
@@ -68,10 +67,9 @@ class RoomsAPIViewsTests(TestCase):
         response = self.client.get('/api/rooms/12345678/in/')
         to_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            {'message': 'Test2 is in this room.', 'is_host': False},
-            to_json
-        )
+        self.assertIn('message', to_json)
+        self.assertIn('token', to_json)
+        self.assertEqual(to_json['is_host'], False)
 
     def test_join_room_not_found(self):
         self._require_login_and_auth(user=self.user1)

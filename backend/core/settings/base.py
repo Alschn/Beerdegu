@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['backend', 'localhost', '127.0.0.1', 'host.docker.internal']
 INSTALLED_APPS = [
     # django channels
     'channels',
+    'daphne',
     # django packages
     'django.contrib.admin',
     'django.contrib.auth',
@@ -241,6 +242,12 @@ OLD_PASSWORD_FIELD_ENABLED = True
 REST_AUTH = {
     'TOKEN_MODEL': None
 }
+
+# Django sesame settings
+# https://django-sesame.readthedocs.io/en/stable/index.html
+
+SESAME_ONE_TIME = False
+SESAME_MAX_AGE = timedelta(minutes=60)
 
 # drf-spectacular settings
 # https://drf-spectacular.readthedocs.io/en/latest/settings.html
