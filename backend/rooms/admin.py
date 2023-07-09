@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db.models import Avg, QuerySet, Count
 from django.http import HttpRequest
 from import_export.admin import ImportExportActionModelAdmin
+from ordered_model.admin import OrderedModelAdmin
 
 from .models import Room, Rating, UserInRoom, BeerInRoom
 
@@ -20,10 +21,14 @@ class RatingAdmin(ImportExportActionModelAdmin):
 
 
 @admin.register(BeerInRoom)
-class BeerInRoomAdmin(ImportExportActionModelAdmin):
-    list_display = ('id', 'room', 'beer', 'notes_count', 'average_note')
+class BeerInRoomAdmin(OrderedModelAdmin, ImportExportActionModelAdmin):
+    list_display = (
+        'id', 'room', 'beer', 'notes_count', 'average_note',
+        'order', 'move_up_down_links'
+    )
     list_select_related = ('room', 'beer')
     search_fields = ('beer__name', 'room__name')
+    ordering = ('-room', 'order')
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[BeerInRoom]:
         queryset = super().get_queryset(request)

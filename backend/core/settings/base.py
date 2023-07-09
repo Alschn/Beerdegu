@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_filters',
     'import_export',
+    'ordered_model',
     # task queue
     'django_q',
     # cors headers
