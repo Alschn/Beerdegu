@@ -49,7 +49,7 @@ class BeerWithResultsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BeerInRoom
-        fields = ('beer', 'average_rating')
+        fields = ('order', 'beer', 'average_rating')
 
 
 class DetailedBeerSerializer(BeerSerializer):

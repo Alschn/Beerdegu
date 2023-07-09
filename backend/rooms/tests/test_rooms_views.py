@@ -330,13 +330,14 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_add_beer_success(self):
         self._require_login_and_auth(self.user3)
+        room_name = 'abcdefgh'
         beer_to_add = Beer.objects.create(name='test', percentage=5, volume_ml=500)
-        beers_before = Beer.objects.filter(room__name='abcdefgh').order_by('id')
+        beers_before = Beer.objects.filter(room__name=room_name).order_by('id')
         self.assertEqual(beers_before.count(), 4)
-        response = self.client.put('/api/rooms/abcdefgh/beers/', {
+        response = self.client.put(f'/api/rooms/{room_name}/beers/', {
             'beer_id': beer_to_add.id
         })
-        beers_after = Beer.objects.filter(room__name='abcdefgh').order_by('id')
+        beers_after = Beer.objects.filter(room__name=room_name).order_by('beerinroom__order')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             response.json(),

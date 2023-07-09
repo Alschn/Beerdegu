@@ -42,12 +42,12 @@ class RoomsModelsTests(TestCase):
     def test_beer_in_room_to_string(self):
         user = User.objects.create_user(username="test2", password="test2")
         beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
-        room = Room.objects.create(name="testroom", slots=4, host=user, state="STARTING")
+        room = Room.objects.create(name="testroom", slots=4, host=user, state=Room.State.STARTING)
         beer_in_room = BeerInRoom.objects.create(beer=beer, room=room)
-        self.assertEqual(str(beer_in_room), f'{room.name} - {beer}')
-        
+        self.assertEqual(str(beer_in_room), f'{room.name} - #{beer_in_room.order} - {beer}')
+
     def test_user_in_room_to_string(self):
         user = User.objects.create_user(username="test3", password="test3")
-        room = Room.objects.create(name="testr00m", slots=3, host=user, state="STARTING")
+        room = Room.objects.create(name="testr00m", slots=3, host=user, state=Room.State.STARTING)
         user_in_room = UserInRoom.objects.create(user=user, room=room)
         self.assertEqual(str(user_in_room), f'{user.username} - {room.name}')

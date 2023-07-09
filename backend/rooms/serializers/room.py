@@ -141,9 +141,12 @@ class RoomAddBeerSerializer(serializers.Serializer):
     def save(self, **kwargs) -> Beer:
         beer = Beer.objects.get(id=self.validated_data['beer_id'])
         BeerInRoom.objects.create(
-            room=self.room, beer=beer
+            room=self.room,
+            beer=beer
         )
-        return Beer.objects.filter(room=self.room).order_by('id')
+        return Beer.objects.filter(room=self.room).order_by(
+            'beerinroom__order'
+        )
 
 
 class RoomDeleteBeerSerializer(serializers.Serializer):

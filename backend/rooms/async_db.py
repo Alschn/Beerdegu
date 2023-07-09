@@ -62,7 +62,7 @@ def bump_users_last_active_field(room_name: str, user: User) -> None:
 
 
 @transaction.atomic
-def save_user_form(room_name: str, user: User, beer_id: str, data: dict) -> None:
+def save_user_form(room_name: str, user: User, beer_id: str, data: dict):
     if user.is_anonymous or not beer_id or not data:
         return
 
@@ -124,7 +124,7 @@ def get_beers_in_room(room_name: str):
     except ObjectDoesNotExist:
         return []
 
-    beers = room.beers.all().order_by('id')
+    beers = room.beers.order_by('beerinroom__order')
     serialized = BeerRepresentationalSerializer(beers, many=True).data
     return serialized
 
@@ -162,6 +162,8 @@ def get_final_user_beer_ratings(room_name: str, user: User):
         belongs_to__room__name=room_name
     ).annotate(
         beer=F('belongs_to__beer')
+    ).order_by(
+        'belongs_to__order'
     )
     serialized = RatingSerializer(ratings, many=True).data
     return serialized
@@ -174,7 +176,7 @@ def get_final_beers_ratings(room_name: str):
 
     beers_with_ratings = beers_in_room.annotate(
         average_rating=Avg('ratings__note', output_field=DecimalField())
-    ).order_by('beer')
+    ).order_by('order')
     serialized = BeerWithResultsSerializer(beers_with_ratings, many=True).data
     return serialized
 
