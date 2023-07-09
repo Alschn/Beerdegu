@@ -8,6 +8,7 @@ from rooms.models import BeerInRoom
 
 
 class Rating(models.Model):
+    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     color = models.TextField(max_length=300, blank=True, null=True)
     foam = models.TextField(max_length=300, blank=True, null=True)
     smell = models.TextField(max_length=300, blank=True, null=True)
@@ -17,7 +18,8 @@ class Rating(models.Model):
         MinValueValidator(1),
         MaxValueValidator(10),
     ], null=True, blank=True)
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['id']

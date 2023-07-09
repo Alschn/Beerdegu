@@ -18,6 +18,8 @@ class BeerInRoom(OrderedModel):
         related_name='belongs_to',
         blank=True
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     order_with_respect_to = ('room',)
 
