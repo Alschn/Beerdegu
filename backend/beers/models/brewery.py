@@ -7,6 +7,8 @@ class Brewery(models.Model):
     country = models.CharField(max_length=100, null=True, blank=True)
     established = models.DateField(null=True, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name_plural = 'Breweries'
