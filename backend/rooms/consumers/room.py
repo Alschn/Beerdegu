@@ -127,6 +127,13 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name
         )
 
+    async def send_json(self, content: dict, close: bool = False):
+        content = {
+            'timestamp': timezone.now().isoformat(),
+            **content
+        }
+        await super().send_json(content, close=close)
+
     """
     Event handlers:
     - get_new_message
@@ -149,15 +156,15 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         'get_new_message' => 'set_new_message'
         """
         user = self.scope['user']
+        message = event.get('data')
         content = {
-            'message': event.get('data'),
+            'message': message,
             'user': str(user),
         }
         await self.send_json(
             {
-                'data': content,
                 'command': 'set_new_message',
-                'timestamp': timezone.now().isoformat()
+                'data': content,
             }
         )
 
@@ -169,9 +176,8 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         users = await async_get_users_in_room(room_name=self.room_name)
         await self.send_json(
             {
-                'data': users,
                 'command': 'set_users',
-                'timestamp': timezone.now().isoformat()
+                'data': users,
             }
         )
 
@@ -179,21 +185,15 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         beers = await async_get_beers_in_room(room_name=self.room_name)
         await self.send_json(
             {
-                'data': beers,
                 'command': 'set_beers',
-                'timestamp': timezone.now().isoformat()
+                'data': beers,
             }
         )
 
     async def load_beers(self, event: dict):
-        beers = await async_get_beers_in_room(room_name=self.room_name)
-        await self.send_json(
-            {
-                'data': beers,
-                'command': 'set_beers',
-                'timestamp': timezone.now().isoformat()
-            }
-        )
+        """Alias for `get_beers` command handler."""
+
+        await self.get_beers(event)
 
     async def get_form_data(self, event: dict):
         beer_id = event.get('data')
@@ -206,7 +206,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_form_data',
                 'data': form_data,
-                'timestamp': timezone.now().isoformat(),
                 'beer_id': beer_id
             }
         )
@@ -239,7 +238,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_room_state',
                 'data': room,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
@@ -250,7 +248,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_room_state',
                 'data': updated_room,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
@@ -260,7 +257,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_final_results',
                 'data': final,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
@@ -271,7 +267,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_user_results',
                 'data': final,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
