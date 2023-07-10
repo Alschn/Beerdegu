@@ -279,8 +279,10 @@ fly pg attach -a <postgres_app_name>
 
 Deploy the app
 
+Include `API_URL`, `WEBSOCKETS_URL` build args to make frontend work
+
 ```shell
-fly deploy
+fly deploy --build-arg API_URL=https://beerdegu.fly.dev --build-arg WEBSOCKETS_URL=wss://beerdegu.fly.dev
 ```
 
 Connecting to app instance (e.g to create superuser)
