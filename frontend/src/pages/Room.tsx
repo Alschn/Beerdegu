@@ -99,6 +99,7 @@ const Room: FC = () => {
   const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   const [isHost, setIsHost] = useState<boolean>(false);
+  const [token, setToken] = useState<string>('');
   const [shouldConnect, setShouldConnect] = useState<boolean>(false);
 
   // on mount decide if the client should connect to ws backend
@@ -108,6 +109,7 @@ const Room: FC = () => {
     () => checkUserInRoom(params.code as string), {
       onSuccess: ({data}) => {
         setIsHost(Boolean(data.is_host));
+        setToken(data.token);
         setShouldConnect(true);
       },
       onError: () => {
@@ -129,7 +131,7 @@ const Room: FC = () => {
     readyState,
   } = useWebSocket(`${WEBSOCKET_URL}/ws/room/${params!.code}/`, {
     queryParams: {
-      token: localStorage.getItem('token') || ''
+      token: token
     },
     onOpen: () => console.log('Websocket open'),
     shouldReconnect: (closeEvent) => true,
