@@ -29,19 +29,20 @@ This setup has been tested with Python 3.10 and Node 16.
 ### Backend
 
 - Django 4.2 + Django Rest Framework : `django` `djangorestframework`
-- Django Channels 3 : `channels`- handling websockets backend
+- Django Channels 4 : `channels`- handling websockets backend
 - `django-extensions` - django utilities
 - `django-cors-headers` - handling cross-origin requests
 - `django-filter` - filter backend for drf views
-- `django-q` - async tasks
-- `django-import-export` - handles data import/export in admin
-- `django-allauth`, `dj-rest-auth`, `djangorestframework-simplejwt` - user auth
+- `django-q` - async task queue
+- `django-import-export` - data import/export in admin panel
+- `django-allauth`, `dj-rest-auth`, `djangorestframework-simplejwt` - authentication (jwt, google)
+- `django-sesame` - websockets token authentication
 - `openpyxl` - excel reports generation
 - `drf-spectacular` - OpenAPI schema generation
 - `coverage` - for code coverage reports and running unit tests
 - `mypy` + `djangorestframework-stubs` - for better typing experience
 - `psycopg2` - needed to use Postgres (in Docker container)
-- `channels_redis` - connection to Redis database service
+- `channels_redis`, `redis` - connection to Redis database service
 - `whitenoise` - building static files
 - `daphne` - production asgi server
 
@@ -166,6 +167,10 @@ EMAIL_HOST=...
 EMAIL_PORT=...
 EMAIL_USER=...
 EMAIL_PASSWORD=...
+# Google auth - configured in Google Cloud Platform
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_CLIENT_REDIRECT_URI=...
 ```
 
 `env/redis.env`
@@ -249,7 +254,8 @@ Launch a new app
 fly launch
 ```
 
-Set secrets: `PRODUCTION_HOST`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`
+Set secrets: `PRODUCTION_HOST`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
+`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI`
 
 ```shell
 fly secrets set KEY=VALUE
@@ -291,13 +297,12 @@ fly ssh console
 3) Run: `heroku create <app name>` to create the Heroku application
 4) Set your environment variables for your production environment by running:
    ```bash
-   heroku config:set VARIABLE=value
+   heroku config:set KEY=VALUE
    ```
    Or in the Heroku dashboard, go to Settings > Config Vars and add the variables there.  
    Variables to set: `DJANGO_SETTINGS_MODULE=core.settings.prod` `DJANGO_SUPERUSER_EMAIL`,
    `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `PRODUCTION_HOST=<app name>.herokuapp.com`,
-   `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`, `REACT_APP_WEBSOCKET_URL`
-   , `REACT_APP_BACKEND_URL`
+   `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`
 5) Run: `heroku stack:set container` so Heroku knows this is a containerized application
 6) Run: `heroku addons:create heroku-postgresql:hobby-dev` which creates the postgres add-on for Heroku
 7) Run: `heroku addons:create heroku-redis:hobby-dev` which creates the redis add-on for Heroku
