@@ -4,7 +4,6 @@ import jwt
 from channels.db import database_sync_to_async
 from channels.middleware import BaseMiddleware
 from django.conf import settings
-from sesame.utils import get_user as sesame_get_user
 
 
 @database_sync_to_async
@@ -62,6 +61,7 @@ class JWTAuthMiddleware(BaseMiddleware):
 @database_sync_to_async
 def get_user_by_sesame_token(token: str | None, ws_path: str):
     from django.contrib.auth.models import AnonymousUser
+    from sesame.utils import get_user as sesame_get_user
 
     if not token:
         return AnonymousUser()
