@@ -237,11 +237,42 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 OLD_PASSWORD_FIELD_ENABLED = True
 
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GOOGLE_CLIENT_REDIRECT_URI = os.getenv('GOOGLE_CLIENT_REDIRECT_URI')
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_CLIENT_SECRET,
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+            'openid'
+        ],
+    }
+}
+
 # dj-rest-auth settings
 # https://dj-rest-auth.readthedocs.io/en/latest/configuration.html#token-model
 
 REST_AUTH = {
-    'TOKEN_MODEL': None
+    # disable built-in rest_framework auth token
+    'TOKEN_MODEL': None,
+
+    # jwt settings - configured with Google auth, not used elsewhere
+    'USE_JWT': True,
+    'JWT_TOKEN_CLAIMS_SERIALIZER': 'users.serializers.auth.TokenObtainPairSerializer',
+    # do not include `access_expiration`, `refresh_expiration` in response
+    'JWT_AUTH_RETURN_EXPIRATION': False,
+    # do not set jwt cookies
+    'JWT_AUTH_COOKIE': None,
+    'JWT_AUTH_REFRESH_COOKIE': None,
+    # so that backend returns refresh token from Google login view
+    'JWT_AUTH_HTTPONLY': False
 }
 
 # Django sesame settings
