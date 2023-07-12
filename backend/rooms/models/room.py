@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -12,7 +12,12 @@ class Room(models.Model):
 
     name = models.CharField(unique=True, max_length=8)
     password = models.CharField(max_length=20, null=True, blank=True)
-    host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='host')
+    host = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='rooms_hosted'
+    )
     slots = models.PositiveIntegerField(default=1, validators=[
         MinValueValidator(1),
         MaxValueValidator(10),
@@ -20,8 +25,17 @@ class Room(models.Model):
     state = models.CharField(max_length=11, choices=State.choices, default=State.WAITING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    users = models.ManyToManyField(User, through='UserInRoom', blank=True)
-    beers = models.ManyToManyField('beers.Beer', through='rooms.BeerInRoom', blank=True)
+    users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='UserInRoom',
+        related_name='rooms_joined',
+        blank=True
+    )
+    beers = models.ManyToManyField(
+        'beers.Beer',
+        through='rooms.BeerInRoom',
+        blank=True
+    )
 
     def __str__(self):
         return f"'{self.name}' {self.users.all().count()}/{self.slots} - {self.state.lower()}"

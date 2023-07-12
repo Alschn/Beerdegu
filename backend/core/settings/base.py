@@ -171,6 +171,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Custom auth user model
+# https://docs.djangoproject.com/en/4.2/topics/auth/customizing/#substituting-a-custom-user-model
+
+AUTH_USER_MODEL = 'users.User'
+
 # Rest Framework config - Authentication, filtering...
 # https://www.django-rest-framework.org/api-guide/settings/
 

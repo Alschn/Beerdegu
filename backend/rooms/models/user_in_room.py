@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 
 from django.db import models
 
@@ -6,8 +6,15 @@ from django.db import models
 class UserInRoom(models.Model):
     """ManyToMany Through Rooms and Users."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    room = models.ForeignKey('rooms.Room', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='rooms_joined_through',
+        on_delete=models.CASCADE
+    )
+    room = models.ForeignKey(
+        'rooms.Room',
+        on_delete=models.CASCADE
+    )
     joined_at = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)
 
