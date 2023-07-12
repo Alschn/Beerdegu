@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from channels.db import database_sync_to_async
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import F, QuerySet
@@ -13,6 +13,8 @@ from beers.serializers import BeerRepresentationalSerializer, BeerWithResultsSer
 from rooms.models import Room, UserInRoom, BeerInRoom, Rating
 from rooms.serializers import RatingSerializer, RoomSerializer
 from users.serializers.user import UserSerializer
+
+User = get_user_model()
 
 INACTIVE_TIMEOUT_SECONDS = 60
 

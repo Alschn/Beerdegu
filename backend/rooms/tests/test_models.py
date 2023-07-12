@@ -1,8 +1,10 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from beers.models import Beer
 from rooms.models import Room, Rating, UserInRoom, BeerInRoom
+
+User = get_user_model()
 
 
 class RoomsModelsTests(TestCase):

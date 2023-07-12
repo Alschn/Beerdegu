@@ -25,7 +25,6 @@ class OutstandingTokenAdmin(BaseOutstandingTokenAdmin):
 admin.site.unregister([Group])
 
 # register user with new user admin
-admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 # unregister model and later register it with a new admin
