@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -10,7 +8,7 @@ from rooms.models import BeerInRoom
 class Rating(models.Model):
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        related_name="ratings",
+        related_name='ratings',
         on_delete=models.SET_NULL,
         null=True
     )
@@ -30,8 +28,8 @@ class Rating(models.Model):
         ordering = ['id']
 
     def __str__(self) -> str:
-        to_str = f"{self.note} by {self.added_by}"
-        rating_for: Optional[BeerInRoom] = self.belongs_to.all().first()
+        to_str = f'{self.note} by {self.added_by}'
+        rating_for: BeerInRoom | None = self.belongs_to.first()
         if rating_for:
-            return f"{rating_for} - {to_str}"
+            return f'{rating_for} - {to_str}'
         return to_str

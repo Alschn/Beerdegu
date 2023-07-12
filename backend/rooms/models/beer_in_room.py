@@ -7,10 +7,12 @@ class BeerInRoom(OrderedModel):
 
     beer = models.ForeignKey(
         'beers.Beer',
+        related_name='rooms_through',
         on_delete=models.CASCADE
     )
     room = models.ForeignKey(
         'rooms.Room',
+        related_name='beers_through',
         on_delete=models.CASCADE
     )
     ratings = models.ManyToManyField(

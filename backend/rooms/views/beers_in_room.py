@@ -54,7 +54,7 @@ class BeersInRoomView(GenericAPIView):
         beers = Beer.objects.filter(
             id__in=beers_in_room.values_list('beer_id', flat=True)
         ).order_by(
-            'beerinroom__order'
+            'rooms_through__order'
         )
         return Response(
             self.serializer_list_class(instance=beers, many=True).data,

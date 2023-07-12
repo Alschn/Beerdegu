@@ -126,7 +126,7 @@ def get_beers_in_room(room_name: str):
     except ObjectDoesNotExist:
         return []
 
-    beers = room.beers.order_by('beerinroom__order')
+    beers = room.beers.order_by('rooms_through__order')
     serialized = BeerRepresentationalSerializer(beers, many=True).data
     return serialized
 
