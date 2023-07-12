@@ -1,3 +1,5 @@
+from .google_login import GoogleLoginAPIView
+from .google_url import GoogleAuthURLAPIView
 from .logout import LogoutAPIView
 from .password_change import PasswordChangeAPIView
 from .password_reset import PasswordResetAPIView

@@ -57,10 +57,9 @@ class RoomsAPIViewsTests(TestCase):
         response = self.client.get('/api/rooms/12345678/in/')
         to_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            {'message': 'Test is in this room.', 'is_host': True},
-            to_json
-        )
+        self.assertIn('message', to_json)
+        self.assertIn('token', to_json)
+        self.assertEqual(to_json['is_host'], True)
 
     def test_user_is_in_room_not_host(self):
         self._require_login_and_auth(user=self.user2)
@@ -68,10 +67,9 @@ class RoomsAPIViewsTests(TestCase):
         response = self.client.get('/api/rooms/12345678/in/')
         to_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            {'message': 'Test2 is in this room.', 'is_host': False},
-            to_json
-        )
+        self.assertIn('message', to_json)
+        self.assertIn('token', to_json)
+        self.assertEqual(to_json['is_host'], False)
 
     def test_join_room_not_found(self):
         self._require_login_and_auth(user=self.user1)
@@ -332,13 +330,14 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_add_beer_success(self):
         self._require_login_and_auth(self.user3)
+        room_name = 'abcdefgh'
         beer_to_add = Beer.objects.create(name='test', percentage=5, volume_ml=500)
-        beers_before = Beer.objects.filter(room__name='abcdefgh').order_by('id')
+        beers_before = Beer.objects.filter(room__name=room_name).order_by('id')
         self.assertEqual(beers_before.count(), 4)
-        response = self.client.put('/api/rooms/abcdefgh/beers/', {
+        response = self.client.put(f'/api/rooms/{room_name}/beers/', {
             'beer_id': beer_to_add.id
         })
-        beers_after = Beer.objects.filter(room__name='abcdefgh').order_by('id')
+        beers_after = Beer.objects.filter(room__name=room_name).order_by('beerinroom__order')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             response.json(),

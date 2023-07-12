@@ -34,7 +34,7 @@ class BeersInRoomView(GenericAPIView):
         room_name = self.kwargs.get(self.lookup_url_kwarg)
         return BeerInRoom.objects.filter(
             room__name=room_name
-        ).select_related('beer').order_by('beer_id')
+        ).select_related('beer').order_by('order')
 
     def initial(self, request: Request, *args: Any, **kwargs: Any) -> None:
         room_name = self.kwargs.get(self.lookup_url_kwarg)
@@ -51,7 +51,11 @@ class BeersInRoomView(GenericAPIView):
     )
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         beers_in_room = self.get_queryset()
-        beers = Beer.objects.filter(id__in=beers_in_room.values_list('beer_id', flat=True)).order_by('id')
+        beers = Beer.objects.filter(
+            id__in=beers_in_room.values_list('beer_id', flat=True)
+        ).order_by(
+            'beerinroom__order'
+        )
         return Response(
             self.serializer_list_class(instance=beers, many=True).data,
             status.HTTP_200_OK
@@ -62,10 +66,11 @@ class BeersInRoomView(GenericAPIView):
         responses=BeerSerializer(many=True),
     )
     def put(self, request: Request, room_name: str, **kwargs: Any) -> Response:
+        room = Room.objects.get(name=room_name)
         serializer = RoomAddBeerSerializer(
             data=request.data,
             beers_in_room=self.get_queryset(),
-            room=Room.objects.get(name=room_name)
+            room=room
         )
         serializer.is_valid(raise_exception=True)
         beers = serializer.save()

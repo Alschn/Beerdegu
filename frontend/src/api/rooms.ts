@@ -5,6 +5,7 @@ import {BeerObject} from "./ws";
 
 interface CheckUserInRoomData {
   is_host: boolean;
+  token: string;
 }
 
 interface LeaveRoomData {

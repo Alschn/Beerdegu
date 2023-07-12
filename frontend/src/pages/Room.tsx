@@ -1,4 +1,4 @@
-import {Box, CircularProgress, Grid, useMediaQuery, useTheme} from "@mui/material";
+import {Box, CircularProgress, Grid, Typography, useMediaQuery, useTheme} from "@mui/material";
 import {BaseSyntheticEvent, FC, useEffect, useReducer, useState} from "react";
 import {useParams} from "react-router";
 import useWebSocket from "react-use-websocket";
@@ -98,28 +98,25 @@ const Room: FC = () => {
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));
 
-  const [isHost, setIsHost] = useState<boolean>(false);
-  const [shouldConnect, setShouldConnect] = useState<boolean>(false);
-
   // on mount decide if the client should connect to ws backend
   // or get directed back to home page
-  const {isLoading: isLoadingCheckUser} = useQuery(
+  const {
+    isLoading: isLoadingCheckUser,
+    isSuccess: isSuccessCheckUser,
+    isError: isErrorCheckUser,
+    data: dataCheckUser,
+  } = useQuery(
     ['userInRoom', params!.code],
     () => checkUserInRoom(params.code as string), {
-      onSuccess: ({data}) => {
-        setIsHost(Boolean(data.is_host));
-        setShouldConnect(true);
-      },
-      onError: () => {
-        setShouldConnect(false);
-        navigate('/');
-      },
       enabled: Boolean(params),
       cacheTime: 0,
       staleTime: Infinity,
       refetchOnWindowFocus: false,
     }
   );
+
+  const isHost = dataCheckUser?.data.is_host || false;
+  const token = dataCheckUser?.data.token || '';
 
   // State related to data that comes via websockets
   const [state, dispatch] = useReducer(roomReducer, initialState);
@@ -129,7 +126,7 @@ const Room: FC = () => {
     readyState,
   } = useWebSocket(`${WEBSOCKET_URL}/ws/room/${params!.code}/`, {
     queryParams: {
-      token: localStorage.getItem('token') || ''
+      token: token
     },
     onOpen: () => console.log('Websocket open'),
     shouldReconnect: (closeEvent) => true,
@@ -142,7 +139,7 @@ const Room: FC = () => {
     },
     reconnectAttempts: TRY_RECONNECT_TIMES,
     share: true,
-  }, shouldConnect);
+  }, isSuccessCheckUser);
 
   const connectionStatus = WebsocketConnectionState[readyState];
 
@@ -215,6 +212,19 @@ const Room: FC = () => {
       height: '100vh',
     }}>
       <CircularProgress/>
+    </Box>
+  );
+
+  if (isErrorCheckUser) return (
+    <Box sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+    }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Could not join room!
+      </Typography>
     </Box>
   );
 

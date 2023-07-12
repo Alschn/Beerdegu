@@ -4,7 +4,8 @@ from django.views.generic import TemplateView
 from .views import (
     RegisterAPIView, LogoutAPIView, PasswordChangeAPIView,
     PasswordResetAPIView, PasswordResetConfirmAPIView,
-    JWTObtainPairView, JWTRefreshView, JWTVerifyView
+    JWTObtainPairView, JWTRefreshView, JWTVerifyView,
+    GoogleLoginAPIView, GoogleAuthURLAPIView
 )
 
 urlpatterns = [
@@ -23,6 +24,10 @@ urlpatterns = [
         'auth/password/reset/confirm/<str:uidb64>/<str:token>/',
         PasswordResetConfirmAPIView.as_view(), name='password_reset_confirm'
     ),
+
+    # google auth url and login
+    path('auth/providers/google/url/', GoogleAuthURLAPIView.as_view(), name='auth-google-login-url'),
+    path('auth/providers/google/', GoogleLoginAPIView.as_view(), name='auth-google-login'),
 
     # This url is used by django-allauth and empty TemplateView is
     # defined just to allow reverse() call inside app, for example when email

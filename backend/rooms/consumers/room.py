@@ -44,12 +44,14 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         if not (current_user := self.scope.get('user')) or current_user.is_anonymous:
+            # reject unauthenticated users
+            await self.close()
             return
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'room_%s' % self.room_name
 
-        self.private_group_name = f"room_user_{current_user.username}"
+        self.private_group_name = f'room_user_{current_user.username}'
 
         # public room
         await self.channel_layer.group_add(
@@ -70,18 +72,20 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             self.room_group_name, {'type': 'get_users'},
         )
 
-        # get room state
+        # get room state on join
         await self.channel_layer.group_send(
             self.room_group_name, {'type': 'get_room_state'},
         )
 
     async def receive_json(self, content: dict, **kwargs: Any):
+        user = self.scope['user']
+        command = content.get('command')
         data_content = content.get('data')
 
         if settings.DEBUG:
-            print(f"\nReceived:\n{content}\nFrom: {self.scope.get('user')}")
+            print(f'\nReceived:\n{content}\nFrom: {user}')
 
-        if not (command := content.get('command')):
+        if not command:
             return
 
         if command in self.private_commands:
@@ -92,23 +96,25 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
                     'data': data_content,
                 }
             )
-        else:
-            if command == "get_new_message":
-                data_content = {
-                    'message': content.get('data'),
-                    'user': str(self.scope.get('user')),
-                }
-
+        elif command in self.commands:
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': self.commands.get(command, 'invalid_command'),
+                    'type': self.commands[command],
                     'data': data_content,
                 }
             )
+        else:
+            await self.invalid_command()
 
-    async def disconnect(self, code):
-        if not self.scope.get('user'):
+        await async_bump_users_last_active_field(
+            room_name=self.room_name,
+            user=user
+        )
+
+    async def disconnect(self, code: int):
+        user = self.scope['user']
+        if user.is_anonymous:
             return
 
         await self.channel_layer.group_discard(
@@ -120,6 +126,13 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             self.private_group_name,
             self.channel_name
         )
+
+    async def send_json(self, content: dict, close: bool = False):
+        content = {
+            'timestamp': timezone.now().isoformat(),
+            **content
+        }
+        await super().send_json(content, close=close)
 
     """
     Event handlers:
@@ -142,13 +155,16 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         Receive message => Broadcast it to others and update client
         'get_new_message' => 'set_new_message'
         """
-        content: dict = event.get('data')
-
+        user = self.scope['user']
+        message = event.get('data')
+        content = {
+            'message': message,
+            'user': str(user),
+        }
         await self.send_json(
             {
-                'data': content,
                 'command': 'set_new_message',
-                'timestamp': timezone.now().isoformat()
+                'data': content,
             }
         )
 
@@ -160,9 +176,8 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         users = await async_get_users_in_room(room_name=self.room_name)
         await self.send_json(
             {
-                'data': users,
                 'command': 'set_users',
-                'timestamp': timezone.now().isoformat()
+                'data': users,
             }
         )
 
@@ -170,21 +185,15 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         beers = await async_get_beers_in_room(room_name=self.room_name)
         await self.send_json(
             {
-                'data': beers,
                 'command': 'set_beers',
-                'timestamp': timezone.now().isoformat()
+                'data': beers,
             }
         )
 
     async def load_beers(self, event: dict):
-        beers = await async_get_beers_in_room(room_name=self.room_name)
-        await self.send_json(
-            {
-                'data': beers,
-                'command': 'set_beers',
-                'timestamp': timezone.now().isoformat()
-            }
-        )
+        """Alias for `get_beers` command handler."""
+
+        await self.get_beers(event)
 
     async def get_form_data(self, event: dict):
         beer_id = event.get('data')
@@ -197,7 +206,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_form_data',
                 'data': form_data,
-                'timestamp': timezone.now().isoformat(),
                 'beer_id': beer_id
             }
         )
@@ -208,15 +216,20 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         Server updates last_active field.
         """
         user = self.scope['user']
-        await async_bump_users_last_active_field(room_name=self.room_name, user=user)
+        await async_bump_users_last_active_field(
+            room_name=self.room_name,
+            user=user
+        )
 
     async def user_form_save(self, event: dict):
         user = self.scope['user']
         received_data = event.get('data')
         beer_id = received_data.get('beer_id')
         await async_save_user_form(
-            room_name=self.room_name, user=user,
-            beer_id=beer_id, data=received_data
+            room_name=self.room_name,
+            user=user,
+            beer_id=beer_id,
+            data=received_data
         )
 
     async def get_room_state(self, event: dict):
@@ -225,7 +238,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_room_state',
                 'data': room,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
@@ -236,7 +248,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_room_state',
                 'data': updated_room,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
@@ -246,7 +257,6 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_final_results',
                 'data': final,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
@@ -257,10 +267,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_user_results',
                 'data': final,
-                'timestamp': timezone.now().isoformat()
             }
         )
 
-    async def invalid_command(self, event: dict):
+    async def invalid_command(self, *args, **kwargs):
         if settings.DEBUG:
             print(f'Received an invalid command!\n')
