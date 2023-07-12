@@ -1,6 +1,6 @@
 from typing import Optional
 
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -8,7 +8,12 @@ from rooms.models import BeerInRoom
 
 
 class Rating(models.Model):
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="ratings",
+        on_delete=models.SET_NULL,
+        null=True
+    )
     color = models.TextField(max_length=300, blank=True, null=True)
     foam = models.TextField(max_length=300, blank=True, null=True)
     smell = models.TextField(max_length=300, blank=True, null=True)

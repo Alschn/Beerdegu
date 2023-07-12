@@ -2,7 +2,7 @@ from io import BytesIO
 from tempfile import NamedTemporaryFile
 from typing import NamedTuple
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -11,6 +11,8 @@ from rooms.async_db import (
     get_final_user_beer_ratings,
     get_final_beers_ratings
 )
+
+User = get_user_model()
 
 MAIN_HEADERS = [
     'NUMER', 'KOLOR', 'PIANA', 'ZAPACH', 'SMAK', 'OPINIA', 'OCENA KOŃCOWA'
