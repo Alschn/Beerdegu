@@ -171,6 +171,9 @@ EMAIL_PASSWORD=...
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 GOOGLE_CLIENT_REDIRECT_URI=...
+# Site object's name in Django admin - needed for building links to frontend
+# e.g. when sending email with password reset link or activation link
+FRONTEND_SITE_NAME=beerdegu
 ```
 
 `env/redis.env`
@@ -255,7 +258,7 @@ fly launch
 ```
 
 Set secrets: `PRODUCTION_HOST`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
-`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI`
+`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI`, `FRONTEND_SITE_NAME`
 
 ```shell
 fly secrets set KEY=VALUE

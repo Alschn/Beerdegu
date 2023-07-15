@@ -1,5 +1,7 @@
+from allauth.account import app_settings as allauth_settings
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import PasswordResetSerializer
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import (
     TokenRefreshSerializer,
@@ -35,6 +37,31 @@ class UserPasswordResetSerializer(PasswordResetSerializer):
 
 
 class TokenObtainPairSerializer(BaseTokenObtainPairSerializer):
+
+    def _validate_user_email_is_verified(self):
+        is_email_verification_mandatory = (
+            allauth_settings.EMAIL_VERIFICATION == allauth_settings.EmailVerificationMethod.MANDATORY
+        )
+        if not is_email_verification_mandatory:
+            return
+
+        user = self.user
+        verified_emails = user.emailaddress_set.filter(email=user.email, verified=True)
+
+        if not verified_emails.exists():
+            raise serializers.ValidationError(_('E-mail is not verified.'))
+
+    def validate(self, attrs: dict) -> dict:
+        data = super().validate(attrs)
+
+        self._validate_user_email_is_verified()
+
+        refresh = self.get_token(self.user)
+
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+        return data
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
