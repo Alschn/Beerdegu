@@ -1,0 +1,47 @@
+ARG PYTHON_VERSION=3.10.4-alpine
+
+# BASE-IMAGE - get base python image with pipenv
+FROM python:${PYTHON_VERSION} as base-image
+
+RUN \
+    apk update && \
+    apk upgrade && \
+    pip install --upgrade pip && \
+    pip install pipenv
+
+# COMPILE-IMAGE - install backend dependencies, setup virtual environment
+FROM base-image as compile-image
+
+ENV PYTHONUNBUFFERED 1
+ENV PIPENV_VENV_IN_PROJECT 1
+
+WORKDIR /app/backend
+
+COPY backend/Pipfile backend/Pipfile.lock /app/backend/
+
+RUN \
+    apk update && \
+    apk upgrade && \
+    apk add --virtual .build-deps gcc musl-dev postgresql-dev && \
+    pipenv install --deploy --python 3.10 && \
+    apk --purge del .build-deps
+
+# RUNTIME - copy environment, collect staticfiles, install packages required at runtime
+FROM base-image as runtime
+
+ENV PATH="/app/backend/.venv/bin:$PATH"
+
+COPY --from=compile-image /app/backend/.venv /app/backend/.venv
+COPY backend /app/backend/
+
+RUN \
+    apk add bash postgresql-libs && \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+ENV DJANGO_SETTINGS_MODULE core.settings.static
+
+RUN mkdir -p /app/staticfiles && python backend/manage.py collectstatic --noinput
+
+WORKDIR /app/backend
