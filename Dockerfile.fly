@@ -30,15 +30,15 @@ RUN \
 # NODE-IMAGE - install frontend dependencies, build frontend files
 FROM node:${NODE_VERSION} as node-image
 
-ARG API_URL
-ARG WEBSOCKETS_URL
+ARG VITE_BACKEND_URL
+ARG VITE_WEBSOCKET_URL
+
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+ENV VITE_WEBSOCKET_URL=$VITE_WEBSOCKET_URL
 
 WORKDIR /app/frontend
 
 COPY frontend /app/frontend/
-
-ENV VITE_BACKEND_URL=$API_URL
-ENV VITE_WEBSOCKET_URL=$WEBSOCKETS_URL
 
 RUN \
     apk update && \
