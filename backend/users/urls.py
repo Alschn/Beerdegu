@@ -1,11 +1,11 @@
-from django.urls import path, re_path
-from django.views.generic import TemplateView
+from django.urls import path
 
 from .views import (
     RegisterAPIView, LogoutAPIView, PasswordChangeAPIView,
     PasswordResetAPIView, PasswordResetConfirmAPIView,
     JWTObtainPairView, JWTRefreshView, JWTVerifyView,
-    GoogleLoginAPIView, GoogleAuthURLAPIView
+    GoogleLoginAPIView, GoogleAuthURLAPIView,
+    VerifyEmailAPIView, ResendEmailAPIView
 )
 
 urlpatterns = [
@@ -29,12 +29,13 @@ urlpatterns = [
     path('auth/providers/google/url/', GoogleAuthURLAPIView.as_view(), name='auth-google-login-url'),
     path('auth/providers/google/', GoogleLoginAPIView.as_view(), name='auth-google-login'),
 
-    # This url is used by django-allauth and empty TemplateView is
-    # defined just to allow reverse() call inside app, for example when email
-    # with verification link is being sent, then it's required to render email
-    # content.
-    re_path(
-        r'^auth/account-confirm-email/(?P<key>[-:\w]+)/$', TemplateView.as_view(),
-        name='account_confirm_email',
+    # email verification
+    path(
+        'auth/register/confirm-email/', VerifyEmailAPIView.as_view(),
+        name='account_email_verification_sent',
     ),
+    path(
+        'auth/register/resend-email/', ResendEmailAPIView.as_view(),
+        name='account_email_verification_resend',
+    )
 ]

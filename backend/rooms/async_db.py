@@ -4,11 +4,13 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import F, QuerySet
+from django.db.models import QuerySet, Subquery, OuterRef
 from django.db.models.aggregates import Avg
-from django.db.models.fields import DecimalField
+from django.db.models.expressions import F
+from django.db.models.fields import DecimalField, FloatField
 from django.utils import timezone
 
+from beers.models import Beer
 from beers.serializers import BeerRepresentationalSerializer, BeerWithResultsSerializer
 from rooms.models import Room, UserInRoom, BeerInRoom, Rating
 from rooms.serializers import RatingSerializer, RoomSerializer
@@ -68,12 +70,11 @@ def save_user_form(room_name: str, user: User, beer_id: str, data: dict):
     if user.is_anonymous or not beer_id or not data:
         return
 
-    try:
-        beer_in_room = BeerInRoom.objects.get(room__name=room_name, beer__id=beer_id)
-    except ObjectDoesNotExist:
-        return
-
-    user_ratings = beer_in_room.ratings.filter(added_by=user)
+    user_ratings = Rating.objects.filter(
+        added_by=user,
+        room__name=room_name,
+        beer__id=beer_id
+    )
 
     clean_data = data
     clean_data.pop('beer_id', None)
@@ -86,38 +87,45 @@ def save_user_form(room_name: str, user: User, beer_id: str, data: dict):
         except ValueError:
             clean_data['note'] = None
 
-    # Create new rating if one does not exist
-    if not user_ratings.exists():
-        # Add added_by field to the dictionary, from which Rating instance will be created
-        new_rating = Rating.objects.create(**clean_data, added_by=user)
-        # add rating to m2m field
-        beer_in_room.ratings.add(new_rating)
-        return RatingSerializer(instace=new_rating).data
+    # update existing rating
+    if user_ratings.exists():
+        user_ratings.update(**clean_data)
+        rating = user_ratings.first()
+        return RatingSerializer(instance=rating).data
 
-    # If rating exists, update it with received data
-    user_ratings.update(**clean_data)
-    rating = user_ratings.first()
-    return RatingSerializer(instance=rating).data
+    try:
+        room = Room.objects.get(name=room_name)
+        beer = Beer.objects.get(id=beer_id)
+    except ObjectDoesNotExist:
+        return
+
+    # create new rating if it's missing
+    new_rating = Rating.objects.create(**clean_data, added_by=user, room=room, beer=beer)
+    return RatingSerializer(instace=new_rating).data
 
 
 def get_user_form_data(room_name: str, user: User, beer_id: str):
     if user.is_anonymous or not beer_id:
         return
 
+    ratings = Rating.objects.filter(
+        added_by=user,
+        room__name=room_name,
+        beer__id=beer_id
+    )
+    rating = ratings.first()
+
+    if rating:
+        return RatingSerializer(instance=rating).data
+
     try:
-        beer_in_room = BeerInRoom.objects.get(room__name=room_name, beer__id=beer_id)
+        beer = Beer.objects.get(id=beer_id)
+        room = Room.objects.get(name=room_name)
     except ObjectDoesNotExist:
         return
 
-    ratings = beer_in_room.ratings.filter(added_by=user)
-    rating = ratings.first()
-
-    if not rating:
-        new_rating = Rating.objects.create(added_by=user)
-        beer_in_room.ratings.add(new_rating)
-        return RatingSerializer(new_rating).data
-
-    return RatingSerializer(instance=rating).data
+    new_rating = Rating.objects.create(added_by=user, beer=beer, room=room)
+    return RatingSerializer(new_rating).data
 
 
 def get_beers_in_room(room_name: str):
@@ -126,7 +134,7 @@ def get_beers_in_room(room_name: str):
     except ObjectDoesNotExist:
         return []
 
-    beers = room.beers.order_by('beerinroom__order')
+    beers = room.beers.order_by('rooms_through__order')
     serialized = BeerRepresentationalSerializer(beers, many=True).data
     return serialized
 
@@ -159,28 +167,43 @@ def get_final_user_beer_ratings(room_name: str, user: User):
     if user.is_anonymous:
         return
 
+    related_beer_in_room = BeerInRoom.objects.filter(
+        room__name=room_name,
+        beer=OuterRef('beer')
+    )
     ratings = Rating.objects.filter(
         added_by=user,
-        belongs_to__room__name=room_name
+        room__name=room_name
     ).annotate(
-        beer=F('belongs_to__beer')
-    ).order_by(
-        'belongs_to__order'
-    )
-    serialized = RatingSerializer(ratings, many=True).data
-    return serialized
+        beer_order=Subquery(
+            related_beer_in_room.values('order')[:1]
+        ),
+    ).order_by('beer_order')
+
+    serializer = RatingSerializer(ratings, many=True)
+    return serializer.data
 
 
 def get_final_beers_ratings(room_name: str):
-    beers_in_room = BeerInRoom.objects.filter(room__name=room_name)
+    beers_in_room = BeerInRoom.objects.filter(room__name=room_name).only('beer', 'room', 'order')
     if not beers_in_room.exists():
         return []
 
+    # find average rating for each beer in the room
+    rating_subquery = Rating.objects.filter(
+        beer=OuterRef('beer'), room=OuterRef('room')
+    ).values('beer', 'room').annotate(
+        average_rating=Avg('note', output_field=FloatField()),
+    )
+
     beers_with_ratings = beers_in_room.annotate(
-        average_rating=Avg('ratings__note', output_field=DecimalField())
+        average_rating=Subquery(
+            rating_subquery.values('average_rating')[:1]
+        )
     ).order_by('order')
-    serialized = BeerWithResultsSerializer(beers_with_ratings, many=True).data
-    return serialized
+
+    serializer = BeerWithResultsSerializer(beers_with_ratings, many=True)
+    return serializer.data
 
 
 async_get_users_in_room = database_sync_to_async(get_users_in_room)

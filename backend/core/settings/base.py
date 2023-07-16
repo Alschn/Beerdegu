@@ -238,7 +238,19 @@ COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', 'localhost')
 # django-allauth settings
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+
+ACCOUNT_CONFIRM_EMAIL_ON_GET = False
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN = 120
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+SOCIALACCOUNT_EMAIL_REQUIRED = ACCOUNT_EMAIL_REQUIRED
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 OLD_PASSWORD_FIELD_ENABLED = True
 
@@ -347,3 +359,5 @@ CSRF_TRUSTED_ORIGINS = [
 
 EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
 DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+FRONTEND_SITE_NAME = os.getenv('FRONTEND_SITE_NAME')

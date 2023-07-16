@@ -144,8 +144,8 @@ class RoomAddBeerSerializer(serializers.Serializer):
             room=self.room,
             beer=beer
         )
-        return Beer.objects.filter(room=self.room).order_by(
-            'beerinroom__order'
+        return Beer.objects.filter(rooms=self.room).order_by(
+            'rooms_through__order'
         )
 
 

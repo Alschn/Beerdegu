@@ -271,7 +271,7 @@ class RoomsAPIViewsTests(TestCase):
     def test_list_beers_in_room(self):
         self._require_login_and_auth(self.user3)
         response = self.client.get('/api/rooms/abcdefgh/beers/')
-        queryset = Beer.objects.filter(room__name='abcdefgh').order_by('id')
+        queryset = Beer.objects.filter(rooms__name='abcdefgh').order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
@@ -282,7 +282,7 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)
         response = self.client.get('/api/rooms/abcdefgh/beers/')
-        queryset = Beer.objects.filter(room__name='abcdefgh').order_by('id')
+        queryset = Beer.objects.filter(rooms__name='abcdefgh').order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
@@ -334,12 +334,12 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(self.user3)
         room_name = 'abcdefgh'
         beer_to_add = Beer.objects.create(name='test', percentage=5, volume_ml=500)
-        beers_before = Beer.objects.filter(room__name=room_name).order_by('id')
+        beers_before = Beer.objects.filter(rooms__name=room_name).order_by('id')
         self.assertEqual(beers_before.count(), 4)
         response = self.client.put(f'/api/rooms/{room_name}/beers/', {
             'beer_id': beer_to_add.id
         })
-        beers_after = Beer.objects.filter(room__name=room_name).order_by('beerinroom__order')
+        beers_after = Beer.objects.filter(rooms__name=room_name).order_by('rooms_through__order')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             response.json(),

@@ -108,7 +108,7 @@ CHANNEL_LAYERS = {
 
 Q_CLUSTER = {
     'name': 'beerdegu_cluster',
-    'workers': 8,
+    'workers': int(os.getenv('Q_CLUSTER_WORKERS', 4)),
     'recycle': 500,
     'timeout': 60,
     'compress': True,
@@ -136,6 +136,8 @@ EMAIL_PORT = int(os.environ['EMAIL_PORT'])
 EMAIL_HOST_USER = os.environ['EMAIL_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_PASSWORD']
 EMAIL_USE_TLS = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CSRF_TRUSTED_ORIGINS = [
     f'https://{PRODUCTION_HOST}'

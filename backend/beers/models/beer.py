@@ -7,18 +7,25 @@ from django.db import models
 class Beer(models.Model):
     name = models.CharField(max_length=60)
     brewery = models.ForeignKey(
-        'beers.Brewery', on_delete=models.SET_NULL,
+        'beers.Brewery',
+        related_name='beers',
+        on_delete=models.SET_NULL,
         null=True, blank=True
     )
     style = models.ForeignKey(
-        'beers.BeerStyle', on_delete=models.SET_NULL,
+        'beers.BeerStyle',
+        related_name='beers',
+        on_delete=models.SET_NULL,
         null=True, blank=True
     )
     percentage = models.DecimalField(
-        max_digits=4, decimal_places=2,
+        max_digits=4,
+        decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))]
     )
-    volume_ml = models.PositiveIntegerField()
+    volume_ml = models.PositiveIntegerField(
+        help_text="Volume of the beer in milliliters [mL]"
+    )
     hop_rate = models.PositiveIntegerField(
         null=True, blank=True,
         help_text="Grams of hops per liter [g/L]"
@@ -33,7 +40,11 @@ class Beer(models.Model):
     )
     image = models.URLField(null=True, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
-    hops = models.ManyToManyField('beers.Hop', blank=True)
+    hops = models.ManyToManyField(
+        'beers.Hop',
+        related_name='beers',
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -34,12 +34,28 @@ class RoomsModelsTests(TestCase):
         self.assertEqual(str(self.room1), "'TestRoom' 1/4 - waiting")
 
     def test_rating_to_string(self):
-        rating = Rating.objects.create(added_by=self.user, note=10)
-        self.assertEqual(str(rating), f'10 by {self.user.username}')
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        rating = Rating.objects.create(added_by=self.user, beer=beer, room=self.room1, note=10)
+        self.assertEqual(
+            str(rating),
+            f'Atak Chmielu - 10 by {self.user.username} in room {self.room1.name}'
+        )
 
     def test_rating_without_note_to_string(self):
-        rating = Rating.objects.create(added_by=self.user)
-        self.assertEqual(str(rating), f'None by {self.user.username}')
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        rating = Rating.objects.create(added_by=self.user, beer=beer, room=self.room1)
+        self.assertEqual(
+            str(rating),
+            f'Atak Chmielu - ? by {self.user.username} in room {self.room1.name}'
+        )
+
+    def test_rating_without_room_to_string(self):
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        rating = Rating.objects.create(added_by=self.user, beer=beer, note=9)
+        self.assertEqual(
+            str(rating),
+            f'Atak Chmielu - 9 by {self.user.username}'
+        )
 
     def test_beer_in_room_to_string(self):
         user = User.objects.create_user(username="test2", password="test2")
