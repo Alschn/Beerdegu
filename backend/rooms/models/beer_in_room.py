@@ -1,5 +1,11 @@
+import typing
+
 from django.db import models
+from django.db.models import QuerySet
 from ordered_model.models import OrderedModel
+
+if typing.TYPE_CHECKING:
+    from rooms.models import Rating
 
 
 class BeerInRoom(OrderedModel):
@@ -15,11 +21,6 @@ class BeerInRoom(OrderedModel):
         related_name='beers_through',
         on_delete=models.CASCADE
     )
-    ratings = models.ManyToManyField(
-        'rooms.Rating',
-        related_name='belongs_to',
-        blank=True
-    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -30,3 +31,7 @@ class BeerInRoom(OrderedModel):
 
     def __str__(self) -> str:
         return f"{self.room.name} - #{self.order} - {self.beer}"
+
+    @property
+    def ratings(self) -> QuerySet['Rating']:
+        return self.beer.ratings.filter(room=self.room)
