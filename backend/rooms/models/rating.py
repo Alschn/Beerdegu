@@ -2,15 +2,26 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from rooms.models import BeerInRoom
-
 
 class Rating(models.Model):
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='ratings',
         on_delete=models.SET_NULL,
+        blank=True,
         null=True
+    )
+    beer = models.ForeignKey(
+        'beers.Beer',
+        related_name='ratings',
+        on_delete=models.CASCADE,
+    )
+    room = models.ForeignKey(
+        'rooms.Room',
+        related_name='ratings',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
     )
     color = models.TextField(max_length=300, blank=True, null=True)
     foam = models.TextField(max_length=300, blank=True, null=True)
@@ -28,8 +39,7 @@ class Rating(models.Model):
         ordering = ['id']
 
     def __str__(self) -> str:
-        to_str = f'{self.note} by {self.added_by}'
-        rating_for: BeerInRoom | None = self.belongs_to.first()
-        if rating_for:
-            return f'{rating_for} - {to_str}'
+        to_str = f'{self.beer.name} - {self.note or "?"} by {self.added_by}'
+        if self.room is not None:
+            to_str += f' in room {self.room.name}'
         return to_str

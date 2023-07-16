@@ -4,7 +4,6 @@ from rooms.models import Rating
 
 
 class RatingSerializer(serializers.ModelSerializer):
-    beer = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Rating

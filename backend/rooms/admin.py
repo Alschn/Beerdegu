@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Avg, QuerySet, Count
+from django.db.models import Avg, QuerySet, Count, Subquery, OuterRef, IntegerField, FloatField
 from django.http import HttpRequest
 from import_export.admin import ImportExportActionModelAdmin
 from ordered_model.admin import OrderedModelAdmin
@@ -17,7 +17,8 @@ class RoomAdmin(ImportExportActionModelAdmin):
 
 @admin.register(Rating)
 class RatingAdmin(ImportExportActionModelAdmin):
-    list_select_related = ('added_by',)
+    list_display = ('id', 'beer', 'note', 'added_by', 'room')
+    list_select_related = ('added_by', 'room', 'beer')
 
 
 @admin.register(BeerInRoom)
@@ -32,9 +33,18 @@ class BeerInRoomAdmin(OrderedModelAdmin, ImportExportActionModelAdmin):
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[BeerInRoom]:
         queryset = super().get_queryset(request)
-        return queryset.prefetch_related('ratings').annotate(
-            notes_count=Count('ratings'),
-            average_note=Avg('ratings__note')
+
+        rating_subquery = Rating.objects.filter(
+            beer=OuterRef('beer'),
+            room=OuterRef('room')
+        ).values('beer', 'room').annotate(
+            average_note=Avg('note', output_field=FloatField()),
+            notes_count=Count('note', output_field=IntegerField())
+        ).values('average_note', 'notes_count')
+
+        return queryset.annotate(
+            notes_count=Subquery(rating_subquery.values('notes_count')[:1]),
+            average_note=Subquery(rating_subquery.values('average_note')[:1])
         )
 
     def notes_count(self, obj) -> int:
