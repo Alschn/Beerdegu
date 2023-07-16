@@ -108,7 +108,7 @@ CHANNEL_LAYERS = {
 
 Q_CLUSTER = {
     'name': 'beerdegu_cluster',
-    'workers': 8,
+    'workers': int(os.getenv('Q_CLUSTER_WORKERS', 4)),
     'recycle': 500,
     'timeout': 60,
     'compress': True,
