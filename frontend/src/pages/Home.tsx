@@ -40,11 +40,11 @@ const Home: FC = () => {
               </Fragment>
             ) : (
               <Fragment>
-                <Button variant="contained" color="primary" onClick={() => navigate('/login')}>
+                <Button variant="contained" color="primary" onClick={() => navigate('/auth/login')}>
                   Login
                 </Button>
 
-                <Button variant="contained" color="error" onClick={() => navigate('/register')}>
+                <Button variant="contained" color="error" onClick={() => navigate('/auth/register')}>
                   Register
                 </Button>
               </Fragment>

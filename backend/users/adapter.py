@@ -9,8 +9,8 @@ def build_frontend_url(path: str) -> str:
 
 
 class AccountAdapter(DefaultAccountAdapter):
-    password_reset_url_path = '/auth/password/reset/confirm/{uid}/{token}/'
-    email_confirmation_url_path = '/auth/register/confirm/{key}/'
+    password_reset_url_path = '/auth/password/reset/confirm/?uid={uid}&token={token}'
+    email_confirmation_url_path = '/auth/register/confirm/?key={key}'
 
     def get_email_confirmation_url(self, request, emailconfirmation) -> str:
         """Constructs the email confirmation (activation) url.

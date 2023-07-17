@@ -114,7 +114,7 @@ const Login: FC = () => {
             </Button>
             <Grid container justifyContent="space-between">
               <Grid item>
-                <Link to="/password/reset/">
+                <Link to="/auth/password/reset/">
                   <MuiLink variant="body2">
                     Forgot Password?
                   </MuiLink>
@@ -122,7 +122,7 @@ const Login: FC = () => {
               </Grid>
 
               <Grid item>
-                <Link to="/register/">
+                <Link to="/auth/register/">
                   <MuiLink variant="body2">
                     Don't have an account? Sign Up
                   </MuiLink>

@@ -29,11 +29,11 @@ const Router: FC = () => {
           <Route path="password/change" element={<PasswordChange/>}/>
         </Route>
 
-        <Route path="/" element={<AuthRoute/>}>
+        <Route path="/auth" element={<AuthRoute/>}>
           <Route path="login" element={<Login/>}/>
           <Route path="register" element={<Register/>}/>
           <Route path="password/reset" element={<PasswordReset/>}/>
-          <Route path="password/reset/confirm/:user_id/:token" element={<PasswordResetConfirm/>}/>
+          <Route path="password/reset/confirm" element={<PasswordResetConfirm/>}/>
         </Route>
 
         <Route path="/" element={<PrivateRoute withHeader={false}/>}>

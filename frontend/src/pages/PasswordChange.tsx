@@ -35,7 +35,7 @@ const PasswordChange: FC = () => {
         message: 'Successfully changed password! Redirecting to homepage ...',
         severity: 'success'
       });
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => navigate("/auth/login"), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,

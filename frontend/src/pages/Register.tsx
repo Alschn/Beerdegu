@@ -37,7 +37,7 @@ const Register: FC = () => {
         message: 'Created account! Redirecting to login page...',
         severity: 'success',
       });
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => navigate("/auth/login"), 1000);
     }).catch(err => {
       if (err.response) setResponse({
         message: `${err.response.statusText} (${err.response.status})`,
@@ -46,7 +46,7 @@ const Register: FC = () => {
     });
   };
 
-  const passwordsMatch = (): boolean => password1 === password2;
+  const passwordsMatch = password1 === password2;
 
   return (
     <Container component="main" maxWidth="xs">
@@ -103,9 +103,9 @@ const Register: FC = () => {
                 id="password1"
                 autoComplete="current-password"
                 onChange={(e) => setPassword1(e.target.value)}
-                error={!passwordsMatch()}
+                error={!passwordsMatch}
                 helperText={
-                  !passwordsMatch() && "Passwords don't match"
+                  !passwordsMatch && "Passwords don't match"
                 }
               />
             </Grid>
@@ -120,9 +120,9 @@ const Register: FC = () => {
                 id="password2"
                 autoComplete="current-password"
                 onChange={(e) => setPassword2(e.target.value)}
-                error={!passwordsMatch()}
+                error={!passwordsMatch}
                 helperText={
-                  !passwordsMatch() && "Passwords don't match"
+                  !passwordsMatch && "Passwords don't match"
                 }
               />
             </Grid>
@@ -138,7 +138,7 @@ const Register: FC = () => {
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link to="/login/">
+              <Link to="/auth/login/">
                 <MuiLink variant="body2">
                   Already have an account? Sign in
                 </MuiLink>
