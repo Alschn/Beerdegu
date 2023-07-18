@@ -1,7 +1,7 @@
 let BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
 let WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL as string;
 
-if (import.meta.env.PROD) {
+if (import.meta.env.PROD && !BACKEND_URL && !WEBSOCKET_URL) {
   // had to use this hack because of heroku cannot use config vars build time for some stupid reason
   BACKEND_URL = 'https://beerdegu.herokuapp.com';
   WEBSOCKET_URL = 'wss://beerdegu.herokuapp.com';
