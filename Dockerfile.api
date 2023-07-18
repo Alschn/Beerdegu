@@ -23,7 +23,7 @@ RUN \
     apk update && \
     apk upgrade && \
     apk add --virtual .build-deps gcc musl-dev postgresql-dev && \
-    pipenv install --deploy --python 3.10 && \
+    pipenv install --python 3.10 --skip-lock && \
     apk --purge del .build-deps
 
 # RUNTIME - copy environment, collect staticfiles, install packages required at runtime
