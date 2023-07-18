@@ -1,5 +1,7 @@
 ARG PYTHON_VERSION=3.10.4-alpine
 ARG NODE_VERSION=16.16.0-alpine
+ARG VITE_BACKEND_URL
+ARG VITE_WEBSOCKET_URL
 
 # BASE-IMAGE - get base python image with pipenv
 FROM python:${PYTHON_VERSION} as base-image
