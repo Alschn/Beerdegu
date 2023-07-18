@@ -51,9 +51,7 @@ const AuthProvider: FC<AuthProviderProps> = ({children}) => {
     });
   }, []);
 
-  const isAuthenticated = useMemo(() => {
-    return token !== null;
-  }, [token]);
+  const isAuthenticated = token !== null;
 
   return (
     <AuthContext.Provider value={{token, setToken, logout, isAuthenticated}}>

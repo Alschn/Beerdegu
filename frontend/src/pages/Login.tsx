@@ -1,5 +1,5 @@
 import {BaseSyntheticEvent, FC, FormEvent, useState} from "react";
-import {Button, Container, Grid, Link as MuiLink} from "@mui/material";
+import {Container, Grid, Link as MuiLink} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
@@ -10,6 +10,8 @@ import CollapsableAlert, {AlertContentObject} from "../components/utils/Collapsa
 import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY} from "../config";
 import {JWTContent, useAuth} from "../context/authContext";
 import {onJWTLogin} from "../api/auth";
+import {useMutation} from "@tanstack/react-query";
+import {LoadingButton} from "@mui/lab";
 
 
 const Login: FC = () => {
@@ -24,17 +26,14 @@ const Login: FC = () => {
     severity: "error",
   });
 
-  const submitForm = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-
-    onJWTLogin({
-      username: username,
-      password: password,
-    }).then(({data}) => {
-      const {access, refresh} = data;
-      setResponse(
-        {message: 'Logged in! Redirecting to home page ...', severity: 'success'}
-      );
+  const loginMutation = useMutation({
+    mutationFn: (data: { username: string, password: string }) => onJWTLogin(data),
+    onSuccess: (res) => {
+      const {access, refresh} = res.data;
+      setResponse({
+        message: 'Logged in! Redirecting to home page ...',
+        severity: 'success'
+      });
 
       // set raw token to local storage
       localStorage.setItem(ACCESS_TOKEN_KEY, access);
@@ -45,12 +44,28 @@ const Login: FC = () => {
       setToken(token);
 
       setTimeout(() => navigate("/"), 800);
-    }).catch(err => {
-      if (err.response) setResponse({
+    },
+    onError: (err: any) => {
+      if (!err?.response) return;
+
+      if (err.response?.status === 400 && err.response?.data?.email) {
+        setResponse({
+          message: `Your email is unverified. Please check your email for verification link.`,
+          severity: 'info',
+        });
+        return;
+      }
+
+      setResponse({
         message: `${err.response.statusText} (${err.response.status})`,
         severity: 'error',
       });
-    });
+    }
+  });
+
+  const submitForm = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    loginMutation.mutate({username, password});
   };
 
   const handleChange = (e: BaseSyntheticEvent) => {
@@ -103,15 +118,16 @@ const Login: FC = () => {
               autoComplete="current-password"
               onChange={handleChange}
             />
-            <Button
+            <LoadingButton
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className="auth-button"
+              loading={loginMutation.isLoading}
             >
               Sign In
-            </Button>
+            </LoadingButton>
             <Grid container justifyContent="space-between">
               <Grid item>
                 <Link to="/auth/password/reset/">

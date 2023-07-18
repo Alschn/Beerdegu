@@ -13,7 +13,7 @@ const AuthRoute: FC<AuthRouteProps> = () => {
   const {isAuthenticated} = useAuth();
 
   return isAuthenticated ? (
-    <Navigate to=""/>
+    <Navigate to="/"/>
   ) : (
     <MainLayout>
       <Outlet/>
