@@ -1,12 +1,8 @@
 let BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
 let WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL as string;
 
-console.log('BACKEND_URL', BACKEND_URL);
-console.log('WEBSOCKET_URL', WEBSOCKET_URL);
-
-if (import.meta.env.RAILWAY_ENVIRONMENT) {
-  BACKEND_URL = 'https://beerdegu.up.railway.app';
-  WEBSOCKET_URL = 'wss://beerdegu.up.railway.app';
+if (BACKEND_URL && WEBSOCKET_URL) {
+  // do nothing, just use the env variables
 } else if (import.meta.env.PROD) {
   // had to use this hack because of heroku cannot use config vars build time for some stupid reason
   BACKEND_URL = 'https://beerdegu.herokuapp.com';
