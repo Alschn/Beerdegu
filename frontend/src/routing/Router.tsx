@@ -13,6 +13,7 @@ import AuthRoute from "./AuthRoute";
 import PasswordChange from "../pages/PasswordChange";
 import PasswordReset from "../pages/PasswordReset";
 import PasswordResetConfirm from "../pages/PasswordResetConfirm";
+import RegisterConfirm from "../pages/RegisterConfirm";
 
 const Router: FC = () => {
   return (
@@ -32,6 +33,7 @@ const Router: FC = () => {
         <Route path="/auth" element={<AuthRoute/>}>
           <Route path="login" element={<Login/>}/>
           <Route path="register" element={<Register/>}/>
+          <Route path="register/confirm" element={<RegisterConfirm/>}/>
           <Route path="password/reset" element={<PasswordReset/>}/>
           <Route path="password/reset/confirm" element={<PasswordResetConfirm/>}/>
         </Route>
