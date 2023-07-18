@@ -112,7 +112,7 @@ class AuthViewsTests(TestCase):
             'password': 'abcdefg',
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('non_field_errors', response.json())
+        self.assertIn('email', response.json())
 
     def test_login_invalid_data(self):
         response = self.client.post(self.jwt_login_url, {
