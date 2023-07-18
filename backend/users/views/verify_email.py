@@ -5,4 +5,5 @@ class VerifyEmailAPIView(VerifyEmailView):
     """
     POST /api/auth/register/confirm-email/
     """
-    pass
+    # disable authentication for this endpoint
+    authentication_classes = []
