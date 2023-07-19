@@ -10,17 +10,16 @@
     <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Docker-008FCC?style=for-the-badge&logo=docker&logoColor=white" alt=""/>
+    <img src="https://img.shields.io/badge/Railway-%23000000.svg?&style=for-the-badge&logo=railway&logoColor=white" alt=""/>
     <img src="https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white" alt=""/>    
-    <img src="https://img.shields.io/badge/Fly.io-7B36ED?style=for-the-badge&logo=fly.io&logoColor=white" alt=""/>&nbsp;
+    <img src="https://img.shields.io/badge/Fly.io-7B36ED?style=for-the-badge&logo=fly.io&logoColor=white" alt=""/>
 </div>
 
 Beerdegu is a real-time web application meant for beer tasting sessions, when
 you and your friends are rating every consumed beer (color, smell, taste etc.).
 
-Built with Django Channels, Django Rest Framework, React with Typescript,
-Postgres, Redis in a Dockerized environment
-with an option to deploy to Heroku. Running development setup
-without docker-compose is also possible.
+Built with Django Channels, Django Rest Framework, Postgres, Redis in a Dockerized environment
+with an option to deploy to Railway.app, Fly.io or Heroku.com.
 
 ### Tools, libraries, frameworks:
 
@@ -47,6 +46,8 @@ This setup has been tested with Python 3.10 and Node 16.
 - `daphne` - production asgi server
 
 ### Frontend (deprecated)
+
+Frontend has been rewritten and moved into separate [repository](https://github.com/Alschn/BeerdeguFrontend).
 
 - React 18
 - Typescript
@@ -249,7 +250,63 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "YOUR_IP_ADDRESS"]
 
 # Production Deployment
 
-## Fly.io
+## Railway.app (preferred)
+
+Go to https://railway.app/dashboard and create a new project with `Deploy from GitHub repo`.
+
+Create backend, django_q, postgres and redis services in production environment by right-clicking on project's canvas.
+
+Configure automatic deployments from a chosen branch.
+
+### API service
+
+`Add New Service` > `GitHub Repo`
+
+Set `RAILWAY_DOCKERFILE_PATH` variable to `Dockerfile.api` (or `Dockerfile.fly` if you want to use old frontend).
+
+Add `PRODUCTION_HOST`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME`,
+`PORT`, `CORS_ORIGIN_WHITELIST`, `CORS_ORIGIN_REGEX_WHITELIST`,
+`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI` variables.
+
+If using old frontend, also add `VITE_BACKEND_URL`, `VITE_WEBSOCKET_URL` variables.
+
+Set `Start command` in Deploy settings section to `daphne -b 0.0.0.0 -p 8000 core.asgi:application -v2`
+
+### Django Q service
+
+`Add New Service` > `GitHub Repo`
+
+Set `RAILWAY_DOCKERFILE_PATH` to `Dockerfile.api`.
+
+Add `PRODUCTION_HOST`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME` variables.
+
+Set `Start command` in Deploy settings section to `python manage.py qcluster`.
+
+### Postgres service
+
+`Add New Service > Database > Add Postgres`
+
+Copy `DATABASE_URL` from Connect tab and put in shared variables.
+
+Go into `backend` directory and run `railway run python manage.py migrate` to apply migrations.
+
+### Redis service
+
+`Add New Service > Database > Add Redis`
+
+Copy `REDIS_URL` from Connect tab and put in shared variables.
+
+### Shared variables
+
+`Settings` > `Shared Variables` > `production`
+
+Set `DATABASE_URL` by coping DATABASE_URL from postgres service variables.
+
+Set `REDIS_URL` by coping REDIS_URL from redis service variables.
+
+Set `EMAIL_HOST`, `EMAIL_PASSWORD`, `EMAIL_PORT`, `EMAIL_USER` variables.
+
+## Fly.io (alternative)
 
 Launch a new app
 
@@ -320,10 +377,3 @@ fly ssh console
 
 This repository uses Github Actions to run test pipeline.  
 `tests.yml` - runs backend and frontend as separate jobs in one workflow
-
-# To do list (backend)
-
-- [ ] User profile with list of past beer tasting sessions and statistics
-- [ ] Test async db utils and consumer
-- [ ] Task queue with Django Q - e.g. removing inactive users in rooms
-- [ ] Improve xlsx reports (headers styling, better formatting, etc.)
