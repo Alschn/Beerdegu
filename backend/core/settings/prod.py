@@ -30,6 +30,10 @@ CORS_ORIGIN_WHITELIST = [
     origin for origin in os.getenv('CORS_ORIGIN_WHITELIST', '').split(',') if origin
 ]
 
+CORS_ORIGIN_REGEX_WHITELIST = [
+    fr'{origin}' for origin in os.getenv('CORS_ORIGIN_REGEX_WHITELIST', '').split(',') if origin
+]
+
 # static files configuration
 # https://docs.djangoproject.com/en/4.2/ref/settings/#static-files
 # https://whitenoise.readthedocs.io/en/latest/
@@ -76,6 +80,23 @@ DATABASES['default'].update({
         'connect_timeout': 5,
     }
 })
+
+# Rest framework
+# https://www.django-rest-framework.org/api-guide/settings/
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 # Django cache config
 # https://docs.djangoproject.com/en/4.2/ref/settings/#caches

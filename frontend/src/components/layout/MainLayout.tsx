@@ -86,10 +86,10 @@ const MainLayout: FC<WrapWithHeaderProps> = ({children}) => {
             ) : (
               <ul className="header-links">
                 <li>
-                  <Link to="/login">Login</Link>
+                  <Link to="/auth/login">Login</Link>
                 </li>
                 <li>
-                  <Link to="/register">Register</Link>
+                  <Link to="/auth/register">Register</Link>
                 </li>
               </ul>
             )}

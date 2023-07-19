@@ -4,7 +4,7 @@ import {FC, useEffect, useState} from "react";
 
 export interface AlertContentObject {
   message: string,
-  severity?: 'error' | 'success',
+  severity?: 'error' | 'success' | 'info',
 }
 
 interface CollapsableAlertProps {

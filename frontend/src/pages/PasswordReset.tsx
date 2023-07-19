@@ -23,7 +23,7 @@ const PasswordReset: FC = () => {
     resetPassword({email}).then((res) => {
       setResponse({
         message: `Sent a password reset link to ${email}`,
-        severity: "success"
+        severity: 'info'
       });
     }).catch(err => {
       if (err.response) setResponse({

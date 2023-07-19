@@ -10,7 +10,7 @@ interface PrivateRouteProps {
 const PrivateRoute: FC<PrivateRouteProps> = ({withHeader = true}) => {
   const {isAuthenticated} = useAuth();
 
-  if (!isAuthenticated) return (<Navigate to="/login"/>);
+  if (!isAuthenticated) return (<Navigate to="/auth/login"/>);
 
   if (withHeader) {
     return (

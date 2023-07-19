@@ -1,4 +1,5 @@
 from allauth.account import app_settings as allauth_settings
+from allauth.account.utils import has_verified_email, send_email_confirmation
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import PasswordResetSerializer
 from django.utils.translation import gettext_lazy as _
@@ -46,10 +47,12 @@ class TokenObtainPairSerializer(BaseTokenObtainPairSerializer):
             return
 
         user = self.user
-        verified_emails = user.emailaddress_set.filter(email=user.email, verified=True)
+        request = self.context.get('request')
 
-        if not verified_emails.exists():
-            raise serializers.ValidationError(_('E-mail is not verified.'))
+        # try to send verification email
+        if request and not has_verified_email(user):
+            send_email_confirmation(request=request, user=user)
+            raise serializers.ValidationError({'email': _('E-mail is not verified.')})
 
     def validate(self, attrs: dict) -> dict:
         data = super().validate(attrs)

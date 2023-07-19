@@ -80,3 +80,11 @@ export const resetPassword = (request_body: ResetPasswordData): Promise<Response
 export const confirmResetPassword = (uid: string, token: string, request_body: ConfirmPasswordResetData): Promise<Response<ConfirmPasswordResetResponseData>> => {
   return axiosClient.post(`/api/auth/password/reset/confirm/${uid}/${token}/`, {...request_body});
 };
+
+export const confirmRegister = (key: string) => {
+  return axiosClient.post(`/api/auth/register/confirm-email/`, {key});
+};
+
+export const confirmResendRegisterEmail = () => {
+  return axiosClient.post(`/api/auth/register/resend-email/`);
+};
