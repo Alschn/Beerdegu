@@ -30,6 +30,10 @@ CORS_ORIGIN_WHITELIST = [
     origin for origin in os.getenv('CORS_ORIGIN_WHITELIST', '').split(',') if origin
 ]
 
+CORS_ORIGIN_REGEX_WHITELIST = [
+    fr'{origin}' for origin in os.getenv('CORS_ORIGIN_REGEX_WHITELIST', '').split(',') if origin
+]
+
 # static files configuration
 # https://docs.djangoproject.com/en/4.2/ref/settings/#static-files
 # https://whitenoise.readthedocs.io/en/latest/
