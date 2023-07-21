@@ -9,7 +9,7 @@ from beers.models import Beer
 from beers.serializers import BeerSerializer
 from rooms.models import Room
 from rooms.serializers import RoomSerializer, DetailedRoomSerializer
-from rooms.serializers.room import RoomListSerializer
+from rooms.serializers.room import RoomListSerializer, RESTRICTED_ROOM_NAMES
 
 User = get_user_model()
 
@@ -167,7 +167,17 @@ class RoomsAPIViewsTests(TestCase):
             'slots': 5,
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Room.objects.filter(name='Good').exists())
+        self.assertTrue(Room.objects.filter(name='good').exists())
+
+    def test_create_room_not_lowercase(self):
+        self._require_login_and_auth(user=self.user2)
+        response = self.client.post('/api/rooms/', data={
+            'name': 'qWeRtY',
+            'password': 'anything',
+            'slots': 5,
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Room.objects.filter(name='qwerty').exists())
 
     def test_create_room_name_not_unique(self):
         self._require_login_and_auth(user=self.user2)
@@ -178,6 +188,18 @@ class RoomsAPIViewsTests(TestCase):
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), {'name': ['room with this name already exists.']})
+
+    def test_create_room_name_restricted(self):
+        restricted_names = RESTRICTED_ROOM_NAMES
+        self._require_login_and_auth(user=self.user2)
+        for name in restricted_names:
+            response = self.client.post('/api/rooms/', data={
+                'name': name,
+                'password': '',
+                'slots': 3,
+            })
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn('name', response.json())
 
     def test_create_room_wrong_slots_number(self):
         self._require_login_and_auth(user=self.user2)

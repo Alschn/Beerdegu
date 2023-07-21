@@ -10,6 +10,8 @@ from users.serializers.user import UserSerializer
 
 User = get_user_model()
 
+RESTRICTED_ROOM_NAMES = ('create', 'join', 'none', 'null', 'undefined', 'true', 'false')
+
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,6 +51,8 @@ class RoomCreateSerializer(serializers.ModelSerializer):
         allow_blank=True,
     )
 
+    restricted_room_names = RESTRICTED_ROOM_NAMES
+
     def __init__(self, *args, user: User = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
@@ -57,18 +61,31 @@ class RoomCreateSerializer(serializers.ModelSerializer):
         model = Room
         fields = ('name', 'password', 'slots', 'host')
 
+    def validate_name(self, name: str) -> str:
+        name = name.lower()
+
+        if name in self.restricted_room_names:
+            raise serializers.ValidationError(
+                f'Room name `{name}` is restricted!',
+                code='restricted_room_name'
+            )
+
+        return name
+
     def validate_host(self, host: User) -> User:
         user = self.user or self.context['request'].user
 
         if user != host:
             raise serializers.ValidationError(
-                'You can only create rooms for yourself.'
+                'You can only create rooms for yourself.',
+                code='host_not_self'
             )
 
         not_finished_hosted_rooms = get_hosted_not_finished_rooms(host)
         if not_finished_hosted_rooms.exists():
             raise serializers.ValidationError(
-                'User is already a host of another room, which is not in `FINISHED` state!'
+                'User is already a host of another room, which is not in `FINISHED` state!',
+                code='host_already_hosting'
             )
 
         return host
