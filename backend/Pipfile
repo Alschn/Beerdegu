@@ -30,6 +30,8 @@ daphne = "*"
 gunicorn = "*"
 openpyxl = "*"
 drf-spectacular = "*"
+django-storages = "*"
+boto3 = "*"
 
 [dev-packages]
 coverage = "*"

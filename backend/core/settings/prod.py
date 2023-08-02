@@ -1,11 +1,11 @@
 """
-Configuration for deployment to Fly.io / Heroku with Dockerfile.(fly/heroku)
+Configuration for production deployment (heroku/fly/railway).
 """
 import dj_database_url
 
 from core.settings.base import *
 
-ROOT_DIR = BASE_DIR.parent.parent
+ROOT_DIR = BASE_DIR.parent
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
@@ -34,32 +34,69 @@ CORS_ORIGIN_REGEX_WHITELIST = [
     fr'{origin}' for origin in os.getenv('CORS_ORIGIN_REGEX_WHITELIST', '').split(',') if origin
 ]
 
-# static files configuration
+# Django static files configuration
 # https://docs.djangoproject.com/en/4.2/ref/settings/#static-files
+
+# Whitenoise configuration
 # https://whitenoise.readthedocs.io/en/latest/
 
-# whitenoise middle - has to be first in the list
-MIDDLEWARE.insert(3, 'whitenoise.middleware.WhiteNoiseMiddleware')
+# AWS S3 configuration
+# https://testdriven.io/blog/storing-django-static-and-media-files-on-amazon-s3/
+# https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 
-# directories with templates or html files
-TEMPLATES[0]['DIRS'] = [
-    os.path.join(ROOT_DIR, 'frontend', 'build')
-]
+USE_AWS_S3 = os.getenv('USE_S3', 'FALSE').lower() == 'true'
 
-# directory where Django can find html, js, css, and other static assets
-STATICFILES_DIRS = [
-    os.path.join(ROOT_DIR, 'frontend', 'build', 'assets')
-]
+if USE_AWS_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_DEFAULT_ACL = None
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': f'max-age={24 * 3600}'}
 
-# directory where WhiteNoise can find all non-html static assets
-WHITENOISE_ROOT = os.path.join(ROOT_DIR, 'frontend', 'build')
+    # s3 static settings
+    STATIC_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 
-# type of static files storage
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # s3 public media settings
+    PUBLIC_MEDIA_LOCATION = 'uploads'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    MEDIA_ROOT = None
 
-STATIC_ROOT = os.path.join(ROOT_DIR, 'staticfiles')
+    STORAGES = {
+        # to allow media upload to s3
+        'default': {
+            'BACKEND': 'core.shared.storages.PublicMediaStorage'
+        },
+        # to allow `collectstatic to s3
+        'staticfiles': {
+            'BACKEND': 'core.shared.storages.StaticStorage'
+        },
+    }
+else:
+    MIDDLEWARE.insert(3, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-STATIC_URL = '/static/'
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(ROOT_DIR, 'staticfiles')
+
+    STORAGES = {
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        }
+    }
+
+    MEDIA_URL = '/uploads/'
+    MEDIA_ROOT = os.path.join(ROOT_DIR, 'uploads')
+
+if SERVE_FRONTEND:
+    WHITENOISE_ROOT = os.path.join(ROOT_DIR, 'frontend', 'build')
+    STATICFILES_DIRS = [
+        os.path.join(ROOT_DIR, 'frontend', 'build', 'assets')
+    ]
+    TEMPLATES[0]['DIRS'] = [
+        os.path.join(ROOT_DIR, 'frontend', 'build')
+    ]
 
 # Database config
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

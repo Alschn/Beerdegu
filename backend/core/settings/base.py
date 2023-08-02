@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -136,7 +136,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR.parent, 'db.sqlite3'),
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
 
@@ -314,7 +314,12 @@ SPECTACULAR_SETTINGS = {
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
+
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -361,3 +366,4 @@ EMAIL_BACKEND = 'core.shared.email_backend.DjangoQBackend'
 DJANGO_Q_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 FRONTEND_SITE_NAME = os.getenv('FRONTEND_SITE_NAME')
+SERVE_FRONTEND = os.getenv('SERVE_FRONTEND', 'False').lower() == 'true'

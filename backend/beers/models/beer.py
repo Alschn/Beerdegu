@@ -38,7 +38,7 @@ class Beer(models.Model):
         null=True, blank=True,
         help_text="Bitterness measured in International Bitterness Units scale"
     )
-    image = models.URLField(null=True, blank=True)
+    image = models.ImageField(null=True, blank=True, upload_to='beers')
     description = models.TextField(max_length=1000, null=True, blank=True)
     hops = models.ManyToManyField(
         'beers.Hop',
