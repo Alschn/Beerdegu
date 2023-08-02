@@ -1,5 +1,9 @@
+import re
 from decimal import Decimal
+from urllib.parse import urljoin
 
+from django.conf import settings
+from django.core.handlers.wsgi import WSGIRequest
 from rest_framework import serializers
 from rest_framework.relations import StringRelatedField
 
@@ -20,6 +24,11 @@ class BeerSerializer(serializers.ModelSerializer):
             'hops'
         )
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['image'] = build_file_url(representation['image'], self.context.get('request'))
+        return representation
+
 
 class SimplifiedBeerSerializer(serializers.ModelSerializer):
     brewery = StringRelatedField(read_only=True)
@@ -38,6 +47,11 @@ class BeerRepresentationalSerializer(SimplifiedBeerSerializer):
             'hop_rate', 'extract', 'IBU',
             'image', 'description'
         )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['image'] = build_file_url(representation['image'], self.context.get('request'))
+        return representation
 
 
 class BeerWithResultsSerializer(serializers.ModelSerializer):
@@ -58,3 +72,44 @@ class DetailedBeerSerializer(BeerSerializer):
     hops = EmbeddedHopsSerializer(many=True, read_only=True)
     style = EmbeddedBeerStyleSerializer(read_only=True)
     brewery = EmbeddedBrewerySerializer(read_only=True)
+
+
+def build_file_url(url: str | None, request: WSGIRequest) -> str | None:
+    """
+    A little bit hacky way to get correct file url regardless of current environment.
+    Compatible with previous implementation of Beer.image field (URLField with link to external websites)
+
+    Todo (?): Create custom FileField including this logic.
+    """
+
+    if not url:
+        return
+
+    # backward compatible with old urls (which were external links)
+    if external_url := _extract_external_url(url):
+        return external_url
+
+    # everything is fine, since absolute uri was build from request
+    if request:
+        return url
+
+    # usage without request in serializer's context (e.g. in websockets or unit tests),
+    # when using AWS S3 or local storage
+
+    if settings.USE_AWS_S3:
+        return urljoin(settings.MEDIA_URL, url)
+
+    return urljoin('http://127.0.0.1:8000', url)
+
+
+def _extract_external_url(url: str | None) -> str | None:
+    # http or https followed by `%3A` (colon, slash) and any other characters
+    pattern = r'https?%3A.*$'
+    match = re.search(pattern, url)
+    if not match:
+        return None
+
+    external_url = url[match.start():]
+    # add missing colon and slash
+    new_external_url = external_url.replace('%3A', ':/')
+    return new_external_url
