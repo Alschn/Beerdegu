@@ -3,6 +3,7 @@ from decimal import Decimal
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.handlers.wsgi import WSGIRequest
 from rest_framework import serializers
 from rest_framework.relations import StringRelatedField
@@ -99,7 +100,8 @@ def build_file_url(url: str | None, request: WSGIRequest) -> str | None:
     if settings.USE_AWS_S3:
         return urljoin(settings.MEDIA_URL, url)
 
-    return urljoin('http://127.0.0.1:8000', url)
+    current_site = Site.objects.get_current()
+    return urljoin(current_site.domain, url)
 
 
 def _extract_external_url(url: str | None) -> str | None:
