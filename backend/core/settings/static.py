@@ -54,9 +54,14 @@ else:
     MEDIA_URL = '/uploads/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
 if SERVE_FRONTEND:
     WHITENOISE_ROOT = os.path.join(ROOT_DIR, 'frontend', 'build')
     STATICFILES_DIRS = [
+        *STATICFILES_DIRS,
         os.path.join(ROOT_DIR, 'frontend', 'build', 'assets')
     ]
     TEMPLATES[0]['DIRS'] = [

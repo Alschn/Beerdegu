@@ -58,7 +58,6 @@ if USE_AWS_S3:
     # s3 static settings
     STATIC_LOCATION = 'static'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
-    STATIC_ROOT = None
 
     # s3 public media settings
     PUBLIC_MEDIA_LOCATION = 'uploads'
@@ -90,9 +89,14 @@ else:
     MEDIA_URL = '/uploads/'
     MEDIA_ROOT = os.path.join(ROOT_DIR, 'uploads')
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
 if SERVE_FRONTEND:
     WHITENOISE_ROOT = os.path.join(ROOT_DIR, 'frontend', 'build')
     STATICFILES_DIRS = [
+        *STATICFILES_DIRS,
         os.path.join(ROOT_DIR, 'frontend', 'build', 'assets')
     ]
     TEMPLATES[0]['DIRS'] = [
