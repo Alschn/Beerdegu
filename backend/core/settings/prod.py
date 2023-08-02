@@ -58,6 +58,7 @@ if USE_AWS_S3:
     # s3 static settings
     STATIC_LOCATION = 'static'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    STATIC_ROOT = None
 
     # s3 public media settings
     PUBLIC_MEDIA_LOCATION = 'uploads'
