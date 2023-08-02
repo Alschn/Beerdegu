@@ -44,7 +44,7 @@ CORS_ORIGIN_REGEX_WHITELIST = [
 # https://testdriven.io/blog/storing-django-static-and-media-files-on-amazon-s3/
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 
-USE_AWS_S3 = os.getenv('USE_S3', 'FALSE').lower() == 'true'
+USE_AWS_S3 = os.getenv('USE_AWS_S3', 'FALSE').lower() == 'true'
 
 if USE_AWS_S3:
     # aws settings
@@ -89,14 +89,9 @@ else:
     MEDIA_URL = '/uploads/'
     MEDIA_ROOT = os.path.join(ROOT_DIR, 'uploads')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
 if SERVE_FRONTEND:
     WHITENOISE_ROOT = os.path.join(ROOT_DIR, 'frontend', 'build')
     STATICFILES_DIRS = [
-        *STATICFILES_DIRS,
         os.path.join(ROOT_DIR, 'frontend', 'build', 'assets')
     ]
     TEMPLATES[0]['DIRS'] = [

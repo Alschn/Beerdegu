@@ -14,7 +14,7 @@ SECRET_KEY = get_random_secret_key()
 
 DEBUG = False
 
-USE_AWS_S3 = os.getenv('USE_S3', 'FALSE').lower() == 'true'
+USE_AWS_S3 = os.getenv('USE_AWS_S3', 'FALSE').lower() == 'true'
 
 if USE_AWS_S3:
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -54,14 +54,9 @@ else:
     MEDIA_URL = '/uploads/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
 if SERVE_FRONTEND:
     WHITENOISE_ROOT = os.path.join(ROOT_DIR, 'frontend', 'build')
     STATICFILES_DIRS = [
-        *STATICFILES_DIRS,
         os.path.join(ROOT_DIR, 'frontend', 'build', 'assets')
     ]
     TEMPLATES[0]['DIRS'] = [

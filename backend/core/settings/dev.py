@@ -53,10 +53,6 @@ else:
     MEDIA_URL = '/uploads/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis_db')
 REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
 
