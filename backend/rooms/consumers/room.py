@@ -13,7 +13,7 @@ from rooms.async_db import (
     async_get_final_user_beer_ratings
 )
 
-logger = logging.getLogger('rooms.consumers.room')
+logger = logging.getLogger(__name__)
 
 
 class RoomConsumer(AsyncJsonWebsocketConsumer):
@@ -28,6 +28,7 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         'get_beers': 'get_beers',
         'load_beers': 'load_beers',
         'get_final_ratings': 'get_final_ratings',
+        'user_leave': 'user_leave',
         # one sided actions: client -> server
         'user_active': 'user_active',
         'get_room_state': 'get_room_state',
@@ -66,6 +67,12 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         )
 
         await self.accept()
+
+        # notify others that current user joined
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {'type': 'user_join', 'data': current_user.username},
+        )
 
         # fetch users in room on join
         await self.channel_layer.group_send(
@@ -117,6 +124,11 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         if user.is_anonymous:
             return
 
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {'type': 'user_disconnect', 'data': user.username},
+        )
+
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -147,6 +159,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
     - change_room_state
     - get_final_ratings
     - get_user_ratings
+    - user_join
+    - user_disconnect
+    - user_leave
     - invalid_command
     """
 
@@ -267,6 +282,47 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             {
                 'command': 'set_user_results',
                 'data': final,
+            }
+        )
+
+    async def user_join(self, event: dict):
+        """Server action to notify others that new user joined"""
+
+        user = self.scope['user']
+        username = event.get('data')
+        if user.username == username:
+            return
+
+        await self.send_json(
+            {
+                'command': 'user_join',
+                'data': username,
+            }
+        )
+
+    async def user_leave(self, event: dict):
+        user = self.scope['user']
+        username = event.get('data')
+        if user.username == username:
+            return
+
+        await self.send_json(
+            {
+                'command': 'user_leave',
+                'data': username,
+            }
+        )
+
+    async def user_disconnect(self, event: dict):
+        user = self.scope['user']
+        username = event.get('data')
+        if user.username == username:
+            return
+
+        await self.send_json(
+            {
+                'command': 'user_disconnect',
+                'data': username,
             }
         )
 
