@@ -105,13 +105,26 @@ def build_file_url(url: str | None, request: WSGIRequest) -> str | None:
 
 
 def _extract_external_url(url: str | None) -> str | None:
-    # http or https followed by `%3A` (colon, slash) and any other characters
-    pattern = r'https?%3A.*$'
+    # http or https and anything after,
+    # but not at the beginning of a string
+    pattern = r'(?<!^)https?.*$'
     match = re.search(pattern, url)
     if not match:
         return None
 
     external_url = url[match.start():]
-    # add missing colon and slash
-    new_external_url = external_url.replace('%3A', ':/')
+
+    # case: wrongly encoded url
+    if '%3A' in external_url:
+        # add missing colon and slash
+        external_url = external_url.replace('%3A', ':/')
+        return external_url
+
+    # no need to adjust url
+    if external_url.startswith('http://') or external_url.startswith('https://'):
+        return external_url
+
+    protocol, *parts = external_url.split('/')
+    protocol = protocol.replace(':', '')
+    new_external_url = f'{protocol}://{"/".join(parts)}'
     return new_external_url
