@@ -143,3 +143,104 @@ class BeersAPIViewsTest(APITestCase):
         self.assertEqual(qs_len_before - 1, Beer.objects.all().count())
         with self.assertRaises(ObjectDoesNotExist):
             Beer.objects.get(id=lookup_id)
+
+    # todo: filtering unit tests
+
+    def test_list_beers_filter_name_icontains(self):
+        pass
+
+    def test_list_beers_filter_name_not_contains(self):
+        pass
+
+    def test_list_beers_filter_brewery(self):
+        pass
+
+    def test_list_beers_filter_multiple_breweries(self):
+        pass
+
+    def test_list_beers_filter_brewery_does_not_exist(self):
+        pass
+
+    def test_list_beers_filter_brewery_name_icontains(self):
+        pass
+
+    def test_list_beers_filter_style(self):
+        pass
+
+    def test_list_beers_filter_multiple_styles(self):
+        pass
+
+    def test_list_beers_filter_style_does_not_exist(self):
+        pass
+
+    def test_list_beers_filter_percentage_gte(self):
+        pass
+
+    def test_list_beers_filter_percentage_lte(self):
+        pass
+
+    def test_list_beers_filter_percentage_range(self):
+        pass
+
+    def test_list_beers_filter_percentage_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_gte(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_lte(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_range(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_gte(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_lte(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_range(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_ibu_gte(self):
+        pass
+
+    def test_list_beers_filter_ibu_lte(self):
+        pass
+
+    def test_list_beers_filter_ibu_range(self):
+        pass
+
+    def test_list_beers_filter_ibu_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_extract_gte(self):
+        pass
+
+    def test_list_beers_filter_extract_lte(self):
+        pass
+
+    def test_list_beers_filter_extract_range(self):
+        pass
+
+    def test_list_beers_filter_extract_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_hop(self):
+        pass
+
+    def test_list_beers_filter_multiple_hops(self):
+        pass
+
+    def test_list_beers_filter_hop_does_not_exist(self):
+        pass
+
+    def test_list_beers_filter_hops_name_icontains(self):
+        pass
