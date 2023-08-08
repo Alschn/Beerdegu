@@ -13,4 +13,5 @@ class RatingsFilterSet(filters.FilterSet):
             'note': ['gte', 'lte', 'gt', 'lt', 'exact', 'range'],
             'created_at': ['gte', 'lte'],
             'updated_at': ['gte', 'lte'],
+            'is_published': ['exact']
         }
