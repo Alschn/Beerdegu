@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from beers.serializers import DetailedBeerSerializer, BeerSerializer
+from beers.serializers.beer import DetailedBeerSerializer, BeerInRatingSerializer
 from rooms.models import Rating
 from rooms.serializers.room import RoomListSerializer
 from users.serializers.user import UserSerializer
@@ -35,7 +35,8 @@ class RatingSerializer(serializers.ModelSerializer):
 
 class RatingListSerializer(serializers.ModelSerializer):
     added_by = UserSerializer()
-    beer = BeerSerializer()
+    beer = BeerInRatingSerializer()
+    room = RoomListSerializer()
 
     class Meta:
         model = Rating
@@ -105,6 +106,11 @@ class RatingCreateSerializer(serializers.ModelSerializer):
 
 
 class RatingUpdateSerializer(serializers.ModelSerializer):
+    # same as in RatingListSerializer, so that the types match
+    added_by = UserSerializer()
+    beer = BeerInRatingSerializer()
+    room = RoomListSerializer()
+
     class Meta:
         model = Rating
         fields = (

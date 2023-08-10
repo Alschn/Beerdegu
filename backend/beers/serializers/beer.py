@@ -37,7 +37,7 @@ class SimplifiedBeerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Beer
-        fields = ('id', 'name', 'brewery', 'style')
+        fields = ('id', 'image', 'name', 'brewery', 'style')
 
 
 class BeerRepresentationalSerializer(SimplifiedBeerSerializer):
@@ -73,6 +73,11 @@ class DetailedBeerSerializer(BeerSerializer):
     hops = EmbeddedHopsSerializer(many=True, read_only=True)
     style = EmbeddedBeerStyleSerializer(read_only=True)
     brewery = EmbeddedBrewerySerializer(read_only=True)
+
+
+class BeerInRatingSerializer(SimplifiedBeerSerializer):
+    # todo: separate serializer for beer embedded in rating
+    pass
 
 
 def build_file_url(url: str | None, request: WSGIRequest) -> str | None:
