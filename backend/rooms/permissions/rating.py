@@ -11,8 +11,7 @@ class CanDeleteRatingPermission(BasePermission):
     """
 
     def has_object_permission(self, request: Request, view: APIView, obj: Rating) -> bool:
-        return (
-            request.method == 'DELETE' and
-            obj.room is None and
-            obj.added_by == request.user
-        )
+        if request.method != 'DELETE':
+            return True
+
+        return obj.room is None and obj.added_by == request.user
