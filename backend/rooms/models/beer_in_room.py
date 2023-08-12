@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from ordered_model.models import OrderedModel
 
 if typing.TYPE_CHECKING:
-    from rooms.models import Rating
+    from ratings.models import Rating
 
 
 class BeerInRoom(OrderedModel):

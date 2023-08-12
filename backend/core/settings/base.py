@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'users',
     'rooms',
     'beers',
+    'ratings',
 ]
 
 MIDDLEWARE = [

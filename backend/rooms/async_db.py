@@ -6,14 +6,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import QuerySet, Subquery, OuterRef
 from django.db.models.aggregates import Avg
-from django.db.models.expressions import F
-from django.db.models.fields import DecimalField, FloatField
+from django.db.models.fields import FloatField
 from django.utils import timezone
 
 from beers.models import Beer
 from beers.serializers import BeerRepresentationalSerializer, BeerWithResultsSerializer
-from rooms.models import Room, UserInRoom, BeerInRoom, Rating
-from rooms.serializers import RatingSerializer, RoomSerializer
+from ratings.models import Rating
+from ratings.serializers import RatingSerializer
+from rooms.models import Room, UserInRoom, BeerInRoom
+from rooms.serializers import RoomSerializer
 from users.serializers.user import UserSerializer
 
 User = get_user_model()

@@ -1,6 +1,6 @@
 import django_filters.rest_framework as filters
 
-from rooms.models import Rating
+from ratings.models import Rating
 
 
 class RatingsFilterSet(filters.FilterSet):

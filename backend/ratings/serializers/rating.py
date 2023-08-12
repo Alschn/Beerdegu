@@ -1,7 +1,10 @@
 from rest_framework import serializers
 
-from beers.serializers.beer import DetailedBeerSerializer, BeerInRatingSerializer
-from rooms.models import Rating
+from beers.serializers.beer import (
+    DetailedBeerSerializer,
+    BeerInRatingSerializer
+)
+from ratings.models import Rating
 from rooms.serializers.room import RoomListSerializer
 from users.serializers.user import UserSerializer
 
