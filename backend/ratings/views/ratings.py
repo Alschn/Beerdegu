@@ -5,10 +5,10 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 
 from core.shared.pagination import page_number_pagination_factory
-from rooms.filters.ratings import RatingsFilterSet
-from rooms.models import Rating
-from rooms.permissions import CanDeleteRatingPermission
-from rooms.serializers.rating import (
+from ratings.filters import RatingsFilterSet
+from ratings.models import Rating
+from ratings.permissons import CanDeleteRatingPermission
+from ratings.serializers import (
     RatingListSerializer,
     RatingDetailSerializer,
     RatingUpdateSerializer,

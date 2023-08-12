@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
-from rooms.models import Rating
+from ratings.models import Rating
 
 
 class CanDeleteRatingPermission(BasePermission):

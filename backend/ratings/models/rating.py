@@ -36,9 +36,6 @@ class Rating(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=False)
 
-    class Meta:
-        ordering = ['id']
-
     def __str__(self) -> str:
         to_str = f'{self.beer.name} - {self.note or "?"} by {self.added_by}'
         if self.room is not None:
