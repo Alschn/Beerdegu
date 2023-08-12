@@ -5,10 +5,12 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.handlers.wsgi import WSGIRequest
+from django.db import transaction
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.relations import StringRelatedField
 
-from beers.models import Beer
+from beers.models import Beer, Hop
 from beers.serializers.beer_style import EmbeddedBeerStyleSerializer
 from beers.serializers.brewery import EmbeddedBrewerySerializer
 from beers.serializers.hop import EmbeddedHopsSerializer
@@ -73,6 +75,34 @@ class DetailedBeerSerializer(BeerSerializer):
     hops = EmbeddedHopsSerializer(many=True, read_only=True)
     style = EmbeddedBeerStyleSerializer(read_only=True)
     brewery = EmbeddedBrewerySerializer(read_only=True)
+
+
+class BeerCreateSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(allow_null=True, required=False)
+
+    class Meta:
+        model = Beer
+        fields = (
+            'id',
+            'name',
+            'brewery',
+            'style',
+            'percentage',
+            'volume_ml',
+            'hop_rate',
+            'extract',
+            'IBU',
+            'image',
+            'description',
+            'hops'
+        )
+
+    @transaction.atomic
+    def create(self, validated_data) -> Beer:
+        hops: list[Hop] = validated_data.pop('hops')
+        instance = super().create(validated_data)
+        instance.hops.set(hops)
+        return instance
 
 
 class BeerInRatingSerializer(SimplifiedBeerSerializer):
