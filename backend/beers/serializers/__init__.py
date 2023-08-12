@@ -1,9 +1,10 @@
 from .beer import (
     BeerSerializer,
+    BeerCreateSerializer,
     SimplifiedBeerSerializer,
     BeerRepresentationalSerializer,
     BeerWithResultsSerializer,
-    DetailedBeerSerializer
+    DetailedBeerSerializer,
 )
 from .beer_style import (
     BeerStyleSerializer, EmbeddedBeerStyleSerializer

@@ -61,7 +61,6 @@ class BeersAPIViewsTest(APITestCase):
             second=json_response['results']
         )
 
-    @unittest.skip('Currently disabled')
     def test_create_beer(self):
         self._require_login_and_auth()
         response = self.client.post('/api/beers/', data={
@@ -75,7 +74,6 @@ class BeersAPIViewsTest(APITestCase):
             BeerSerializer(Beer.objects.get(name="a'la Grodziskie")).data
         )
 
-    @unittest.skip('Currently disabled')
     def test_create_beer_missing_data(self):
         self._require_login_and_auth()
         response = self.client.post('/api/beers/', data={
@@ -83,8 +81,8 @@ class BeersAPIViewsTest(APITestCase):
             'volume_ml': 750,
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('percentage', response.json())
 
-    @unittest.skip('Currently disabled')
     def test_create_beer_negative_percentage(self):
         self._require_login_and_auth()
         response = self.client.post('/api/beers/', data={
@@ -93,12 +91,17 @@ class BeersAPIViewsTest(APITestCase):
             'volume_ml': 500,
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('percentage', response.json())
 
-    def test_get_beer_by_id(self):
+    # todo: more create beer tests (including base64 image upload)
+
+    def test_retrieve_beer(self):
         beer = Beer.objects.create(name='Kwas Theta', percentage=10.2, volume_ml=500)
         response = self.client.get(f'/api/beers/{beer.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), BeerSerializer(beer).data)
+
+    # todo: more retrieve beer tests
 
     def test_get_update_delete_beer_not_exists(self):
         response_get = self.client.get('/api/beers/200/')
