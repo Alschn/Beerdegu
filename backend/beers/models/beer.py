@@ -50,7 +50,8 @@ class Beer(models.Model):
     )
     image = models.ImageField(
         null=True, blank=True,
-        upload_to=get_file_path
+        upload_to=get_file_path,
+        max_length=255,
     )
     description = models.TextField(max_length=1000, null=True, blank=True)
     hops = models.ManyToManyField(
