@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from beers.serializers.beer import (
     DetailedBeerSerializer,
-    BeerInRatingSerializer
+    BeerInRatingSerializer, SimplifiedBeerSerializer
 )
 from ratings.models import Rating
 from rooms.serializers.room import RoomListSerializer
@@ -138,3 +138,19 @@ class RatingUpdateSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         )
+
+
+class RatingWithSimplifiedBeerSerializer(serializers.ModelSerializer):
+    beer = SimplifiedBeerSerializer()
+
+    class Meta:
+        model = Rating
+        fields = (
+            'id',
+            'beer',
+            'added_by',
+            'note',
+            'created_at',
+            'updated_at'
+        )
+        read_only_fields = fields
