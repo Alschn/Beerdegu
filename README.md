@@ -42,7 +42,8 @@ This setup has been tested with Python 3.10 and Node 16.
 - `mypy` + `djangorestframework-stubs` - for better typing experience
 - `psycopg2` - needed to use Postgres (in Docker container)
 - `channels_redis`, `redis` - connection to Redis database service
-- `whitenoise` - building static files
+- `whitenoise` - collecting and serving static files (if not using AWS S3)
+- `boto3`, `django-storages` - storing static and media files on AWS S3
 - `daphne` - production asgi server
 
 ### Frontend (deprecated)
@@ -175,6 +176,11 @@ GOOGLE_CLIENT_REDIRECT_URI=...
 # Site object's name in Django admin - needed for building links to frontend
 # e.g. when sending email with password reset link or activation link
 FRONTEND_SITE_NAME=beerdegu
+# (Optional) If you want to test upload to AWS S3
+USE_AWS_S3=True
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_STORAGE_BUCKET_NAME=...
 ```
 
 `env/redis.env`
@@ -264,11 +270,25 @@ Configure automatic deployments from a chosen branch.
 
 Set `RAILWAY_DOCKERFILE_PATH` variable to `Dockerfile.api` (or `Dockerfile.fly` if you want to use old frontend).
 
-Add `PRODUCTION_HOST`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME`,
-`PORT`, `CORS_ORIGIN_WHITELIST`, `CORS_ORIGIN_REGEX_WHITELIST`,
-`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI` variables.
+```dotenv
+RAILWAY_DOCKERFILE_PATH=Dockerfile.api
+PRODUCTION_HOST=<appname>.up.railway.app
+DJANGO_SETTINGS_MODULE=core.settings.prod
+FRONTEND_SITE_NAME=Beerdegu
+PORT=8000
+SECRET_KEY=...
+CORS_ORIGIN_WHITELIST=...
+CORS_ORIGIN_REGEX_WHITELIST=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_CLIENT_REDIRECT_URI=...
+USE_AWS_S3=True
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_STORAGE_BUCKET_NAME=...
+```
 
-If using old frontend, also add `VITE_BACKEND_URL`, `VITE_WEBSOCKET_URL` variables.
+If using old frontend, also add `VITE_BACKEND_URL`, `VITE_WEBSOCKET_URL`, `SERVE_FRONTEND` variables.
 
 Set `Start command` in Deploy settings section to `daphne -b 0.0.0.0 -p 8000 core.asgi:application -v2`
 
@@ -305,6 +325,10 @@ Set `DATABASE_URL` by coping DATABASE_URL from postgres service variables.
 Set `REDIS_URL` by coping REDIS_URL from redis service variables.
 
 Set `EMAIL_HOST`, `EMAIL_PASSWORD`, `EMAIL_PORT`, `EMAIL_USER` variables.
+
+Variables can also be referenced between services by using `${SERVICE_NAME.ENV_VAR_NAME}` syntax.
+
+---
 
 ## Fly.io (alternative)
 

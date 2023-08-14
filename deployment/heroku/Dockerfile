@@ -1,23 +1,19 @@
-# Use image with both python and node installed
 FROM nikolaik/python-nodejs:python3.10-nodejs16
 
 ENV PIPENV_VENV_IN_PROJECT=1
 
 WORKDIR /app/backend
 
-# Install Python dependencies
 COPY ./backend/Pipfile ./backend/Pipfile.lock /app/backend/
 RUN pip install --upgrade pip && pipenv install
 
 ENV PATH="/app/backend/.venv/bin:$PATH"
 
-# Install frontend dependencies
 WORKDIR /app/frontend
 
 COPY ./frontend/package.json ./frontend/yarn.lock /app/frontend/
 RUN yarn install
 
-# Add scripts and rest of code
 COPY ./backend/scripts/ /app/
 COPY . /app/
 
@@ -28,5 +24,6 @@ RUN mkdir /app/backend/staticfiles
 WORKDIR /app
 
 ENV DJANGO_SETTINGS_MODULE=core.settings.static
+ENV SERVE_FRONTEND=True
 
 RUN python3 backend/manage.py collectstatic --noinput

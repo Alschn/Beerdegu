@@ -1,10 +1,19 @@
 from django.contrib import admin
-from django.db.models import Avg, QuerySet, Count, Subquery, OuterRef, IntegerField, FloatField
+from django.db.models import (
+    Avg,
+    QuerySet,
+    Count,
+    Subquery,
+    OuterRef,
+    IntegerField,
+    FloatField
+)
 from django.http import HttpRequest
 from import_export.admin import ImportExportActionModelAdmin
 from ordered_model.admin import OrderedModelAdmin
 
-from .models import Room, Rating, UserInRoom, BeerInRoom
+from ratings.models import Rating
+from .models import Room, UserInRoom, BeerInRoom
 
 
 @admin.register(Room)
@@ -13,12 +22,6 @@ class RoomAdmin(ImportExportActionModelAdmin):
     list_select_related = ('host',)
     list_filter = ('state',)
     search_fields = ('name', 'host__username')
-
-
-@admin.register(Rating)
-class RatingAdmin(ImportExportActionModelAdmin):
-    list_display = ('id', 'beer', 'note', 'added_by', 'room')
-    list_select_related = ('added_by', 'room', 'beer')
 
 
 @admin.register(BeerInRoom)

@@ -61,7 +61,6 @@ class BeersAPIViewsTest(APITestCase):
             second=json_response['results']
         )
 
-    @unittest.skip('Currently disabled')
     def test_create_beer(self):
         self._require_login_and_auth()
         response = self.client.post('/api/beers/', data={
@@ -75,7 +74,6 @@ class BeersAPIViewsTest(APITestCase):
             BeerSerializer(Beer.objects.get(name="a'la Grodziskie")).data
         )
 
-    @unittest.skip('Currently disabled')
     def test_create_beer_missing_data(self):
         self._require_login_and_auth()
         response = self.client.post('/api/beers/', data={
@@ -83,8 +81,8 @@ class BeersAPIViewsTest(APITestCase):
             'volume_ml': 750,
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('percentage', response.json())
 
-    @unittest.skip('Currently disabled')
     def test_create_beer_negative_percentage(self):
         self._require_login_and_auth()
         response = self.client.post('/api/beers/', data={
@@ -93,12 +91,17 @@ class BeersAPIViewsTest(APITestCase):
             'volume_ml': 500,
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('percentage', response.json())
 
-    def test_get_beer_by_id(self):
+    # todo: more create beer tests (including base64 image upload)
+
+    def test_retrieve_beer(self):
         beer = Beer.objects.create(name='Kwas Theta', percentage=10.2, volume_ml=500)
         response = self.client.get(f'/api/beers/{beer.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), BeerSerializer(beer).data)
+
+    # todo: more retrieve beer tests
 
     def test_get_update_delete_beer_not_exists(self):
         response_get = self.client.get('/api/beers/200/')
@@ -143,3 +146,104 @@ class BeersAPIViewsTest(APITestCase):
         self.assertEqual(qs_len_before - 1, Beer.objects.all().count())
         with self.assertRaises(ObjectDoesNotExist):
             Beer.objects.get(id=lookup_id)
+
+    # todo: filtering unit tests
+
+    def test_list_beers_filter_name_icontains(self):
+        pass
+
+    def test_list_beers_filter_name_not_contains(self):
+        pass
+
+    def test_list_beers_filter_brewery(self):
+        pass
+
+    def test_list_beers_filter_multiple_breweries(self):
+        pass
+
+    def test_list_beers_filter_brewery_does_not_exist(self):
+        pass
+
+    def test_list_beers_filter_brewery_name_icontains(self):
+        pass
+
+    def test_list_beers_filter_style(self):
+        pass
+
+    def test_list_beers_filter_multiple_styles(self):
+        pass
+
+    def test_list_beers_filter_style_does_not_exist(self):
+        pass
+
+    def test_list_beers_filter_percentage_gte(self):
+        pass
+
+    def test_list_beers_filter_percentage_lte(self):
+        pass
+
+    def test_list_beers_filter_percentage_range(self):
+        pass
+
+    def test_list_beers_filter_percentage_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_gte(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_lte(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_range(self):
+        pass
+
+    def test_list_beers_filter_volume_ml_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_gte(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_lte(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_range(self):
+        pass
+
+    def test_list_beers_filter_hop_rate_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_ibu_gte(self):
+        pass
+
+    def test_list_beers_filter_ibu_lte(self):
+        pass
+
+    def test_list_beers_filter_ibu_range(self):
+        pass
+
+    def test_list_beers_filter_ibu_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_extract_gte(self):
+        pass
+
+    def test_list_beers_filter_extract_lte(self):
+        pass
+
+    def test_list_beers_filter_extract_range(self):
+        pass
+
+    def test_list_beers_filter_extract_invalid_range(self):
+        pass
+
+    def test_list_beers_filter_hop(self):
+        pass
+
+    def test_list_beers_filter_multiple_hops(self):
+        pass
+
+    def test_list_beers_filter_hop_does_not_exist(self):
+        pass
+
+    def test_list_beers_filter_hops_name_icontains(self):
+        pass

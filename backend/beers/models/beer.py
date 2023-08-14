@@ -2,6 +2,16 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils.crypto import get_random_string
+from django.utils.text import slugify
+
+
+def get_file_path(instance: 'Beer', filename: str) -> str:
+    _, extension = filename.split('.')
+    slug = slugify(instance.name)
+    random_part = get_random_string(length=8)
+    name = f"{slug}-{random_part}.{extension}"
+    return f"beers/{name}"
 
 
 class Beer(models.Model):
@@ -38,7 +48,11 @@ class Beer(models.Model):
         null=True, blank=True,
         help_text="Bitterness measured in International Bitterness Units scale"
     )
-    image = models.URLField(null=True, blank=True)
+    image = models.ImageField(
+        null=True, blank=True,
+        upload_to=get_file_path,
+        max_length=255,
+    )
     description = models.TextField(max_length=1000, null=True, blank=True)
     hops = models.ManyToManyField(
         'beers.Hop',

@@ -9,7 +9,7 @@ kill_timeout = 5
   worker = "python manage.py qcluster"
 
 [build]
-  dockerfile = "Dockerfile.fly"
+  dockerfile = "deployment/fly/Dockerfile"
   build-target = "runtime"
 
 [deploy]

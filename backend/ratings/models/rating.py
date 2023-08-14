@@ -34,9 +34,7 @@ class Rating(models.Model):
     ], null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['id']
+    is_published = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         to_str = f'{self.beer.name} - {self.note or "?"} by {self.added_by}'

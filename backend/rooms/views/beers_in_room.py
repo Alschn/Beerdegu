@@ -14,7 +14,6 @@ from beers.serializers import BeerSerializer
 from rooms.models import Room, BeerInRoom
 from rooms.permissions import IsHostOrListOnly
 from rooms.serializers.room import RoomAddBeerSerializer, RoomDeleteBeerSerializer
-from rooms.views.helpers import check_if_room_exists
 
 
 class BeersInRoomView(GenericAPIView):
@@ -92,3 +91,7 @@ class BeersInRoomView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'message': 'Successfully removed beer from room!'}, status.HTTP_200_OK)
+
+
+def check_if_room_exists(room_name: str) -> bool:
+    return Room.objects.filter(name=room_name).exists()
