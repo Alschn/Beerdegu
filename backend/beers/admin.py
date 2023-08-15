@@ -11,7 +11,7 @@ class BeerAdmin(ImportExportActionModelAdmin):
 
 
 class BreweryAdmin(ImportExportActionModelAdmin):
-    list_display = ('id', 'name', 'city', 'country', 'established')
+    list_display = ('id', 'name', 'city', 'country', 'year_established')
     search_fields = ('name', 'city')
 
 
