@@ -7,7 +7,9 @@ from .beer import (
     DetailedBeerSerializer,
 )
 from .beer_style import (
-    BeerStyleSerializer, EmbeddedBeerStyleSerializer
+    BeerStyleListSerializer,
+    BeerStyleDetailSerializer,
+    EmbeddedBeerStyleSerializer
 )
 from .brewery import (
     BrewerySerializer, EmbeddedBrewerySerializer,
