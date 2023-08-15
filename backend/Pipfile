@@ -33,6 +33,7 @@ openpyxl = "*"
 drf-spectacular = "*"
 django-storages = "*"
 boto3 = "*"
+django-countries = "*"
 
 [dev-packages]
 coverage = "*"
