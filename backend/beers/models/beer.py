@@ -40,7 +40,10 @@ class Beer(models.Model):
         null=True, blank=True,
         help_text="Grams of hops per liter [g/L]"
     )
-    extract = models.PositiveIntegerField(
+    extract = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0'))],
         null=True, blank=True,
         help_text="Concentration of dissolved solids (mainly sugars) in a brewery wort. [°BLG]"
     )
