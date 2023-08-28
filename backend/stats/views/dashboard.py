@@ -10,9 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from beers.models import Beer
-from beers.serializers import SimplifiedBeerSerializer
 from ratings.models import Rating
-from ratings.serializers.rating import RatingWithSimplifiedBeerSerializer
 from rooms.models import Room
 from rooms.serializers.room import RoomListSerializer
 from stats.serializers.dashboard import StatisticsQueryParamsSerializer, DashboardStatisticsSerializer
@@ -71,8 +69,9 @@ def get_statistics_for_users(
     ).order_by('-note')
 
     average_rating = ratings.aggregate(Avg('note'))['note__avg']
-    highest_rating = ratings.first()
-    lowest_rating = ratings.last()
+
+    # highest_rating = ratings.first()
+    # lowest_rating = ratings.last()
 
     rooms_joined = Room.objects.filter(
         ratings__added_by__in=users,
@@ -86,21 +85,21 @@ def get_statistics_for_users(
     ).distinct()
     rooms_created_count = rooms_created.count()
 
-    if highest_rating:
-        highest_rating = RatingWithSimplifiedBeerSerializer(highest_rating).data
+    # if highest_rating:
+    #     highest_rating = RatingWithSimplifiedBeerSerializer(highest_rating).data
 
-    if lowest_rating:
-        lowest_rating = RatingWithSimplifiedBeerSerializer(lowest_rating).data
+    # if lowest_rating:
+    #     lowest_rating = RatingWithSimplifiedBeerSerializer(lowest_rating).data
 
-    recently_consumed_beers = consumed_beers[:5]
-    recently_consumed_beers = SimplifiedBeerSerializer(recently_consumed_beers, many=True).data
+    # recently_consumed_beers = consumed_beers[:5]
+    # recently_consumed_beers = SimplifiedBeerSerializer(recently_consumed_beers, many=True).data
 
     rooms_with_users = Room.objects.filter(users__in=users)
     current_rooms = RoomListSerializer(rooms_with_users, many=True).data
 
     aggregated_data = {
         'consumed_beers_count': consumed_beers_count,
-        'average_rating': average_rating,
+        'average_rating': round(average_rating, 2),
         'rooms_joined_count': rooms_joined_count,
         'rooms_created_count': rooms_created_count,
         'current_rooms': current_rooms,
