@@ -210,7 +210,7 @@ While in **root directory**, build docker images and run them with docker-compos
 Rebuilding image is crucial after installing new packages via pip or npm.
 
 ```shell script
-docker-compose up --build
+docker compose up --build
 ```
 
 Application should be up and running: backend `127.0.0.1:8000`, frontend `127.0.0.1:3000`.
@@ -218,31 +218,31 @@ Application should be up and running: backend `127.0.0.1:8000`, frontend `127.0.
 If images had been installed and **no additional packages have been installed**, just run to start containers:
 
 ```shell script
-docker-compose up
+docker compose up
 ```
 
 Bringing down containers with **optional** -v flag removes **all** attached volumes and invalidates caches.
 
 ```shell script
-docker-compose down
+docker compose down
 ```
 
 To run commands in active container:
 
 ```shell script
-docker exec -it CONTAINER_ID bash
+docker exec -it CONTAINER_NAME bash
 ```
 
 Rebuilding individual containers instead of all of them
 
 ```shell
-docker-compose build CONTAINER_NAME
+docker compose build SERVICE_NAME
 ```
 
 If there are problems caused by caching, then you can use optional flag to build container without Docker's cache
 
 ```shell
-docker-compose build CONTAINER_NAME --no-cache
+docker compose build SERVICE_NAME --no-cache
 ```
 
 ## Accessing backend from mobile app (BeerdeguMobile):
