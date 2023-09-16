@@ -69,6 +69,7 @@ def get_statistics_for_users(
     ).order_by('-note')
 
     average_rating = ratings.aggregate(Avg('note'))['note__avg']
+    rounded_avg_rating = round(average_rating, 2) if average_rating else None
 
     # highest_rating = ratings.first()
     # lowest_rating = ratings.last()
@@ -99,7 +100,7 @@ def get_statistics_for_users(
 
     aggregated_data = {
         'consumed_beers_count': consumed_beers_count,
-        'average_rating': round(average_rating, 2),
+        'average_rating': rounded_avg_rating,
         'rooms_joined_count': rooms_joined_count,
         'rooms_created_count': rooms_created_count,
         'current_rooms': current_rooms,
