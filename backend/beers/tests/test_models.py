@@ -17,7 +17,7 @@ class BeersModelsTest(TestCase):
             name='West Coast IPA',
             percentage=5, volume_ml=500
         )
-        self.assertEqual(str(beer_with_brewery), "West Coast IPA 5% 500ml, Browar Warmia")
+        self.assertEqual(str(beer_with_brewery), "West Coast IPA 5% 500ml, Warmia")
         self.assertEqual(str(beer_without_brewery), "West Coast IPA 5% 500ml")
 
     def test_BeerStyle_to_string(self):
@@ -29,4 +29,4 @@ class BeersModelsTest(TestCase):
         self.assertEqual(str(hop), "Marynka")
 
     def test_Brewery_to_string(self):
-        self.assertEqual(str(self.brewery), "Browar Warmia")
+        self.assertEqual(str(self.brewery), "Warmia")
