@@ -9,6 +9,22 @@ class BeerAdmin(ImportExportActionModelAdmin):
     list_select_related = ('brewery', 'style')
     search_fields = ('name', 'brewery__name', 'style__name')
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+        if db_field.name in ('brewery', 'style'):
+            form_field.queryset = form_field.queryset.order_by('name')
+
+        return form_field
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_manytomany(db_field, request, **kwargs)
+
+        if db_field.name == 'hops':
+            form_field.queryset = form_field.queryset.order_by('name')
+
+        return form_field
+
 
 class BreweryAdmin(ImportExportActionModelAdmin):
     list_display = ('id', 'name', 'city', 'country', 'year_established')
