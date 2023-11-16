@@ -256,7 +256,7 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "YOUR_IP_ADDRESS"]
 
 # Production Deployment
 
-## Railway.app (preferred)
+## Railway.app
 
 Go to https://railway.app/dashboard and create a new project with `Deploy from GitHub repo`.
 
@@ -272,7 +272,7 @@ Set `RAILWAY_DOCKERFILE_PATH` variable to `Dockerfile.api` (or `Dockerfile.fly` 
 
 ```dotenv
 RAILWAY_DOCKERFILE_PATH=Dockerfile.api
-PRODUCTION_HOST=<appname>.up.railway.app
+ALLOWED_HOSTS=<railway_app_name>.up.railway.app,<other_domain>
 DJANGO_SETTINGS_MODULE=core.settings.prod
 FRONTEND_SITE_NAME=Beerdegu
 PORT=8000
@@ -298,7 +298,7 @@ Set `Start command` in Deploy settings section to `daphne -b 0.0.0.0 -p 8000 cor
 
 Set `RAILWAY_DOCKERFILE_PATH` to `Dockerfile.api`.
 
-Add `PRODUCTION_HOST`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME` variables.
+Add `ALLOWED_HOSTS`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME` variables.
 
 Set `Start command` in Deploy settings section to `python manage.py qcluster`.
 
@@ -338,7 +338,7 @@ Launch a new app
 fly launch
 ```
 
-Set secrets: `PRODUCTION_HOST`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
+Set secrets: `ALLOWED_HOSTS`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI`, `FRONTEND_SITE_NAME`
 
 ```shell
@@ -387,7 +387,7 @@ fly ssh console
    ```
    Or in the Heroku dashboard, go to Settings > Config Vars and add the variables there.  
    Variables to set: `DJANGO_SETTINGS_MODULE=core.settings.prod` `DJANGO_SUPERUSER_EMAIL`,
-   `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `PRODUCTION_HOST=<app name>.herokuapp.com`,
+   `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `ALLOWED_HOSTS=<app_name>.herokuapp.com`,
    `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`
 5) Run: `heroku stack:set container` so Heroku knows this is a containerized application
 6) Run: `heroku addons:create heroku-postgresql:hobby-dev` which creates the postgres add-on for Heroku
