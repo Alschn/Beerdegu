@@ -9,10 +9,8 @@ ROOT_DIR = BASE_DIR.parent
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-PRODUCTION_HOST = os.environ['PRODUCTION_HOST']
-
 ALLOWED_HOSTS = [
-    PRODUCTION_HOST,
+    h for h in os.environ['ALLOWED_HOSTS'].split(',') if h
 ]
 
 DEBUG = False
@@ -198,5 +196,5 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CSRF_TRUSTED_ORIGINS = [
-    f'https://{PRODUCTION_HOST}'
+    f'https://{host}' for host in ALLOWED_HOSTS
 ]
