@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from core.shared.pagination import page_number_pagination_factory
 from ratings.filters import RatingsFilterSet
 from ratings.models import Rating
-from ratings.permissons import CanDeleteRatingPermission
+from ratings.permissons import CanEditRatingPermission
 from ratings.serializers import (
     RatingListSerializer,
     RatingDetailSerializer,
@@ -37,7 +37,7 @@ class RatingsViewSet(
 
     DELETE  /api/ratings/<int:id>/            - delete rating
     """
-    permission_classes = [IsAuthenticated, CanDeleteRatingPermission]
+    permission_classes = [IsAuthenticated, CanEditRatingPermission]
     pagination_class = RatingsPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RatingsFilterSet
