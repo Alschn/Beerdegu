@@ -68,11 +68,13 @@ def get_statistics_for_users(
 ) -> dict:
     ratings = filter_ratings_for_users(users, date_from, date_to).order_by('-note')
     average_rating = get_average_rating(ratings)
+
     highest_rating = ratings.first()
-    lowest_rating = ratings.last()
 
     if highest_rating:
-        highest_rating = serialize_rating(lowest_rating)
+        highest_rating = serialize_rating(highest_rating)
+
+    lowest_rating = ratings.last()
 
     if lowest_rating:
         lowest_rating = serialize_rating(lowest_rating)
@@ -93,16 +95,20 @@ def get_statistics_for_users(
     recently_consumed_beers = consumed_beers[:recently_consumed_beers_limit]
     recently_consumed_beers = serialize_beers(recently_consumed_beers)
 
-    beer_styles = filter_beer_styles_from_beers(consumed_beers).order_by('-beers__ratings__note').distinct()
+    beer_styles = filter_beer_styles_from_beers(consumed_beers)
     beer_styles_count = beer_styles.count()
 
-    favourite_beer_style = beer_styles.first()
+    ordered_beer_styles = beer_styles.order_by('-beers__ratings__note')
+    favourite_beer_style = ordered_beer_styles.first()
+
     if favourite_beer_style:
         favourite_beer_style = serialize_beer_style(favourite_beer_style)
 
-    breweries = filter_breweries_from_beers(consumed_beers).order_by('-beers__ratings__note').distinct()
+    breweries = filter_breweries_from_beers(consumed_beers)
     breweries_count = breweries.count()
-    favourite_brewery = breweries.first()
+
+    ordered_breweries = breweries.order_by('-beers__ratings__note')
+    favourite_brewery = ordered_breweries.first()
 
     if favourite_brewery:
         favourite_brewery = serialize_brewery(favourite_brewery)
