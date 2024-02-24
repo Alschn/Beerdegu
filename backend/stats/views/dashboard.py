@@ -88,7 +88,9 @@ def get_statistics_for_users(
     rooms_with_users = filter_current_rooms_for_users(users)
     current_rooms = serialize_rooms(rooms_with_users)
 
-    consumed_beers = filter_consumed_beers_for_users(users, date_from, date_to).order_by('-ratings__note').distinct()
+    consumed_beers = filter_consumed_beers_for_users(users, date_from, date_to).annotate(
+        average_beer_note=Avg('ratings__note')
+    ).order_by('-average_beer_note').distinct()
     consumed_beers_count = consumed_beers.count()
 
     recently_consumed_beers_limit = 5
@@ -98,7 +100,9 @@ def get_statistics_for_users(
     beer_styles = filter_beer_styles_from_beers(consumed_beers)
     beer_styles_count = beer_styles.count()
 
-    ordered_beer_styles = beer_styles.order_by('-beers__ratings__note')
+    ordered_beer_styles = beer_styles.annotate(
+        average_beer_note=Avg('beers__ratings__note')
+    ).order_by('-average_beer_note')
     favourite_beer_style = ordered_beer_styles.first()
 
     if favourite_beer_style:
@@ -107,14 +111,16 @@ def get_statistics_for_users(
     breweries = filter_breweries_from_beers(consumed_beers)
     breweries_count = breweries.count()
 
-    ordered_breweries = breweries.order_by('-beers__ratings__note')
+    ordered_breweries = breweries.annotate(
+        average_beer_note=Avg('beers__ratings__note')
+    ).order_by('-average_beer_note')
     favourite_brewery = ordered_breweries.first()
 
     if favourite_brewery:
         favourite_brewery = serialize_brewery(favourite_brewery)
 
-    beer_styles_distribution = get_beer_styles_distribution(beer_styles)
-    breweries_distribution = get_breweries_distribution(breweries)
+    beer_styles_distribution = get_beer_styles_distribution(ordered_beer_styles)
+    breweries_distribution = get_breweries_distribution(ordered_breweries)
 
     aggregated_data = {
         'consumed_beers_count': consumed_beers_count,
