@@ -4,7 +4,10 @@ from purchases.models import BeerPurchase
 
 
 class BeerPurchaseFilterSet(filters.FilterSet):
-    # todo: add beer csv filter
+    beer = filters.BaseCSVFilter(
+        field_name='beer__id',
+        lookup_expr='in'
+    )
 
     class Meta:
         model = BeerPurchase
