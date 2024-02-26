@@ -27,14 +27,20 @@ class BeerPurchasesViewSet(
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
     filterset_class = BeerPurchaseFilterSet
     search_fields = ('beer__name', 'beer__style__name')
+    ordering_fields = ('purchased_at', 'price')
 
     def get_queryset(self) -> QuerySet[BeerPurchase]:
         return BeerPurchase.objects.filter(
             sold_to=self.request.user
-        ).select_related('beer', 'sold_to', 'beer__style')
+        ).select_related(
+            'beer', 'sold_to', 'beer__style'
+        ).order_by('-purchased_at')
 
     def get_serializer_class(self):
         if self.action == 'create':
             return BeerPurchaseCreateSerializer
 
         return BeerPurchaseSerializer
+
+    def perform_create(self, serializer: BeerPurchaseCreateSerializer) -> None:
+        serializer.save(sold_to=self.request.user)
