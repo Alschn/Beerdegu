@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('packaging', models.CharField(choices=[('BOTTLE', 'Bottle'), ('CAN', 'Can'), ('KEG', 'Keg'), ('DRAUGHT', 'Draught')], max_length=7)),
                 ('price', models.DecimalField(decimal_places=2, help_text='Price of the beer in Polish Zloty [PLN]', max_digits=5, validators=[django.core.validators.MinValueValidator(Decimal('0'))])),
-                ('volume_ml', models.PositiveIntegerField(help_text='Volume of the beer in milliliters [mL]', validators=[django.core.validators.MinValueValidator(Decimal('0'))])),
+                ('volume_ml', models.PositiveIntegerField(help_text='Volume of the beer in milliliters [mL]')),
                 ('image', models.ImageField(blank=True, help_text='Image of the receipt, menu or the beer itself', null=True, upload_to='purchases/')),
                 ('purchased_at', models.DateField(default=datetime.date.today)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),

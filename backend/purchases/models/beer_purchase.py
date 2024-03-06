@@ -36,8 +36,7 @@ class BeerPurchase(models.Model):
         validators=[MinValueValidator(Decimal('0'))]
     )
     volume_ml = models.PositiveIntegerField(
-        help_text=_('Volume of the beer in milliliters [mL]'),
-        validators=[MinValueValidator(Decimal('0'))]
+        help_text=_('Volume of the beer in milliliters [mL]')
     )
     image = models.ImageField(
         upload_to='purchases/',
