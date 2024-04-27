@@ -1,9 +1,14 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from beers.models import Beer
 from beers.serializers.beer import (
     DetailedBeerSerializer,
-    BeerInRatingSerializer, SimplifiedBeerSerializer
+    BeerInRatingSerializer,
+    SimplifiedBeerSerializer
 )
+from purchases.models import BeerPurchase
+from purchases.serializers import BeerPurchaseSimplifiedSerializer
 from ratings.models import Rating
 from rooms.serializers.room import RoomListSerializer
 from users.serializers.user import UserSerializer
@@ -13,13 +18,15 @@ class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = (
+            'id',
             'color',
             'foam',
             'smell',
             'taste',
             'opinion',
             'note',
-            'beer'
+            'beer',
+            'beer_purchase'
         )
 
     def to_representation(self, instance: Rating):
@@ -39,6 +46,7 @@ class RatingSerializer(serializers.ModelSerializer):
 class RatingListSerializer(serializers.ModelSerializer):
     added_by = UserSerializer()
     beer = BeerInRatingSerializer()
+    beer_purchase = BeerPurchaseSimplifiedSerializer()
     room = RoomListSerializer()
 
     class Meta:
@@ -47,6 +55,7 @@ class RatingListSerializer(serializers.ModelSerializer):
             'id',
             'added_by',
             'beer',
+            'beer_purchase',
             'room',
             'color',
             'foam',
@@ -62,6 +71,7 @@ class RatingListSerializer(serializers.ModelSerializer):
 class RatingDetailSerializer(serializers.ModelSerializer):
     added_by = UserSerializer()
     beer = DetailedBeerSerializer()
+    beer_purchase = BeerPurchaseSimplifiedSerializer()
     room = RoomListSerializer()
 
     class Meta:
@@ -70,6 +80,7 @@ class RatingDetailSerializer(serializers.ModelSerializer):
             'id',
             'added_by',
             'beer',
+            'beer_purchase',
             'room',
             'color',
             'foam',
@@ -89,6 +100,7 @@ class RatingCreateSerializer(serializers.ModelSerializer):
             'id',
             'added_by',
             'beer',
+            'beer_purchase',
             'room',
             'color',
             'foam',
@@ -107,11 +119,25 @@ class RatingCreateSerializer(serializers.ModelSerializer):
             'updated_at'
         )
 
+    def validate(self, attrs: dict) -> dict:
+        validated_data = super().validate(attrs)
+        beer: Beer = validated_data.get('beer')
+        beer_purchase: BeerPurchase | None = validated_data.get('beer_purchase')
+
+        if beer and beer_purchase and beer_purchase.beer != beer:
+            message = _('Beer from beer_purchase does not match the beer.')
+            raise serializers.ValidationError(
+                {'beer': message, 'beer_purchase': message}
+            )
+
+        return validated_data
+
 
 class RatingUpdateSerializer(serializers.ModelSerializer):
     # same as in RatingListSerializer, so that the types match
     added_by = UserSerializer()
     beer = BeerInRatingSerializer()
+    beer_purchase = BeerPurchaseSimplifiedSerializer()
     room = RoomListSerializer()
 
     class Meta:
@@ -120,6 +146,7 @@ class RatingUpdateSerializer(serializers.ModelSerializer):
             'id',
             'added_by',
             'beer',
+            'beer_purchase',
             'room',
             'color',
             'foam',
@@ -134,6 +161,7 @@ class RatingUpdateSerializer(serializers.ModelSerializer):
             'id',
             'added_by',
             'beer',
+            'beer_purchase',
             'room',
             'created_at',
             'updated_at'
@@ -148,6 +176,7 @@ class RatingWithSimplifiedBeerSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'beer',
+            'beer_purchase',
             'added_by',
             'note',
             'created_at',

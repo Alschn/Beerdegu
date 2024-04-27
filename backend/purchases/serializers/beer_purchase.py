@@ -22,6 +22,20 @@ class BeerPurchaseSerializer(serializers.ModelSerializer):
         )
 
 
+class BeerPurchaseSimplifiedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeerPurchase
+        fields = (
+            'id',
+            'beer',
+            'packaging',
+            'price',
+            'volume_ml',
+            'image',
+            'purchased_at',
+        )
+
+
 class BeerPurchaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeerPurchase

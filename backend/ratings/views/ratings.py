@@ -53,22 +53,26 @@ class RatingsViewSet(
         if not self.request.user.is_authenticated:
             return Rating.objects.none()
 
+        queryset = Rating.objects.filter(
+            added_by=self.request.user
+        ).order_by('-created_at')
+
         if self.action == 'list':
-            return Rating.objects.filter(
-                added_by=self.request.user
-            ).select_related('added_by', 'beer').order_by('-created_at')
+            return queryset.select_related(
+                'added_by', 'beer', 'beer_purchase'
+            )
 
         if self.action == 'retrieve':
-            return Rating.objects.filter(
-                added_by=self.request.user
-            ).select_related(
-                'added_by', 'beer', 'room', 'room__host',
-                'beer__brewery', 'beer__style'
+            return queryset.select_related(
+                'added_by',
+                'beer', 'beer__brewery', 'beer__style'
+                                         'room', 'room__host',
+                'beer_purchase',
             ).prefetch_related(
                 'beer__hops'
-            ).order_by('-created_at')
+            )
 
-        return Rating.objects.filter(added_by=self.request.user).order_by('-created_at')
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'list':
