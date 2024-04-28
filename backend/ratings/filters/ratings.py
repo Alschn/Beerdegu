@@ -9,7 +9,6 @@ class RatingsFilterSet(filters.FilterSet):
         fields = {
             'beer': ['exact', 'in'],
             'room': ['exact', 'in'],
-            'added_by': ['exact', 'in'],
             'note': ['gte', 'lte', 'gt', 'lt', 'exact', 'range'],
             'created_at': ['gte', 'lte'],
             'updated_at': ['gte', 'lte'],
