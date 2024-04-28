@@ -26,14 +26,14 @@ class BeerPurchasesViewSet(
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
     filterset_class = BeerPurchaseFilterSet
-    search_fields = ('beer__name', 'beer__style__name')
+    search_fields = ('beer__name', 'beer__style__name', 'beer__brewery__name')
     ordering_fields = ('purchased_at', 'price')
 
     def get_queryset(self) -> QuerySet[BeerPurchase]:
         return BeerPurchase.objects.filter(
             sold_to=self.request.user
         ).select_related(
-            'beer', 'sold_to', 'beer__style'
+            'beer', 'sold_to', 'beer__style', 'beer__brewery'
         ).order_by('-purchased_at')
 
     def get_serializer_class(self):
