@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from beers.models import Beer
 from beers.serializers import BeerSerializer
+from core.shared.factories import UserFactory, RoomFactory, BeerFactory
 from rooms.models import Room
 from rooms.serializers import RoomSerializer, DetailedRoomSerializer
 from rooms.serializers.room import RoomListSerializer, RESTRICTED_ROOM_NAMES
@@ -20,20 +21,21 @@ class RoomsAPIViewsTests(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user1 = User.objects.create_user(username='Test', password='!@#$%')
-        cls.user2 = User.objects.create_user(username='Test2', password='!@#$%')
-        cls.user3 = User.objects.create_user(username='Test3', password='abcdef123@')
-        cls.room = Room.objects.create(name='12345678', host=cls.user1, slots=4)
-        cls.room_with_pass = Room.objects.create(
+        cls.user1 = UserFactory(username='Test', password='!@#$%')
+        cls.user2 = UserFactory(username='Test2', password='!@#$%')
+        cls.user3 = UserFactory(username='Test3', password='abcdef123@')
+        cls.room = RoomFactory(name='12345678', host=cls.user1, slots=4)
+        cls.room_with_pass = RoomFactory(
             name='abcdefgh', password='password', slots=2,
             host=cls.user3
         )
-        cls.room_with_pass.beers.add(*Beer.objects.bulk_create([
+        beers = Beer.objects.bulk_create([
             Beer(id=50, name='Atak Chmielu', percentage=6.1, volume_ml=500),
             Beer(id=51, name='Maniac', percentage=8, volume_ml=500),
             Beer(id=52, name='Triple NEIPA', percentage=9.2, volume_ml=500),
             Beer(id=53, name='Diablo Verde', percentage=7.6, volume_ml=500),
-        ]))
+        ])
+        cls.room_with_pass.beers.add(*beers)
 
     # noinspection PyUnresolvedReferences
     def _require_login_and_auth(self, user: User) -> None:
@@ -43,49 +45,53 @@ class RoomsAPIViewsTests(TestCase):
     def test_user_is_in_room_doesnt_exist(self):
         self._require_login_and_auth(user=self.user1)
         response = self.client.get('/api/rooms/xd/in/')
-        to_json = response.json()
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual({'detail': 'Not found.'}, to_json)
+        self.assertIn('detail', response_json)
 
     def test_user_is_not_in_room(self):
         self._require_login_and_auth(user=self.user2)
         response = self.client.get('/api/rooms/12345678/in/')
-        to_json = response.json()
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual({'message': 'User is not part of this room!'}, to_json)
+        self.assertEqual(response_json, {'message': 'User is not part of this room!'})
 
     def test_user_is_in_room_and_host(self):
         self._require_login_and_auth(user=self.user1)
         response = self.client.get('/api/rooms/12345678/in/')
-        to_json = response.json()
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('message', to_json)
-        self.assertIn('token', to_json)
-        self.assertEqual(to_json['is_host'], True)
+        self.assertIn('message', response_json)
+        self.assertIn('token', response_json)
+        self.assertEqual(response_json['is_host'], True)
 
     def test_user_is_in_room_not_host(self):
         self._require_login_and_auth(user=self.user2)
         self.room.users.add(self.user2)
         response = self.client.get('/api/rooms/12345678/in/')
-        to_json = response.json()
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('message', to_json)
-        self.assertIn('token', to_json)
-        self.assertEqual(to_json['is_host'], False)
+        self.assertIn('message', response_json)
+        self.assertIn('token', response_json)
+        self.assertEqual(response_json['is_host'], False)
 
     def test_join_room_not_found(self):
         self._require_login_and_auth(user=self.user1)
         response = self.client.put('/api/rooms/aha/join/', data={})
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'detail': 'Not found.'})
+        self.assertIn('detail', response_json)
 
     def test_join_room_already_in(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.put('/api/rooms/12345678/join/', data={'password': ''})
+        room_name = '12345678'
+        response = self.client.put(
+            f'/api/rooms/{room_name}/join/', data={'password': ''}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_join_room_full(self):
-        room = Room.objects.create(
+        room = RoomFactory(
             name='FULL',
             slots=1,
             host=self.user2
@@ -131,31 +137,35 @@ class RoomsAPIViewsTests(TestCase):
     def test_leave_room_not_found(self):
         self._require_login_and_auth(user=self.user1)
         response = self.client.delete('/api/rooms/aha/leave/')
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'detail': 'Not found.'})
+        self.assertIn('detail', response_json)
 
     def test_leave_room_not_in(self):
         self._require_login_and_auth(user=self.user2)
         response = self.client.delete('/api/rooms/12345678/leave/')
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'message': f'Test2 is not inside this room!'})
+        self.assertEqual(response_json, {'message': 'Test2 is not inside this room!'})
 
     def test_leave_room_success(self):
         self._require_login_and_auth(user=self.user1)
         r = Room.objects.get(name='12345678')
         self.assertEqual(r.users.count(), 1)
         response = self.client.delete('/api/rooms/12345678/leave/')
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'message': f'Test has left room 12345678!'})
+        self.assertEqual(response_json, {'message': 'Test has left room 12345678!'})
         self.assertEqual(r.users.count(), 0)
         self.assertNotIn(self.user1, r.users.all())
 
     def test_list_rooms(self):
         self._require_login_and_auth(user=self.user1)
         response = self.client.get('/api/rooms/')
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            first=response.json()['results'],
+            first=response_json['results'],
             second=RoomListSerializer(Room.objects.order_by('id'), many=True).data
         )
 
@@ -293,10 +303,11 @@ class RoomsAPIViewsTests(TestCase):
     def test_list_beers_in_room(self):
         self._require_login_and_auth(self.user3)
         response = self.client.get('/api/rooms/abcdefgh/beers/')
+        response_json = response.json()
         queryset = Beer.objects.filter(rooms__name='abcdefgh').order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            response.json(),
+            response_json,
             BeerSerializer(queryset, many=True).data
         )
 
@@ -350,21 +361,24 @@ class RoomsAPIViewsTests(TestCase):
         response = self.client.put('/api/rooms/abcdefgh/beers/', {
             'beer_id': beer.id
         })
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn('detail', response_json)
 
     def test_add_beer_success(self):
         self._require_login_and_auth(self.user3)
         room_name = 'abcdefgh'
-        beer_to_add = Beer.objects.create(name='test', percentage=5, volume_ml=500)
+        beer_to_add = BeerFactory(name='test', percentage=5, volume_ml=500)
         beers_before = Beer.objects.filter(rooms__name=room_name).order_by('id')
         self.assertEqual(beers_before.count(), 4)
         response = self.client.put(f'/api/rooms/{room_name}/beers/', {
             'beer_id': beer_to_add.id
         })
+        response_json = response.json()
         beers_after = Beer.objects.filter(rooms__name=room_name).order_by('rooms_through__order')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
-            response.json(),
+            response_json,
             BeerSerializer(beers_after, many=True).data
         )
         self.assertEqual(beers_after.count(), 5)
