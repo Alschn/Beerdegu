@@ -20,7 +20,7 @@ from rooms.permissions import IsHostOrListCreateOnly
 from rooms.reports import generate_excel_report
 from rooms.serializers import (
     RoomSerializer,
-    DetailedRoomSerializer,
+    RoomDetailedSerializer,
     RoomCreateSerializer
 )
 from rooms.serializers.room import RoomJoinSerializer, RoomListSerializer
@@ -53,7 +53,6 @@ class RoomsViewSet(
     """
     permission_classes = [IsAuthenticated, IsHostOrListCreateOnly]
     pagination_class = RoomsPagination
-    serializer_class = RoomSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = RoomsFilterSet
     lookup_field = 'name'
@@ -69,7 +68,7 @@ class RoomsViewSet(
             return RoomListSerializer
 
         if self.action == 'retrieve':
-            return DetailedRoomSerializer
+            return RoomDetailedSerializer
 
         if self.action == 'create':
             return RoomCreateSerializer
@@ -77,7 +76,7 @@ class RoomsViewSet(
         if self.action == 'user_join':
             return RoomJoinSerializer
 
-        return super().get_serializer_class()
+        return RoomSerializer
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().create(request, *args, **kwargs)

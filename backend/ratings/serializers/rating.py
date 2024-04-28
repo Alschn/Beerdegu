@@ -3,9 +3,8 @@ from rest_framework import serializers
 
 from beers.models import Beer
 from beers.serializers.beer import (
-    DetailedBeerSerializer,
-    BeerInRatingSerializer,
-    SimplifiedBeerSerializer
+    BeerDetailedSerializer,
+    BeerSimplifiedSerializer
 )
 from purchases.models import BeerPurchase
 from purchases.serializers import BeerPurchaseSimplifiedSerializer
@@ -30,22 +29,20 @@ class RatingSerializer(serializers.ModelSerializer):
         )
 
     def to_representation(self, instance: Rating):
-        my_fields = self.Meta.fields
         data = super().to_representation(instance)
 
         # Replace None with empty string, so that client does not receive nulls
-        for field in my_fields:
-            try:
-                if data[field] is None:
-                    data[field] = ""
-            except KeyError:
-                pass
+        # todo: move this elsewhere
+        for key, value in data.items():
+            if value is None:
+                data[key] = ""
+
         return data
 
 
 class RatingListSerializer(serializers.ModelSerializer):
     added_by = UserSerializer()
-    beer = BeerInRatingSerializer()
+    beer = BeerSimplifiedSerializer()
     beer_purchase = BeerPurchaseSimplifiedSerializer()
     room = RoomListSerializer()
 
@@ -70,7 +67,7 @@ class RatingListSerializer(serializers.ModelSerializer):
 
 class RatingDetailSerializer(serializers.ModelSerializer):
     added_by = UserSerializer()
-    beer = DetailedBeerSerializer()
+    beer = BeerDetailedSerializer()
     beer_purchase = BeerPurchaseSimplifiedSerializer()
     room = RoomListSerializer()
 
@@ -136,7 +133,7 @@ class RatingCreateSerializer(serializers.ModelSerializer):
 class RatingUpdateSerializer(serializers.ModelSerializer):
     # same as in RatingListSerializer, so that the types match
     added_by = UserSerializer()
-    beer = BeerInRatingSerializer()
+    beer = BeerSimplifiedSerializer()
     beer_purchase = BeerPurchaseSimplifiedSerializer()
     room = RoomListSerializer()
 
@@ -169,7 +166,7 @@ class RatingUpdateSerializer(serializers.ModelSerializer):
 
 
 class RatingWithSimplifiedBeerSerializer(serializers.ModelSerializer):
-    beer = SimplifiedBeerSerializer()
+    beer = BeerSimplifiedSerializer()
 
     class Meta:
         model = Rating

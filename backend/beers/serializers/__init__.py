@@ -1,19 +1,19 @@
 from .beer import (
     BeerSerializer,
     BeerCreateSerializer,
-    SimplifiedBeerSerializer,
+    BeerSimplifiedSerializer,
     BeerRepresentationalSerializer,
     BeerWithResultsSerializer,
-    DetailedBeerSerializer,
+    BeerDetailedSerializer,
 )
 from .beer_style import (
     BeerStyleListSerializer,
     BeerStyleDetailSerializer,
-    EmbeddedBeerStyleSerializer
+    BeerStyleEmbeddedSerializer
 )
 from .brewery import (
-    BrewerySerializer, EmbeddedBrewerySerializer,
+    BrewerySerializer, BreweryEmbeddedSerializer,
 )
 from .hop import (
-    HopSerializer, EmbeddedHopsSerializer
+    HopSerializer, HopEmbeddedSerializer
 )

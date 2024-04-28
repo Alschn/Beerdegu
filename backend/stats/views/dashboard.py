@@ -11,10 +11,10 @@ from rest_framework.views import APIView
 
 from beers.models import Beer, BeerStyle, Brewery
 from beers.serializers import (
-    SimplifiedBeerSerializer,
-    EmbeddedBeerStyleSerializer
+    BeerSimplifiedSerializer,
+    BeerStyleEmbeddedSerializer
 )
-from beers.serializers.brewery import SimplifiedBrewerySerializer
+from beers.serializers.brewery import BrewerySimplifiedSerializer
 from ratings.models import Rating
 from ratings.serializers.rating import RatingWithSimplifiedBeerSerializer
 from rooms.models import Room
@@ -232,7 +232,7 @@ def serialize_rating(rating: Rating) -> dict:
 
 
 def serialize_beers(beers: QuerySet[Beer]) -> list[dict]:
-    serializer = SimplifiedBeerSerializer(beers, many=True)
+    serializer = BeerSimplifiedSerializer(beers, many=True)
     return serializer.data
 
 
@@ -242,10 +242,10 @@ def serialize_rooms(rooms: QuerySet[Room]) -> list[dict]:
 
 
 def serialize_beer_style(beer_style: BeerStyle) -> dict:
-    serializer = EmbeddedBeerStyleSerializer(beer_style)
+    serializer = BeerStyleEmbeddedSerializer(beer_style)
     return serializer.data
 
 
 def serialize_brewery(brewery: Brewery) -> dict:
-    serializer = SimplifiedBrewerySerializer(brewery)
+    serializer = BrewerySimplifiedSerializer(brewery)
     return serializer.data
