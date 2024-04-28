@@ -39,6 +39,7 @@ django-countries = "==7.5.1"
 coverage = "==7.3.0"
 freezegun = "==1.2.2"
 factory-boy = "==3.3.0"
+ruff = "==0.4.2"
 
 [requires]
 python_version = "3.10"
