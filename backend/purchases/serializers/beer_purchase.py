@@ -4,10 +4,15 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from beers.serializers.beer import BeerEmbeddedSerializer
 from purchases.models import BeerPurchase
+from users.serializers.user import UserSerializer
 
 
 class BeerPurchaseSerializer(serializers.ModelSerializer):
+    beer = BeerEmbeddedSerializer()
+    sold_to = UserSerializer()
+
     class Meta:
         model = BeerPurchase
         fields = (
@@ -28,6 +33,7 @@ class BeerPurchaseSimplifiedSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'beer',
+            'sold_to',
             'packaging',
             'price',
             'volume_ml',

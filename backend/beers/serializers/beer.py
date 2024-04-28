@@ -21,13 +21,21 @@ class BeerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Beer
         fields = (
-            'id', 'name', 'brewery', 'style',
-            'percentage', 'volume_ml', 'hop_rate',
-            'extract', 'IBU', 'image', 'description',
-            'hops'
+            'id',
+            'name',
+            'description',
+            'brewery',
+            'style',
+            'hops',
+            'image',
+            'percentage',
+            'volume_ml',
+            'hop_rate',
+            'extract',
+            'IBU',
         )
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Beer) -> dict:
         representation = super().to_representation(instance)
         representation['image'] = build_file_url(representation['image'], self.context.get('request'))
         return representation
@@ -70,9 +78,19 @@ class BeerWithResultsSerializer(serializers.ModelSerializer):
 
 
 class DetailedBeerSerializer(BeerSerializer):
-    """BeerSerializer with serialized relationships fields.
-    Used when handling GET method (list/retrieve action)."""
+    """
+    BeerSerializer with serialized relationships fields.
+    Used when handling GET method (list/retrieve action).
+    """
     hops = EmbeddedHopsSerializer(many=True, read_only=True)
+    style = EmbeddedBeerStyleSerializer(read_only=True)
+    brewery = EmbeddedBrewerySerializer(read_only=True)
+
+
+class BeerEmbeddedSerializer(BeerSerializer):
+    """
+    BeerSerializer with serialized brewery and style related fields.
+    """
     style = EmbeddedBeerStyleSerializer(read_only=True)
     brewery = EmbeddedBrewerySerializer(read_only=True)
 
@@ -98,7 +116,7 @@ class BeerCreateSerializer(serializers.ModelSerializer):
         )
 
     @transaction.atomic
-    def create(self, validated_data) -> Beer:
+    def create(self, validated_data: dict) -> Beer:
         hops: list[Hop] = validated_data.pop('hops')
         instance = super().create(validated_data)
         instance.hops.set(hops)
