@@ -2,7 +2,9 @@ import unittest
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse_lazy
 from rest_framework import status
+from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from beers.models import Beer
@@ -16,6 +18,8 @@ User = get_user_model()
 
 
 class RoomsAPIViewsTests(TestCase):
+    list_url = reverse_lazy('rooms-list')
+
     def setUp(self) -> None:
         self.client = APIClient()
 
@@ -161,7 +165,7 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_list_rooms(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.get('/api/rooms/')
+        response = self.client.get(self.list_url)
         response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -171,7 +175,7 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_create_room(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.post('/api/rooms/', data={
+        response = self.client.post(self.list_url, data={
             'name': 'Good',
             'password': 'anything',
             'slots': 5,
@@ -181,7 +185,7 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_create_room_not_lowercase(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.post('/api/rooms/', data={
+        response = self.client.post(self.list_url, data={
             'name': 'qWeRtY',
             'password': 'anything',
             'slots': 5,
@@ -191,7 +195,7 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_create_room_name_not_unique(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.post('/api/rooms/', data={
+        response = self.client.post(self.list_url, data={
             'name': '12345678',
             'password': '',
             'slots': 3,
@@ -203,7 +207,7 @@ class RoomsAPIViewsTests(TestCase):
         restricted_names = RESTRICTED_ROOM_NAMES
         self._require_login_and_auth(user=self.user2)
         for name in restricted_names:
-            response = self.client.post('/api/rooms/', data={
+            response = self.client.post(self.list_url, data={
                 'name': name,
                 'password': '',
                 'slots': 3,
@@ -213,33 +217,43 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_create_room_wrong_slots_number(self):
         self._require_login_and_auth(user=self.user2)
-        r1 = self.client.post('/api/rooms/', data={
+
+        r1 = self.client.post(self.list_url, data={
             'name': 'ooo', 'password': 'anything', 'slots': 11,
         })
         self.assertEqual(r1.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('slots', r1.json())
 
-        r2 = self.client.post('/api/rooms/', data={
+        r2 = self.client.post(self.list_url, data={
             'name': 'ooo', 'password': 'anything', 'slots': -1,
         })
         self.assertEqual(r2.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('slots', r2.json())
 
-        r3 = self.client.post('/api/rooms/', data={
+        r3 = self.client.post(self.list_url, data={
             'name': 'ooo', 'password': 'anything', 'slots': 5.6,
         })
         self.assertEqual(r3.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('slots', r3.json())
 
-        r4 = self.client.post('/api/rooms/', data={
+        r4 = self.client.post(self.list_url, data={
             'name': 'ooo', 'password': 'anything', 'slots': 'a',
         })
         self.assertEqual(r4.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('slots', r4.json())
 
     def test_create_room_but_user_already_host_in_other_room(self):
-        self._require_login_and_auth(user=self.user1)
-        response = self.client.post('/api/rooms/', data={
-            'name': 'Blahblah',
-        })
+        user = UserFactory(username='new_host_user')
+        RoomFactory(name='test', host=user)
+
+        self._require_login_and_auth(user=user)
+
+        response = self.client.post(
+            self.list_url, data={'name': 'Blahblah'}
+        )
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('host', response.json())
+        self.assertIn('host', response_json)
 
     def test_get_room_by_name(self):
         self._require_login_and_auth(user=self.user1)
@@ -289,16 +303,6 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(user=self.user1)
         response_get = self.client.get('/api/rooms/123/')
         self.assertEqual(response_get.status_code, status.HTTP_404_NOT_FOUND)
-
-        # self._require_login_and_auth(user=self.user1)
-        # response_put = self.client.put('/api/rooms/123/', {})
-        # self.assertEqual(response_put.status_code, status.HTTP_404_NOT_FOUND)
-        #
-        # response_patch = self.client.patch('/api/rooms/123/', {})
-        # self.assertEqual(response_patch.status_code, status.HTTP_404_NOT_FOUND)
-        #
-        # response_delete = self.client.delete('/api/rooms/123/')
-        # self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_beers_in_room(self):
         self._require_login_and_auth(self.user3)
@@ -404,6 +408,7 @@ class RoomsAPIViewsTests(TestCase):
         self.assertNotEqual(self.user2, self.room_with_pass.host)
         response = self.client.delete('/api/rooms/abcdefgh/beers/?id=50')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn('detail', response.json())
 
     def test_delete_beer_success(self):
         self._require_login_and_auth(self.user3)
