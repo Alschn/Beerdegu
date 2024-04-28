@@ -65,8 +65,8 @@ class RatingsViewSet(
         if self.action == 'retrieve':
             return queryset.select_related(
                 'added_by',
-                'beer', 'beer__brewery', 'beer__style'
-                                         'room', 'room__host',
+                'beer', 'beer__brewery', 'beer__style',
+                'room', 'room__host',
                 'beer_purchase',
             ).prefetch_related(
                 'beer__hops'
