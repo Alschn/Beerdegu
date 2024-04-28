@@ -1,0 +1,1 @@
+from .beer_purchases import BeerPurchasesViewSet

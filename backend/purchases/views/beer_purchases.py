@@ -30,6 +30,9 @@ class BeerPurchasesViewSet(
     ordering_fields = ('purchased_at', 'price')
 
     def get_queryset(self) -> QuerySet[BeerPurchase]:
+        if not self.request.user.is_authenticated:
+            return BeerPurchase.objects.none()
+
         return BeerPurchase.objects.filter(
             sold_to=self.request.user
         ).select_related(
