@@ -34,7 +34,7 @@ class RatingSerializer(serializers.ModelSerializer):
         # Replace None with empty string, so that client does not receive nulls
         # todo: move this elsewhere
         for key, value in data.items():
-            if value is None:
+            if key != 'beer_purchase' and value is None:
                 data[key] = ""
 
         return data
