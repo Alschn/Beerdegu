@@ -3,6 +3,7 @@ from collections import OrderedDict
 import factory
 
 from purchases.models import BeerPurchase
+from rooms.models import Room
 
 DEFAULT_USER_FACTORY_PASSWORD = 'test'
 
@@ -130,21 +131,42 @@ class BeerPurchaseFactory(factory.django.DjangoModelFactory):
     purchased_at = factory.Faker('date_this_year', after_today=False)
 
 
-class RoomFactory:
+class RoomFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = 'rooms.Room'
 
+    name = factory.LazyAttributeSequence(lambda o, n: f'room_{n}')
+    password = None
+    host = factory.SubFactory(UserFactory)
+    slots = factory.Faker('random_int', min=1, max=10)
+    state = factory.Faker('random_element', elements=Room.State.values)
 
-class UserInRoomFactory:
+
+class UserInRoomFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = 'rooms.UserInRoom'
 
 
-class BeerInRoomFactory:
+class BeerInRoomFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = 'rooms.BeerInRoom'
 
 
-class RatingFactory:
+class RatingFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = 'ratings.Rating'
+
+    added_by = factory.SubFactory(UserFactory)
+    beer = factory.SubFactory(BeerFactory)
+    # todo: maybe make beer_purchase and room fks random
+    beer_purchase = factory.SubFactory(
+        BeerPurchaseFactory,
+        beer=factory.SelfAttribute('..beer')
+    )
+    room = None
+    color = factory.Faker('text')
+    foam = factory.Faker('text')
+    smell = factory.Faker('text')
+    taste = factory.Faker('text')
+    opinion = factory.Faker('text')
+    note = factory.Faker('random_int', min=1, max=10)
