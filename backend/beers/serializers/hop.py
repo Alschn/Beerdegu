@@ -17,7 +17,7 @@ class HopSerializer(serializers.ModelSerializer):
         )
 
 
-class EmbeddedHopsSerializer(serializers.ModelSerializer):
+class HopEmbeddedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hop
         fields = (

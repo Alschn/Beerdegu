@@ -39,7 +39,7 @@ def try_remove_inactive_users_in_room(room: Room) -> None:
 
 
 @transaction.atomic
-def get_users_in_room(room_name: str):
+def get_users_in_room(room_name: str) -> list[dict]:
     try:
         room = Room.objects.get(name=room_name)
     except Room.DoesNotExist:
@@ -49,8 +49,9 @@ def get_users_in_room(room_name: str):
 
     # users have been updated, only active users are inside the room now
     active_users = room.users.all()
-    serialized = UserSerializer(active_users, many=True).data
-    return serialized
+
+    serializer = UserSerializer(active_users, many=True)
+    return serializer.data
 
 
 def bump_users_last_active_field(room_name: str, user: User) -> None:
@@ -67,7 +68,7 @@ def bump_users_last_active_field(room_name: str, user: User) -> None:
 
 
 @transaction.atomic
-def save_user_form(room_name: str, user: User, beer_id: str, data: dict):
+def save_user_form(room_name: str, user: User, beer_id: str, data: dict) -> dict | None:
     if user.is_anonymous or not beer_id or not data:
         return
 
@@ -92,7 +93,8 @@ def save_user_form(room_name: str, user: User, beer_id: str, data: dict):
     if user_ratings.exists():
         user_ratings.update(**clean_data)
         rating = user_ratings.first()
-        return RatingSerializer(instance=rating).data
+        serializer = RatingSerializer(instance=rating)
+        return serializer.data
 
     try:
         room = Room.objects.get(name=room_name)
@@ -101,11 +103,18 @@ def save_user_form(room_name: str, user: User, beer_id: str, data: dict):
         return
 
     # create new rating if it's missing
-    new_rating = Rating.objects.create(**clean_data, added_by=user, room=room, beer=beer)
-    return RatingSerializer(instace=new_rating).data
+    new_rating = Rating.objects.create(
+        **clean_data,
+        added_by=user,
+        room=room,
+        beer=beer
+    )
+
+    serializer = RatingSerializer(instance=new_rating)
+    return serializer.data
 
 
-def get_user_form_data(room_name: str, user: User, beer_id: str):
+def get_user_form_data(room_name: str, user: User, beer_id: str) -> dict | None:
     if user.is_anonymous or not beer_id:
         return
 
@@ -117,7 +126,8 @@ def get_user_form_data(room_name: str, user: User, beer_id: str):
     rating = ratings.first()
 
     if rating:
-        return RatingSerializer(instance=rating).data
+        serializer = RatingSerializer(instance=rating)
+        return serializer.data
 
     try:
         beer = Beer.objects.get(id=beer_id)
@@ -125,32 +135,38 @@ def get_user_form_data(room_name: str, user: User, beer_id: str):
     except ObjectDoesNotExist:
         return
 
-    new_rating = Rating.objects.create(added_by=user, beer=beer, room=room)
-    return RatingSerializer(new_rating).data
+    new_rating = Rating.objects.create(
+        added_by=user,
+        beer=beer,
+        room=room
+    )
+
+    serializer = RatingSerializer(new_rating)
+    return serializer.data
 
 
-def get_beers_in_room(room_name: str):
+def get_beers_in_room(room_name: str) -> list[dict]:
     try:
         room = Room.objects.get(name=room_name)
     except ObjectDoesNotExist:
         return []
 
     beers = room.beers.order_by('rooms_through__order')
-    serialized = BeerRepresentationalSerializer(beers, many=True).data
-    return serialized
+    serializer = BeerRepresentationalSerializer(beers, many=True)
+    return serializer.data
 
 
-def get_current_room(room_name: str):
+def get_current_room(room_name: str) -> dict | None:
     try:
         room = Room.objects.get(name=room_name)
     except ObjectDoesNotExist:
         return
 
-    serialized = RoomSerializer(room).data
-    return serialized
+    serializer = RoomSerializer(room)
+    return serializer.data
 
 
-def change_room_state_to(state: str, room_name: str):
+def change_room_state_to(state: str, room_name: str) -> dict | None:
     try:
         room = Room.objects.get(name=room_name)
     except ObjectDoesNotExist:
@@ -164,10 +180,7 @@ def change_room_state_to(state: str, room_name: str):
     return serializer.data
 
 
-def get_final_user_beer_ratings(room_name: str, user: User):
-    if user.is_anonymous:
-        return
-
+def get_final_user_beer_ratings(room_name: str, user: User) -> list[dict]:
     related_beer_in_room = BeerInRoom.objects.filter(
         room__name=room_name,
         beer=OuterRef('beer')

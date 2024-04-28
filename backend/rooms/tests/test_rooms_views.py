@@ -9,7 +9,7 @@ from beers.models import Beer
 from beers.serializers import BeerSerializer
 from core.shared.factories import UserFactory, RoomFactory, BeerFactory
 from rooms.models import Room
-from rooms.serializers import RoomSerializer, DetailedRoomSerializer
+from rooms.serializers import RoomSerializer, RoomDetailedSerializer
 from rooms.serializers.room import RoomListSerializer, RESTRICTED_ROOM_NAMES
 
 User = get_user_model()
@@ -245,7 +245,7 @@ class RoomsAPIViewsTests(TestCase):
         self._require_login_and_auth(user=self.user1)
         response = self.client.get(f'/api/rooms/{self.room.name}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), DetailedRoomSerializer(self.room).data)
+        self.assertEqual(response.json(), RoomDetailedSerializer(self.room).data)
 
     @unittest.skip('Currently disabled')
     def test_update_room_by_name(self):

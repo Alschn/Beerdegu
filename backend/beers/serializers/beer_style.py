@@ -42,7 +42,7 @@ class BeerStyleDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class EmbeddedBeerStyleSerializer(serializers.ModelSerializer):
+class BeerStyleEmbeddedSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeerStyle
         fields = (

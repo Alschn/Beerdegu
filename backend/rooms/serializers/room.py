@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from rest_framework import serializers
 
 from beers.models import Beer
-from beers.serializers import SimplifiedBeerSerializer
+from beers.serializers import BeerSimplifiedSerializer
 from rooms.models import Room, BeerInRoom
 from users.serializers.user import UserSerializer
 
@@ -91,14 +91,16 @@ class RoomCreateSerializer(serializers.ModelSerializer):
         return host
 
 
-class DetailedRoomSerializer(RoomSerializer):
+class RoomDetailedSerializer(RoomSerializer):
     host = UserSerializer(read_only=True)
     users = UserSerializer(many=True, read_only=True)
-    beers = SimplifiedBeerSerializer(many=True, read_only=True)
+    beers = BeerSimplifiedSerializer(many=True, read_only=True)
 
 
 class RoomJoinSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, allow_blank=True)
+
+    # todo: add read_only fields so that to_representation does not have to be changed
 
     instance: Room
 
@@ -134,7 +136,8 @@ class RoomJoinSerializer(serializers.ModelSerializer):
         return self.instance
 
     def to_representation(self, instance: Room) -> dict:
-        return RoomSerializer(instance).data
+        serializer = RoomSerializer(instance)
+        return serializer.data
 
 
 class RoomAddBeerSerializer(serializers.Serializer):

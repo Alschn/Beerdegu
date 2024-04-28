@@ -10,7 +10,7 @@ from beers.models import (
     Hop, Brewery
 )
 from beers.serializers import (
-    DetailedBeerSerializer,
+    BeerDetailedSerializer,
     BeerSerializer,
 )
 from core.shared.unit_tests import APITestCase
@@ -57,7 +57,7 @@ class BeersAPIViewsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json_response['count'], beers.count())
         self.assertEqual(
-            first=DetailedBeerSerializer(beers, many=True).data,
+            first=BeerDetailedSerializer(beers, many=True).data,
             second=json_response['results']
         )
 

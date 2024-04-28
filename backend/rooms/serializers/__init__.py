@@ -1,5 +1,5 @@
 from .room import (
     RoomSerializer,
     RoomCreateSerializer,
-    DetailedRoomSerializer,
+    RoomDetailedSerializer,
 )

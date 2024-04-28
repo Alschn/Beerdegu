@@ -2,10 +2,10 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from beers.serializers import (
-    SimplifiedBeerSerializer,
-    EmbeddedBeerStyleSerializer
+    BeerSimplifiedSerializer,
+    BeerStyleEmbeddedSerializer
 )
-from beers.serializers.brewery import SimplifiedBrewerySerializer
+from beers.serializers.brewery import BrewerySimplifiedSerializer
 from ratings.serializers.rating import RatingWithSimplifiedBeerSerializer
 from rooms.serializers.room import RoomListSerializer
 
@@ -36,12 +36,12 @@ class DashboardStatisticsSerializer(serializers.Serializer):
     rooms_joined_count = serializers.IntegerField(min_value=0)
     rooms_created_count = serializers.IntegerField(min_value=0)
     current_rooms = RoomListSerializer(many=True)
-    recently_consumed_beers = SimplifiedBeerSerializer(many=True)
+    recently_consumed_beers = BeerSimplifiedSerializer(many=True)
     highest_rating = RatingWithSimplifiedBeerSerializer(allow_null=True)
     lowest_rating = RatingWithSimplifiedBeerSerializer(allow_null=True)
     beer_styles_count = serializers.IntegerField(min_value=0)
-    favourite_beer_style = EmbeddedBeerStyleSerializer(allow_null=True)
+    favourite_beer_style = BeerStyleEmbeddedSerializer(allow_null=True)
     breweries_count = serializers.IntegerField(min_value=0)
-    favourite_brewery = SimplifiedBrewerySerializer(allow_null=True)
+    favourite_brewery = BrewerySimplifiedSerializer(allow_null=True)
     beer_styles_distribution_chart = EntityDistributionSerializer(many=True)
     breweries_distribution_chart = EntityDistributionSerializer(many=True)
