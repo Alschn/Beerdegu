@@ -2,9 +2,12 @@ from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.test import TestCase, override_settings
+from drf_standardized_errors.openapi_serializers import ValidationErrorEnum, ClientErrorEnum
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework.test import APIClient
+
+from core.shared.unit_tests import ExceptionResponse
 
 User = get_user_model()
 
@@ -23,14 +26,15 @@ class AuthViewsTests(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = User.objects.create_user(
+        user = User.objects.create_user(
             username='Test',
             email='test@example.com',
             password='abcdefg'
         )
+        cls.user = user
         EmailAddress.objects.create(
-            user=cls.user,
-            email=cls.user.email,
+            user=user,
+            email=user.email,
         )
         Site.objects.create(
             domain=FRONTEND_DOMAIN,
@@ -38,44 +42,59 @@ class AuthViewsTests(TestCase):
         )
 
     def test_register_success(self):
-        response = self.client.post(self.register_url, {
+        payload = {
             'username': 'Test2',
             'email': 'test2@example.com',
             'password1': 'verysecretpassword123',
             'password2': 'verysecretpassword123',
-        })
+        }
+        response = self.client.post(self.register_url, payload)
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('detail', response.json())
+        self.assertIn('detail', response_json)
 
     def test_register_invalid_email(self):
-        response = self.client.post(self.register_url, {
+        payload = {
             'username': 'Halo',
             'email': 'abc',
             'password1': '123ogpasd2',
             'password2': '123ogpasd2',
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'email': ['Enter a valid email address.']})
+        }
+        response = self.client.post(self.register_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('email')
+        self.assertEqual(err.code, 'invalid')
+        self.assertEqual(err.detail, 'Enter a valid email address.')
 
     def test_register_passwords_not_matching(self):
-        response2 = self.client.post(self.register_url, {
+        payload = {
             'username': 'Halo',
             'email': 'abc@gmail.com',
             'password1': '123ogpasd2',
             'password2': '123ogpasd1',
-        })
-        self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response2.json(), {'non_field_errors': ["The two password fields didn't match."]})
+        }
+        response = self.client.post(self.register_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('non_field_errors')
+        self.assertEqual(err.detail, "The two password fields didn't match.")
 
     def test_register_user_already_exists(self):
-        response = self.client.post(self.register_url, {
+        payload = {
             'username': 'Test',
             'email': 'test@gmail.com',
             'password1': '!@#sdafggdf',
             'password2': '!@#sdafggdf',
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'username': ['A user with that username already exists.']})
+        }
+        response = self.client.post(self.register_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('username', error_attrs)
 
     def test_login_success(self):
         username = 'Test1'
@@ -90,14 +109,16 @@ class AuthViewsTests(TestCase):
             email=user.email,
             verified=True,
         )
-        response = self.client.post(self.jwt_login_url, {
+
+        payload = {
             'username': username,
             'password': password,
-        })
+        }
+        response = self.client.post(self.jwt_login_url, payload)
         response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue('access' in response_json)
-        self.assertTrue('refresh' in response_json)
+        self.assertIn('access', response_json)
+        self.assertIn('refresh', response_json)
 
     def test_login_email_unverified(self):
         username = 'Test1'
@@ -107,32 +128,46 @@ class AuthViewsTests(TestCase):
             email='test1@example.com',
             password=password
         )
-        response = self.client.post(self.jwt_login_url, {
+        payload = {
             'username': 'Test',
             'password': 'abcdefg',
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('email', response.json())
+        }
+        response = self.client.post(self.jwt_login_url, payload)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('email')
+        self.assertEqual(err.code, 'invalid')
+        self.assertEqual(err.detail, 'E-mail is not verified.')
 
     def test_login_invalid_data(self):
-        response = self.client.post(self.jwt_login_url, {
+        payload = {
             'username': 'Test',
             'password': 'xd',
-        })
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertIn('detail', response.json())
+        }
+        response = self.client.post(self.jwt_login_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        err = res.get_error_by_code('no_active_account')
+        self.assertEqual(err.detail, 'No active account found with the given credentials')
 
     def test_logout(self):
         self.client.login(username='Test', password='abcdefg')
         self.client.force_authenticate(self.user)
         response = self.client.post(self.logout_url, {})
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'message': 'Successfully logged out.'})
+        self.assertEqual(response_json, {'message': 'Successfully logged out.'})
 
     def test_logout_unauthorized(self):
         response = self.client.post(self.logout_url, {})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response.json())
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        err = res.get_error_by_code('not_authenticated')
+        self.assertEqual(err.detail, 'Authentication credentials were not provided.')
 
     def test_verify_email(self):
         pass

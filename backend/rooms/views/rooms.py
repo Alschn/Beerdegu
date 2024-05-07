@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -94,20 +95,20 @@ class RoomsViewSet(
         """GET api/rooms/<str:name>/in/"""
 
         room = self.get_object()
-        sender = request.user
+        user = request.user
 
-        if not room.users.filter(id=sender.id).exists():
-            return Response(
-                {'message': 'User is not part of this room!'},
-                status=status.HTTP_403_FORBIDDEN
+        if not room.users.filter(id=user.id).exists():
+            raise PermissionDenied(
+                'User is not part of this room!',
+                code='user_not_in_room'
             )
 
-        is_host = room.host and room.host == sender
-        token = get_token(sender, scope=f'rooms:{room.name}')
+        is_host = room.host and room.host == user
+        token = get_token(user, scope=f'rooms:{room.name}')
 
         return Response(
             {
-                'message': f'{sender.username} is in this room.',
+                'message': f'{user.username} is in this room.',
                 'is_host': is_host,
                 'token': token
             },
@@ -147,9 +148,9 @@ class RoomsViewSet(
         users_in_room = room.users
 
         if not users_in_room.filter(id=sender.id).exists():
-            return Response(
-                {'message': f'{sender.username} is not inside this room!'},
-                status=status.HTTP_400_BAD_REQUEST
+            raise ValidationError(
+                'User is not part of this room!',
+                code='user_not_in_room'
             )
 
         users_in_room.remove(sender)
@@ -175,15 +176,15 @@ class RoomsViewSet(
         user = self.request.user
 
         if not room.users.filter(id=user.id).exists():
-            return Response(
-                {'message': 'User is not part of this room!'},
-                status=status.HTTP_403_FORBIDDEN
+            raise PermissionDenied(
+                'User is not part of this room!',
+                code='user_not_in_room'
             )
 
         if room.state != Room.State.FINISHED:
-            return Response(
-                {'message': 'Room is not in FINISHED state! Cannot generate report!'},
-                status=status.HTTP_400_BAD_REQUEST
+            raise ValidationError(
+                'Room is not in FINISHED state! Cannot generate report!',
+                code='room_not_finished'
             )
 
         file_buffer = generate_excel_report(room.name, user)

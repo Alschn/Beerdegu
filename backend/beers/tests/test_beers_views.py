@@ -3,7 +3,9 @@ from random import choice
 from string import ascii_letters
 
 from django.core.exceptions import ObjectDoesNotExist
+from drf_standardized_errors.openapi_serializers import ValidationErrorEnum, ClientErrorEnum, ErrorCode404Enum
 from rest_framework import status
+from rest_framework.reverse import reverse_lazy
 
 from beers.models import (
     Beer, BeerStyle,
@@ -13,10 +15,11 @@ from beers.serializers import (
     BeerDetailedSerializer,
     BeerSerializer,
 )
-from core.shared.unit_tests import APITestCase
+from core.shared.unit_tests import APITestCase, ExceptionResponse
 
 
 class BeersAPIViewsTest(APITestCase):
+    list_url = reverse_lazy('beers-list')
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -51,99 +54,126 @@ class BeersAPIViewsTest(APITestCase):
         )
 
     def test_list_beers(self):
-        response = self.client.get('/api/beers/')
-        json_response = response.json()
         beers = Beer.objects.order_by('-id')
+
+        response = self.client.get(self.list_url)
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(json_response['count'], beers.count())
+        self.assertEqual(response_json['count'], beers.count())
         self.assertEqual(
-            first=BeerDetailedSerializer(beers, many=True).data,
-            second=json_response['results']
+            response_json['results'],
+            BeerDetailedSerializer(beers, many=True).data
         )
 
     def test_create_beer(self):
-        self._require_login_and_auth()
-        response = self.client.post('/api/beers/', data={
+        payload = {
             'name': "a'la Grodziskie",
             'percentage': 5,
             'volume_ml': 500,
-        })
+        }
+        self._require_login_and_auth()
+        response = self.client.post(self.list_url, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        beer = Beer.objects.get(name=payload['name'])
         self.assertEqual(
             response.json(),
-            BeerSerializer(Beer.objects.get(name="a'la Grodziskie")).data
+            BeerSerializer(beer).data
         )
 
     def test_create_beer_missing_data(self):
-        self._require_login_and_auth()
-        response = self.client.post('/api/beers/', data={
+        payload = {
             'name': "Random name",
             'volume_ml': 750,
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('percentage', response.json())
+        }
+        self._require_login_and_auth()
+        response = self.client.post(self.list_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('percentage')
+        self.assertEqual(err.code, 'required')
 
     def test_create_beer_negative_percentage(self):
-        self._require_login_and_auth()
-        response = self.client.post('/api/beers/', data={
+        payload = {
             'name': "Negative",
             'percentage': -1,
             'volume_ml': 500,
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('percentage', response.json())
+        }
+        self._require_login_and_auth()
+        response = self.client.post(self.list_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('percentage')
+        self.assertEqual(err.code, 'min_value')
 
     # todo: more create beer tests (including base64 image upload)
 
     def test_retrieve_beer(self):
         beer = Beer.objects.create(name='Kwas Theta', percentage=10.2, volume_ml=500)
-        response = self.client.get(f'/api/beers/{beer.id}/')
+        response = self.client.get(
+            reverse_lazy('beers-detail', args=(beer.id,))
+        )
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), BeerSerializer(beer).data)
+        self.assertEqual(
+            response_json,
+            BeerSerializer(beer).data
+        )
 
     # todo: more retrieve beer tests
 
-    def test_get_update_delete_beer_not_exists(self):
-        response_get = self.client.get('/api/beers/200/')
-        self.assertEqual(response_get.status_code, status.HTTP_404_NOT_FOUND)
-
-        # self._require_login_and_auth()
-        # response_put = self.client.put('/api/beers/200/', {})
-        # self.assertEqual(response_put.status_code, status.HTTP_404_NOT_FOUND)
-        #
-        # response_patch = self.client.patch('/api/beers/200/', {})
-        # self.assertEqual(response_patch.status_code, status.HTTP_404_NOT_FOUND)
-        #
-        # response_delete = self.client.delete('/api/beers/200/')
-        # self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
+    def test_get_beer_does_not_exists(self):
+        beer_id = 200
+        response = self.client.get(
+            reverse_lazy('beers-detail', args=(beer_id,))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     @unittest.skip('Currently disabled')
     def test_update_beer_by_id(self):
         self._require_login_and_auth()
         self.assertIsNone(self.beer_to_update.description)
-        response = self.client.patch(f"/api/beers/{self.beer_to_update.id}/", {
-            "description": 'Very nice beer',
-        })
+        payload = {
+            'description': 'Very nice beer',
+        }
+        response = self.client.patch(
+            reverse_lazy('beers-detail', args=(self.beer_to_update.id,)),
+            payload
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        beer = Beer.objects.get(name='PanIIPAni')
-        self.assertEqual(beer.description, "Very nice beer")
+        self.beer_to_update.refresh_from_db()
+        self.assertEqual(self.beer_to_update.description, payload['description'])
 
     @unittest.skip('Currently disabled')
     def test_update_beer_too_long_data(self):
         self._require_login_and_auth()
-        response = self.client.patch(f"/api/beers/{self.beer_to_update.id}/", {
-            "name": ''.join(choice(ascii_letters) for _ in range(101)),
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        payload = {
+            'name': ''.join(choice(ascii_letters) for _ in range(101)),
+        }
+        response = self.client.patch(
+            reverse_lazy('beers-detail', args=(self.beer_to_update.id,)),
+            payload
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('name')
+        self.assertEqual(err.code, 'max_length')
 
     @unittest.skip('Currently disabled')
     def test_delete_beer_by_id(self):
         self._require_login_and_auth()
-        qs_len_before = Beer.objects.all().count()
+        qs_len_before = Beer.objects.count()
         lookup_id = self.beer_to_delete.id
-        response = self.client.delete(f"/api/beers/{lookup_id}/")
+        response = self.client.delete(
+            reverse_lazy('beers-detail', args=(lookup_id,))
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(qs_len_before - 1, Beer.objects.all().count())
+        self.assertEqual(qs_len_before - 1, Beer.objects.count())
         with self.assertRaises(ObjectDoesNotExist):
             Beer.objects.get(id=lookup_id)
 

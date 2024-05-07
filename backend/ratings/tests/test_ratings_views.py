@@ -1,3 +1,9 @@
+from drf_standardized_errors.openapi_serializers import (
+    ClientErrorEnum,
+    ValidationErrorEnum,
+    ErrorCode403Enum,
+    ErrorCode404Enum,
+)
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework.test import APITestCase
@@ -10,6 +16,7 @@ from core.shared.factories import (
     RoomFactory,
     DEFAULT_USER_FACTORY_PASSWORD,
 )
+from core.shared.unit_tests import ExceptionResponse
 from ratings.models import Rating
 from ratings.serializers import (
     RatingListSerializer,
@@ -61,9 +68,12 @@ class RatingsViewSetTests(APITestCase):
     def test_list_ratings_filter_beer_not_exists(self):
         self._require_login()
         response = self.client.get(self.list_url, {'beer': 69})
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('beer', error_attrs)
 
     def test_list_ratings_filter_beer_in(self):
         beer1, beer2 = BeerFactory.create_batch(2)
@@ -84,9 +94,12 @@ class RatingsViewSetTests(APITestCase):
     def test_list_ratings_filter_beer_in_not_exists(self):
         self._require_login()
         response = self.client.get(self.list_url, {'beer': '69,420'})
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('beer', error_attrs)
 
     def test_list_ratings_filter_room(self):
         room = RoomFactory(host=self.user)
@@ -106,9 +119,12 @@ class RatingsViewSetTests(APITestCase):
     def test_list_ratings_filter_room_not_exists(self):
         self._require_login()
         response = self.client.get(self.list_url, {'room': '2137'})
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('room', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('room', error_attrs)
 
     def test_list_ratings_filter_room_in(self):
         room1, room2 = RoomFactory.create_batch(2, host=self.user)
@@ -129,9 +145,12 @@ class RatingsViewSetTests(APITestCase):
     def test_list_ratings_filter_room_in_not_exists(self):
         self._require_login()
         response = self.client.get(self.list_url, {'room__in': '21,37'})
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('room__in', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('room__in', error_attrs)
 
     def test_list_ratings_filter_note_gte(self):
         RatingFactory.create_batch(3, added_by=self.user, note=8)
@@ -313,9 +332,12 @@ class RatingsViewSetTests(APITestCase):
         }
         self._require_login()
         response = self.client.post(self.list_url, payload)
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('beer', error_attrs)
 
     def test_create_rating_missing_fields(self):
         payload = {
@@ -328,9 +350,11 @@ class RatingsViewSetTests(APITestCase):
         }
         self._require_login()
         response = self.client.post(self.list_url, payload)
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer', response_json)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('beer', error_attrs)
 
     def test_create_rating_invalid_note(self):
         beer = BeerFactory()
@@ -340,9 +364,12 @@ class RatingsViewSetTests(APITestCase):
         }
         self._require_login()
         response = self.client.post(self.list_url, payload)
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('note', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('note', error_attrs)
 
     def test_retrieve_rating(self):
         rating = RatingFactory(added_by=self.user)
@@ -359,8 +386,11 @@ class RatingsViewSetTests(APITestCase):
         response = self.client.get(
             reverse_lazy('ratings-detail', args=(69,))
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response.json())
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND.value, res.codes)
 
     def test_retrieve_rating_does_not_belong_to_current_user(self):
         rating = RatingFactory()
@@ -368,8 +398,11 @@ class RatingsViewSetTests(APITestCase):
         response = self.client.get(
             reverse_lazy('ratings-detail', args=(rating.id,))
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response.json())
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND.value, res.codes)
 
     def test_update_rating(self):
         rating = RatingFactory(added_by=self.user)
@@ -386,7 +419,6 @@ class RatingsViewSetTests(APITestCase):
             reverse_lazy('ratings-detail', args=(rating.id,)),
             payload
         )
-        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         rating.refresh_from_db()
@@ -423,12 +455,16 @@ class RatingsViewSetTests(APITestCase):
             reverse_lazy('ratings-detail', args=(rating.id,)),
             payload
         )
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('note', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('note', error_attrs)
 
     def test_delete_rating(self):
         rating = RatingFactory(added_by=self.user)
+
         self._require_login()
         response = self.client.delete(
             reverse_lazy('ratings-detail', args=(rating.id,))
@@ -440,24 +476,35 @@ class RatingsViewSetTests(APITestCase):
         response = self.client.delete(
             reverse_lazy('ratings-detail', args=(69,))
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response.json())
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND.value, res.codes)
 
     def test_delete_rating_does_not_belong_to_current_user(self):
         rating = RatingFactory()
+
         self._require_login()
         response = self.client.delete(
             reverse_lazy('ratings-detail', args=(rating.id,))
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response.json())
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND.value, res.codes)
 
     def test_delete_rating_belongs_to_room(self):
         room = RoomFactory(host=self.user)
         rating = RatingFactory(added_by=self.user, room=room)
+
         self._require_login()
         response = self.client.delete(
             reverse_lazy('ratings-detail', args=(rating.id,))
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response.json())
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode403Enum.PERMISSION_DENIED.value, res.codes)
