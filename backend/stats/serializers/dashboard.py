@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -14,11 +15,15 @@ class StatisticsQueryParamsSerializer(serializers.Serializer):
     date_from = serializers.DateField()
     date_to = serializers.DateField()
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict) -> dict:
         validated_data = super().validate(attrs)
 
         if validated_data['date_from'] > validated_data['date_to']:
-            raise ValidationError({"date_from": "`date_from` field value cannot be greater than `date_to`."})
+            message = _("`%(date_from_field)s` field value cannot be greater than `%(date_to_field)s`.")
+            raise ValidationError(
+                message % {'date_from_field': 'date_from', 'date_to_field': 'date_to'},
+                code='invalid'
+            )
 
         return validated_data
 

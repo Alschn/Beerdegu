@@ -138,7 +138,7 @@ class AuthViewsTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
         err = res.get_error_by_attr('email')
-        self.assertEqual(err.code, 'invalid')
+        self.assertEqual(err.code, 'email_not_verified')
         self.assertEqual(err.detail, 'E-mail is not verified.')
 
     def test_login_invalid_data(self):
