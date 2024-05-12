@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import QuerySet
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from beers.models import Beer
@@ -10,7 +11,7 @@ from users.serializers.user import UserSerializer
 
 User = get_user_model()
 
-RESTRICTED_ROOM_NAMES = ('create', 'join', 'none', 'null', 'undefined', 'true', 'false')
+RESTRICTED_ROOM_NAMES = ('create', 'join', 'none', 'null', 'true', 'false', 'admin')
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -66,8 +67,8 @@ class RoomCreateSerializer(serializers.ModelSerializer):
 
         if name in self.restricted_room_names:
             raise serializers.ValidationError(
-                f'Room name `{name}` is restricted!',
-                code='restricted_room_name'
+                _('Room name "%(name)s" is restricted!') % {'name': name},
+                code='room_name_restricted'
             )
 
         return name
@@ -77,15 +78,16 @@ class RoomCreateSerializer(serializers.ModelSerializer):
 
         if user != host:
             raise serializers.ValidationError(
-                'You can only create rooms for yourself.',
-                code='host_not_self'
+                _('You can only create rooms for yourself.'),
+                code='room_host_not_self'
             )
 
         not_finished_hosted_rooms = get_hosted_not_finished_rooms(host)
         if not_finished_hosted_rooms.exists():
             raise serializers.ValidationError(
-                'User is already a host of another room, which is not in `FINISHED` state!',
-                code='host_already_hosting'
+                _('User is already a host of another room, which is not in "%(state)s" state!')
+                % {'state': str(Room.State.FINISHED)},
+                code='room_host_already_hosting'
             )
 
         return host
@@ -114,16 +116,25 @@ class RoomJoinSerializer(serializers.ModelSerializer):
 
     def validate_password(self, password: str) -> str:
         if self.instance.has_password and self.instance.password != password:
-            raise serializers.ValidationError('Invalid password!')
+            raise serializers.ValidationError(
+                _('Invalid password provided!'),
+                code='room_password_invalid'
+            )
 
         elif not self.instance.has_password and password != "":
-            raise serializers.ValidationError('This room does not have a password but one was provided!')
+            raise serializers.ValidationError(
+                _('This room does not have a password but one was provided!'),
+                code='room_password_not_required'
+            )
 
         return password
 
     def validate(self, attrs: dict) -> dict:
         if self.instance.users.count() >= self.instance.slots:
-            raise serializers.ValidationError({'slots': f'Room {self.instance.name} is full!'})
+            raise serializers.ValidationError(
+                {'slots': _('Room is already full!')},
+                code='room_already_full'
+            )
 
         return attrs
 
@@ -150,10 +161,16 @@ class RoomAddBeerSerializer(serializers.Serializer):
 
     def validate_beer_id(self, beer_id: int) -> int:
         if not Beer.objects.filter(id=beer_id).exists():
-            raise serializers.ValidationError(f'Beer with id `{beer_id}` does not exist!')
+            raise serializers.ValidationError(
+                _('Beer with id "%(beer_id)s" does not exist!') % {'beer_id': beer_id},
+                code='beer_does_not_exist'
+            )
 
         if self.beers_in_room.filter(beer__id=beer_id).exists():
-            raise serializers.ValidationError(f'Beer with id `{beer_id}` is already in this room!')
+            raise serializers.ValidationError(
+                _('Beer with id "%(beer_id)s" is already in this room!') % {'beer_id': beer_id},
+                code='beer_already_in_room'
+            )
 
         return beer_id
 
@@ -178,7 +195,10 @@ class RoomDeleteBeerSerializer(serializers.Serializer):
 
     def validate_beer_id(self, beer_id: int) -> int:
         if not self.beers_in_room.filter(beer__id=beer_id).exists():
-            raise serializers.ValidationError(f'Beer with id `{beer_id}` is not in this room!')
+            raise serializers.ValidationError(
+                _('Beer with id "%(beer_id)s" is not in this room!') % {'beer_id': beer_id},
+                code='beer_not_in_room'
+            )
 
         return beer_id
 

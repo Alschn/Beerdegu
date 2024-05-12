@@ -124,7 +124,8 @@ class RatingCreateSerializer(serializers.ModelSerializer):
         if beer and beer_purchase and beer_purchase.beer != beer:
             message = _('Beer from beer_purchase does not match the beer.')
             raise serializers.ValidationError(
-                {'beer': message, 'beer_purchase': message}
+                {'beer': message, 'beer_purchase': message},
+                code='beer_mismatch'
             )
 
         return validated_data

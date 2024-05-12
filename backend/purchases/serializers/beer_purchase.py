@@ -63,7 +63,8 @@ class BeerPurchaseCreateSerializer(serializers.ModelSerializer):
 
         if value > now.date():
             raise serializers.ValidationError(
-                _('Cannot purchase beer in the future')
+                _('Cannot purchase beer in the future'),
+                code='date_in_future'
             )
 
         return value

@@ -3,12 +3,17 @@ import unittest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse_lazy
+from drf_standardized_errors.openapi_serializers import (
+    ClientErrorEnum,
+    ErrorCode403Enum, ErrorCode404Enum, ValidationErrorEnum,
+)
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from beers.models import Beer
 from beers.serializers import BeerSerializer
 from core.shared.factories import UserFactory, RoomFactory, BeerFactory
+from core.shared.unit_tests import ExceptionResponse
 from rooms.models import Room
 from rooms.serializers import RoomSerializer, RoomDetailedSerializer
 from rooms.serializers.room import RoomListSerializer, RESTRICTED_ROOM_NAMES
@@ -47,21 +52,30 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_user_is_in_room_doesnt_exist(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.get('/api/rooms/xd/in/')
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response_json)
+        response = self.client.get(
+            reverse_lazy('rooms-user-in', args=('xd',))
+        )
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_user_is_not_in_room(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.get('/api/rooms/12345678/in/')
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response_json, {'message': 'User is not part of this room!'})
+        response = self.client.get(
+            reverse_lazy('rooms-user-in', args=('12345678',))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn('user_not_in_room', res.codes)
 
     def test_user_is_in_room_and_host(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.get('/api/rooms/12345678/in/')
+        response = self.client.get(
+            reverse_lazy('rooms-user-in', args=('12345678',))
+        )
         response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('message', response_json)
@@ -71,7 +85,9 @@ class RoomsAPIViewsTests(TestCase):
     def test_user_is_in_room_not_host(self):
         self._require_login_and_auth(user=self.user2)
         self.room.users.add(self.user2)
-        response = self.client.get('/api/rooms/12345678/in/')
+        response = self.client.get(
+            reverse_lazy('rooms-user-in', args=('12345678',))
+        )
         response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('message', response_json)
@@ -80,16 +96,21 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_join_room_not_found(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.put('/api/rooms/aha/join/', data={})
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response_json)
+        response = self.client.put(
+            reverse_lazy('rooms-user-join', args=('aha',)),
+            data={}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_join_room_already_in(self):
         self._require_login_and_auth(user=self.user1)
         room_name = '12345678'
         response = self.client.put(
-            f'/api/rooms/{room_name}/join/', data={'password': ''}
+            reverse_lazy('rooms-user-join', args=(room_name,)),
+            data={'password': ''}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -99,147 +120,186 @@ class RoomsAPIViewsTests(TestCase):
             slots=1,
             host=self.user2
         )
-        self._require_login_and_auth(user=self.user1)
         self.assertEqual(room.slots, room.users.count())
-        response = self.client.put('/api/rooms/FULL/join/', data={'password': ''})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('slots', response.json())
+
+        self._require_login_and_auth(user=self.user1)
+        response = self.client.put(
+            reverse_lazy('rooms-user-join', args=(room.name,)),
+            data={'password': ''}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('slots')
+        self.assertEqual(err.code, 'room_already_full')
 
     def test_join_room_success(self):
+        room = Room.objects.get(name='12345678')
+        self.assertEqual(room.users.count(), 1)
+
         self._require_login_and_auth(user=self.user2)
-        r = Room.objects.get(name='12345678')
-        self.assertEqual(r.users.count(), 1)
-        response = self.client.put('/api/rooms/12345678/join/', data={'password': ''})
+        response = self.client.put(
+            reverse_lazy('rooms-user-join', args=('12345678',)),
+            data={'password': ''}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(r.users.count(), 2)
-        self.assertIn(self.user2, r.users.all())
+        self.assertEqual(room.users.count(), 2)
+        self.assertTrue(room.users.contains(self.user2))
 
     def test_join_room_with_password_not_in_body(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.put('/api/rooms/abcdefgh/join/', data={})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('password', response.json())
-        self.assertNotIn(self.user1, self.room_with_pass.users.all())
+        response = self.client.put(
+            reverse_lazy('rooms-user-join', args=('abcdefgh',)),
+            data={}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('password')
+        self.assertEqual(err.code, 'required')
+        self.assertFalse(
+            self.room_with_pass.users.contains(self.user1)
+        )
 
     def test_join_room_password_invalid(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.put('/api/rooms/abcdefgh/join/', data={'password': '12345'})
-        self.assertIn('password', response.json())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertNotIn(self.user1, self.room_with_pass.users.all())
+        payload = {'password': '12345'}
+        response = self.client.put(
+            reverse_lazy('rooms-user-join', args=('abcdefgh',)),
+            data=payload
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        self.assertIn('password', res.attrs)
 
     def test_join_room_with_password_success(self):
+        room = Room.objects.get(name='abcdefgh')
+        self.assertEqual(room.users.count(), 1)
+
         self._require_login_and_auth(user=self.user1)
-        r = Room.objects.get(name='abcdefgh')
-        self.assertEqual(r.users.count(), 1)
-        response = self.client.put('/api/rooms/abcdefgh/join/', data={'password': 'password'})
+        payload = {'password': 'password'}
+        response = self.client.put(
+            reverse_lazy('rooms-user-join', args=('abcdefgh',)),
+            data=payload
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(r.users.count(), 2)
-        self.assertIn(self.user1, r.users.all())
+        self.assertEqual(room.users.count(), 2)
+        self.assertTrue(room.users.contains(self.user1))
 
     def test_leave_room_not_found(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.delete('/api/rooms/aha/leave/')
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response_json)
+        response = self.client.delete(
+            reverse_lazy('rooms-user-leave', args=('aha',))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_leave_room_not_in(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.delete('/api/rooms/12345678/leave/')
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_json, {'message': 'Test2 is not inside this room!'})
+        response = self.client.delete(
+            reverse_lazy('rooms-user-leave', args=('12345678',))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        self.assertIn('user_not_in_room', res.codes)
 
     def test_leave_room_success(self):
+        room = Room.objects.get(name='12345678')
+        self.assertEqual(room.users.count(), 1)
+
         self._require_login_and_auth(user=self.user1)
-        r = Room.objects.get(name='12345678')
-        self.assertEqual(r.users.count(), 1)
-        response = self.client.delete('/api/rooms/12345678/leave/')
+        response = self.client.delete(
+            reverse_lazy('rooms-user-leave', args=(room.name,))
+        )
         response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json, {'message': 'Test has left room 12345678!'})
-        self.assertEqual(r.users.count(), 0)
-        self.assertNotIn(self.user1, r.users.all())
+        self.assertEqual(response_json, {'message': f'Test has left room {room.name}!'})
+        self.assertEqual(room.users.count(), 0)
+        self.assertFalse(room.users.contains(self.user1))
 
     def test_list_rooms(self):
+        queryset = Room.objects.order_by('id')
+
         self._require_login_and_auth(user=self.user1)
         response = self.client.get(self.list_url)
         response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            first=response_json['results'],
-            second=RoomListSerializer(Room.objects.order_by('id'), many=True).data
+            response_json['results'],
+            RoomListSerializer(queryset, many=True).data
         )
 
     def test_create_room(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.post(self.list_url, data={
+        payload = {
             'name': 'Good',
             'password': 'anything',
             'slots': 5,
-        })
+        }
+        response = self.client.post(self.list_url, payload)
+        queryset = Room.objects.filter(name='good')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Room.objects.filter(name='good').exists())
+        self.assertTrue(queryset.exists())
 
     def test_create_room_not_lowercase(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.post(self.list_url, data={
+        payload = {
             'name': 'qWeRtY',
             'password': 'anything',
             'slots': 5,
-        })
+        }
+        response = self.client.post(self.list_url, payload)
+        queryset = Room.objects.filter(name='qwerty')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Room.objects.filter(name='qwerty').exists())
+        self.assertTrue(queryset.exists())
 
     def test_create_room_name_not_unique(self):
         self._require_login_and_auth(user=self.user2)
-        response = self.client.post(self.list_url, data={
+        payload = {
             'name': '12345678',
-            'password': '',
+            'password': 'anything',
             'slots': 3,
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'name': ['room with this name already exists.']})
+        }
+        response = self.client.post(self.list_url, payload)
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('name')
+        self.assertEqual(err.code, 'unique')
 
     def test_create_room_name_restricted(self):
         restricted_names = RESTRICTED_ROOM_NAMES
+        payload = {
+            'password': 'anything',
+            'slots': 3,
+        }
         self._require_login_and_auth(user=self.user2)
         for name in restricted_names:
-            response = self.client.post(self.list_url, data={
-                'name': name,
-                'password': '',
-                'slots': 3,
-            })
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertIn('name', response.json())
+            data = {**payload, 'name': name}
+            response = self.client.post(self.list_url, data=data)
+            res = ExceptionResponse.from_response(response)
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+            err = res.get_error_by_attr('name')
+            self.assertEqual(err.code, 'room_name_restricted')
 
     def test_create_room_wrong_slots_number(self):
         self._require_login_and_auth(user=self.user2)
-
-        r1 = self.client.post(self.list_url, data={
-            'name': 'ooo', 'password': 'anything', 'slots': 11,
-        })
-        self.assertEqual(r1.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('slots', r1.json())
-
-        r2 = self.client.post(self.list_url, data={
-            'name': 'ooo', 'password': 'anything', 'slots': -1,
-        })
-        self.assertEqual(r2.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('slots', r2.json())
-
-        r3 = self.client.post(self.list_url, data={
-            'name': 'ooo', 'password': 'anything', 'slots': 5.6,
-        })
-        self.assertEqual(r3.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('slots', r3.json())
-
-        r4 = self.client.post(self.list_url, data={
-            'name': 'ooo', 'password': 'anything', 'slots': 'a',
-        })
-        self.assertEqual(r4.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('slots', r4.json())
+        payload = {
+            'name': 'ooo', 'password': 'anything',
+        }
+        invalid_slots = (11, -1, 5.6, 'a')
+        for slots in invalid_slots:
+            data = {**payload, 'slots': slots}
+            response = self.client.post(self.list_url, data=data)
+            res = ExceptionResponse.from_response(response)
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+            self.assertIn('slots', res.attrs)
 
     def test_create_room_but_user_already_host_in_other_room(self):
         user = UserFactory(username='new_host_user')
@@ -250,64 +310,99 @@ class RoomsAPIViewsTests(TestCase):
         response = self.client.post(
             self.list_url, data={'name': 'Blahblah'}
         )
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('host', response_json)
+
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('host')
+        self.assertEqual(err.code, 'room_host_already_hosting')
 
     def test_get_room_by_name(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.get(f'/api/rooms/{self.room.name}/')
+        response = self.client.get(
+            reverse_lazy('rooms-detail', args=(self.room.name,))
+        )
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), RoomDetailedSerializer(self.room).data)
+        self.assertEqual(
+            response_json,
+            RoomDetailedSerializer(self.room).data
+        )
 
     @unittest.skip('Currently disabled')
     def test_update_room_by_name(self):
         self._require_login_and_auth(user=self.user1)
-        lookup = self.room.name
-        self.assertEqual(self.room.state, 'WAITING')
-        response = self.client.patch(f'/api/rooms/{lookup}/', {
-            'state': 'IN_PROGRESS'
-        })
+        self.assertEqual(self.room.state, Room.State.WAITING)
+
+        room_name = self.room.name
+        payload = {'state': str(Room.State.IN_PROGRESS)}
+
+        response = self.client.patch(
+            reverse_lazy('rooms-detail', args=(room_name,)),
+            payload
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         self.room.refresh_from_db()
-        self.assertEqual(self.room.state, 'IN_PROGRESS')
+        self.assertEqual(self.room.state, Room.State.IN_PROGRESS)
         self.assertEqual(
-            first=response.json(),
-            second=RoomSerializer(Room.objects.get(name=lookup)).data
+            response.json(),
+            RoomSerializer(self.room).data
         )
 
     @unittest.skip('Currently disabled')
     def test_update_room_not_host(self):
         self._require_login_and_auth(user=self.user1)
-        self.assertEqual(self.room.state, 'WAITING')
-        response = self.client.patch(f'/api/rooms/{self.room_with_pass.name}/', {
-            'state': 'IN_PROGRESS'
-        })
-        self.assertEqual(self.room.state, 'WAITING')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.room.state, Room.State.WAITING)
+        payload = {'state': str(Room.State.IN_PROGRESS)}
+        response = self.client.patch(
+            reverse_lazy('rooms-detail', args=(self.room_with_pass.name,)),
+            payload
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode403Enum.PERMISSION_DENIED, res.codes)
+        self.assertEqual(self.room.state, Room.State.WAITING)
 
     @unittest.skip('Currently disabled')
     def test_delete_room_by_name(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.delete(f'/api/rooms/{self.room.name}/')
+        response = self.client.delete(
+            reverse_lazy('rooms-detail', args=(self.room.name,))
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     @unittest.skip('Currently disabled')
     def test_delete_room_not_host(self):
         self._require_login_and_auth(user=self.user1)
-        response = self.client.delete(f'/api/rooms/{self.room_with_pass.name}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.delete(
+            reverse_lazy('rooms-detail', args=(self.room_with_pass.name,))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode403Enum.PERMISSION_DENIED, res.codes)
 
     def test_get_update_delete_room_doesnt_exist(self):
         self._require_login_and_auth(user=self.user1)
-        response_get = self.client.get('/api/rooms/123/')
-        self.assertEqual(response_get.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.get(
+            reverse_lazy('rooms-detail', args=('123',))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_list_beers_in_room(self):
+        room_name = 'abcdefgh'
+
         self._require_login_and_auth(self.user3)
-        response = self.client.get('/api/rooms/abcdefgh/beers/')
+        response = self.client.get(
+            reverse_lazy('rooms-detail-beers', args=(room_name,))
+        )
         response_json = response.json()
-        queryset = Beer.objects.filter(rooms__name='abcdefgh').order_by('id')
+        queryset = Beer.objects.filter(rooms__name=room_name).order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response_json,
@@ -317,8 +412,14 @@ class RoomsAPIViewsTests(TestCase):
     def test_list_beers_in_room_user_not_host(self):
         self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)
-        response = self.client.get('/api/rooms/abcdefgh/beers/')
-        queryset = Beer.objects.filter(rooms__name='abcdefgh').order_by('id')
+        room_name = 'abcdefgh'
+        response = self.client.get(
+            reverse_lazy('rooms-detail-beers', args=(room_name,))
+        )
+        response = self.client.get(
+            reverse_lazy('rooms-detail-beers', args=(room_name,))
+        )
+        queryset = Beer.objects.filter(rooms__name=room_name).order_by('id')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
@@ -332,52 +433,84 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_add_beer_no_id_in_request(self):
         self._require_login_and_auth(self.user3)
-        response = self.client.put('/api/rooms/abcdefgh/beers/', {})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer_id', response.json())
+        room_name = 'abcdefgh'
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room_name,)),
+            data={}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        self.assertIn('beer_id', res.attrs)
 
     def test_add_beer_which_doesnt_exist(self):
+        room_name = 'abcdefgh'
+        beer_id = 10000
+
         self._require_login_and_auth(self.user3)
-        response = self.client.put('/api/rooms/abcdefgh/beers/', {
-            'beer_id': 10000,
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer_id', response.json())
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room_name,)),
+            data={'beer_id': beer_id}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        self.assertIn('beer_id', res.attrs)
 
     def test_add_beer_room_doesnt_exist(self):
+        room_name = 'XDDDD'
+
         self._require_login_and_auth(self.user3)
-        response = self.client.put('/api/rooms/XDDDD/beers/', {})
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room_name,)),
+            data={}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_add_beer_already_in_room(self):
+        room_name = 'abcdefgh'
+        beer_id = 50
+
         self._require_login_and_auth(self.user3)
-        response = self.client.put('/api/rooms/abcdefgh/beers/', {
-            'beer_id': 50,
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer_id', response.json())
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room_name,)),
+            data={'beer_id': beer_id}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        self.assertIn('beer_id', res.attrs)
 
     def test_add_beer_user_not_host(self):
         self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)
-        beer = Beer.objects.create(name='user_not_host', percentage=5, volume_ml=500)
-        response = self.client.put('/api/rooms/abcdefgh/beers/', {
-            'beer_id': beer.id
-        })
-        response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response_json)
+
+        beer = BeerFactory(name='user_not_host_beer')
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=('abcdefgh',)),
+            data={'beer_id': beer.id}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode403Enum.PERMISSION_DENIED, res.codes)
 
     def test_add_beer_success(self):
-        self._require_login_and_auth(self.user3)
         room_name = 'abcdefgh'
-        beer_to_add = BeerFactory(name='test', percentage=5, volume_ml=500)
+        beer_to_add = BeerFactory(name='test')
         beers_before = Beer.objects.filter(rooms__name=room_name).order_by('id')
         self.assertEqual(beers_before.count(), 4)
-        response = self.client.put(f'/api/rooms/{room_name}/beers/', {
-            'beer_id': beer_to_add.id
-        })
+
+        self._require_login_and_auth(self.user3)
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room_name,)),
+            data={'beer_id': beer_to_add.id}
+        )
         response_json = response.json()
+
         beers_after = Beer.objects.filter(rooms__name=room_name).order_by('rooms_through__order')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -388,28 +521,60 @@ class RoomsAPIViewsTests(TestCase):
 
     def test_delete_no_id_in_url_parameters(self):
         self._require_login_and_auth(self.user3)
-        response = self.client.delete('/api/rooms/abcdefgh/beers/')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.delete(
+            reverse_lazy('rooms-detail-beers', args=('abcdefgh',))
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('beer_id')
+        self.assertEqual(err.code, 'required')
 
     def test_delete_beer_room_doesnt_exist(self):
         self._require_login_and_auth(self.user3)
-        response = self.client.delete('/api/rooms/XDDDD/beers/')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.delete(
+            reverse_lazy('rooms-detail-beers', args=('XDDDD',)),
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_delete_beer_not_found_in_room(self):
+        beer_id = 100
+
         self._require_login_and_auth(self.user3)
-        response = self.client.delete('/api/rooms/abcdefgh/beers/?id=100')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('beer_id', response.json())
+        response = self.client.delete(
+            reverse_lazy('rooms-detail-beers', args=('abcdefgh',)) + f'?beer_id={beer_id}',
+            data={'id': beer_id}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        err = res.get_error_by_attr('beer_id')
+        self.assertEqual(err.code, 'beer_not_in_room')
 
     def test_delete_beer_user_not_host(self):
-        self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)
-        response = self.client.delete('/api/rooms/abcdefgh/beers/?id=50')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response.json())
+
+        beer_id = 50
+
+        self._require_login_and_auth(self.user2)
+        response = self.client.delete(
+            reverse_lazy('rooms-detail-beers', args=('abcdefgh',)) + f'?beer_id={beer_id}',
+            data={'id': beer_id}
+        )
+        res = ExceptionResponse.from_response(response)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode403Enum.PERMISSION_DENIED, res.codes)
 
     def test_delete_beer_success(self):
+        beer_id = 53
+        query = f'?beer_id={beer_id}'
+
         self._require_login_and_auth(self.user3)
-        response = self.client.delete('/api/rooms/abcdefgh/beers/?beer_id=53')
+        response = self.client.delete(
+            reverse_lazy('rooms-detail-beers', args=('abcdefgh',)) + query,
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

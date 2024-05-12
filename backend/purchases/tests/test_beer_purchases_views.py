@@ -2,13 +2,28 @@ import datetime
 
 import freezegun
 from django.utils import timezone
+from drf_standardized_errors.openapi_serializers import (
+    ErrorCode401Enum,
+    ErrorCode404Enum,
+    ClientErrorEnum,
+    ValidationErrorEnum,
+)
 from rest_framework import status
 from rest_framework.reverse import reverse_lazy
 from rest_framework.test import APITestCase
 
-from core.shared.factories import BeerPurchaseFactory, UserFactory, DEFAULT_USER_FACTORY_PASSWORD, BeerFactory
+from core.shared.factories import (
+    BeerPurchaseFactory,
+    UserFactory,
+    BeerFactory,
+    DEFAULT_USER_FACTORY_PASSWORD,
+)
+from core.shared.unit_tests import ExceptionResponse
 from purchases.models import BeerPurchase
-from purchases.serializers.beer_purchase import BeerPurchaseSerializer, BeerPurchaseCreateSerializer
+from purchases.serializers.beer_purchase import (
+    BeerPurchaseSerializer,
+    BeerPurchaseCreateSerializer
+)
 
 
 class BeerPurchasesViewsTests(APITestCase):
@@ -43,7 +58,11 @@ class BeerPurchasesViewsTests(APITestCase):
         BeerPurchaseFactory.create_batch(2, sold_to=self.user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response.json())
+
+        response_json = response.json()
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR.value)
+        self.assertIn(ErrorCode401Enum.NOT_AUTHENTICATED.value, res.codes)
 
     def test_list_purchases_filter_beer(self):
         BeerPurchaseFactory.create_batch(2, sold_to=self.user)
@@ -125,8 +144,10 @@ class BeerPurchasesViewsTests(APITestCase):
         response = self.client.get(
             reverse_lazy('beer-purchases-detail', kwargs={'pk': purchase.id})
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response.json())
+        response_json = response.json()
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR.value)
+        self.assertIn(ErrorCode401Enum.NOT_AUTHENTICATED.value, res.codes)
 
     def test_retrieve_purchase_other_user(self):
         purchase = BeerPurchaseFactory()
@@ -136,7 +157,11 @@ class BeerPurchasesViewsTests(APITestCase):
             reverse_lazy('beer-purchases-detail', kwargs={'pk': purchase.id})
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response.json())
+
+        response_json = response.json()
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_retrieve_purchase_not_found(self):
         self._require_login()
@@ -144,7 +169,11 @@ class BeerPurchasesViewsTests(APITestCase):
             reverse_lazy('beer-purchases-detail', kwargs={'pk': 696969})
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('detail', response.json())
+
+        response_json = response.json()
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR)
+        self.assertIn(ErrorCode404Enum.NOT_FOUND, res.codes)
 
     def test_create_purchase(self):
         beer = BeerFactory()
@@ -186,7 +215,11 @@ class BeerPurchasesViewsTests(APITestCase):
     def test_create_purchase_not_authenticated(self):
         response = self.client.post(self.list_url, {})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('detail', response.json())
+
+        response_json = response.json()
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ClientErrorEnum.CLIENT_ERROR.value)
+        self.assertIn(ErrorCode401Enum.NOT_AUTHENTICATED.value, res.codes)
 
     def test_create_purchase_invalid_data(self):
         future_date = timezone.now().date() + datetime.timedelta(days=1)
@@ -203,11 +236,14 @@ class BeerPurchasesViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response_json = response.json()
-        self.assertIn('beer', response_json)
-        self.assertIn('packaging', response_json)
-        self.assertIn('price', response_json)
-        self.assertIn('volume_ml', response_json)
-        self.assertIn('purchased_at', response_json)
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('beer', error_attrs)
+        self.assertIn('packaging', error_attrs)
+        self.assertIn('price', error_attrs)
+        self.assertIn('volume_ml', error_attrs)
+        self.assertIn('purchased_at', error_attrs)
 
     def test_create_purchase_missing_data(self):
         data = {}
@@ -216,7 +252,10 @@ class BeerPurchasesViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response_json = response.json()
-        self.assertIn('beer', response_json)
-        self.assertIn('packaging', response_json)
-        self.assertIn('price', response_json)
-        self.assertIn('volume_ml', response_json)
+        res = ExceptionResponse.from_dict(response_json)
+        self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
+        error_attrs = res.attrs
+        self.assertIn('beer', error_attrs)
+        self.assertIn('packaging', error_attrs)
+        self.assertIn('price', error_attrs)
+        self.assertIn('volume_ml', error_attrs)

@@ -8,6 +8,7 @@ from rest_framework.reverse import reverse_lazy
 
 from beers.models import BeerStyle
 from beers.serializers import BeerStyleListSerializer, BeerStyleDetailSerializer
+from core.shared.factories import BeerStyleFactory
 from core.shared.unit_tests import APITestCase
 
 
@@ -17,16 +18,19 @@ class BeerStylesAPIViewsTests(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.style_ipa = BeerStyle.objects.create(name='India Pale Ale')
-        cls.style_apa = BeerStyle.objects.create(name='American Pale Ale')
-        cls.beer_style_to_delete = BeerStyle.objects.create(name='DDH APA')
+        cls.style_ipa = BeerStyleFactory(name='IPA')
+        cls.style_apa = BeerStyleFactory(name='APA')
+        cls.beer_style_to_delete = BeerStyleFactory(name='DDH APA')
 
     def test_list_beer_styles(self):
+        queryset = BeerStyle.objects.order_by('-id')
+
         response = self.client.get(self.styles_url)
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            first=response.json()['results'],
-            second=BeerStyleListSerializer(BeerStyle.objects.order_by('-id'), many=True).data
+            response_json['results'],
+            BeerStyleListSerializer(queryset, many=True).data
         )
 
     @unittest.skip('Currently disabled')
@@ -35,10 +39,12 @@ class BeerStylesAPIViewsTests(APITestCase):
         response = self.client.post(self.styles_url, {
             'name': 'DDH Hazy IPA'
         })
+        response_json = response.json()
+        beer_style = BeerStyle.objects.get(name='DDH Hazy IPA')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
-            first=response.json(),
-            second=BeerStyleListSerializer(BeerStyle.objects.get(name='DDH Hazy IPA')).data
+            response_json,
+            BeerStyleListSerializer(beer_style).data
         )
 
     @unittest.skip('Currently disabled')
@@ -64,24 +70,32 @@ class BeerStylesAPIViewsTests(APITestCase):
         # self.assertEqual(response_delete.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_beer_style_by_id(self):
-        response = self.client.get(f'/api/styles/{self.style_apa.id}/')
+        response = self.client.get(
+            reverse_lazy('styles-detail', args=(self.style_apa.id,))
+        )
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            first=response.json(),
-            second=BeerStyleDetailSerializer(self.style_apa).data
+            response_json,
+            BeerStyleDetailSerializer(self.style_apa).data
         )
 
     @unittest.skip('Currently disabled')
     def test_update_beer_style_by_id(self):
         self._require_login_and_auth()
-        response = self.client.put(f'/api/styles/{self.style_apa.id}/', data={
+        payload = {
             'name': 'APA',
             'description': 'Very nice beer style',
-        })
+        }
+        response = self.client.put(
+            reverse_lazy('styles-detail', args=(self.style_apa.id,)),
+            data=payload
+        )
+        response_json = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.style_apa.refresh_from_db()
         self.assertEqual(
-            response.json(),
+            response_json,
             BeerStyleDetailSerializer(self.style_apa).data
         )
 
