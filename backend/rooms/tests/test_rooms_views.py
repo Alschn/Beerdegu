@@ -484,6 +484,42 @@ class RoomsAPIViewsTests(TestCase):
         self.assertEqual(res.type, ValidationErrorEnum.VALIDATION_ERROR)
         self.assertIn('beer_id', res.attrs)
 
+    def test_add_beer_already_in_room_order_specified(self):
+        room = RoomFactory(name='testtest', host=self.user3)
+        beer1 = BeerFactory(name='test_beer')
+        beer2 = BeerFactory(name='test_beer2')
+        room.beers.add(*[beer1, beer2])
+
+        order = 1
+
+        self._require_login_and_auth(self.user3)
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room.name,)),
+            data={'beer_id': beer1.id, 'order': order}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        other_beer = room.beers_through.get(beer=beer2)
+        inserted_beer = room.beers_through.get(beer=beer1)
+        self.assertEqual(other_beer.order, 0)
+        self.assertEqual(inserted_beer.order, 1)
+
+    def test_add_beer_order_exceeds_beer_count(self):
+        room = RoomFactory(name='testtest', host=self.user3)
+        beer = BeerFactory(name='test_beer')
+
+        order = 2
+
+        self._require_login_and_auth(self.user3)
+        response = self.client.put(
+            reverse_lazy('rooms-detail-beers', args=(room.name,)),
+            data={'beer_id': beer.id, 'order': order}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        inserted_beer = room.beers_through.get(beer=beer)
+        self.assertEqual(inserted_beer.order, 0)
+
     def test_add_beer_user_not_host(self):
         self._require_login_and_auth(self.user2)
         self.assertNotEqual(self.user2, self.room_with_pass.host)

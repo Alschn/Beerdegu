@@ -152,7 +152,11 @@ class RoomJoinSerializer(serializers.ModelSerializer):
 
 
 class RoomAddBeerSerializer(serializers.Serializer):
+    """
+    Serializer for adding a beer to a room or relocating existing one at the given index.
+    """
     beer_id = serializers.IntegerField()
+    order = serializers.IntegerField(min_value=0, required=False)
 
     def __init__(self, *args, beers_in_room: QuerySet[BeerInRoom] = None, room: Room = None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -166,21 +170,38 @@ class RoomAddBeerSerializer(serializers.Serializer):
                 code='beer_does_not_exist'
             )
 
-        if self.beers_in_room.filter(beer__id=beer_id).exists():
+        return beer_id
+
+    def validate(self, attrs: dict) -> dict:
+        data = super().validate(attrs)
+        beer_id = data['beer_id']
+        order = data.get('order')
+
+        if order is None and self.beers_in_room.filter(beer__id=beer_id).exists():
             raise serializers.ValidationError(
-                _('Beer with id "%(beer_id)s" is already in this room!') % {'beer_id': beer_id},
+                {'beer_id': _('Beer with id "%(beer_id)s" is already in this room!') % {'beer_id': beer_id}},
                 code='beer_already_in_room'
             )
 
-        return beer_id
+        if order:
+            beers_count = self.beers_in_room.count()
+            data['order'] = min(order, max(beers_count - 1, 0))
+
+        return data
 
     @transaction.atomic
     def save(self, **kwargs) -> Beer:
         beer = Beer.objects.get(id=self.validated_data['beer_id'])
-        BeerInRoom.objects.create(
+        order = self.validated_data.pop('order', None)
+
+        beer_in_room, _ = BeerInRoom.objects.get_or_create(
             room=self.room,
             beer=beer
         )
+
+        if order is not None:
+            beer_in_room.to(order=order)
+
         return Beer.objects.filter(rooms=self.room).order_by(
             'rooms_through__order'
         )
