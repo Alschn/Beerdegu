@@ -23,12 +23,12 @@ with an option to deploy to Railway.app, Fly.io or Heroku.com.
 
 ### Tools, libraries, frameworks:
 
-This setup has been tested with Python 3.10 and Node 16.
+This setup has been tested with Python 3.10, 3.11 and Node 16, 18.
 
 ### Backend
 
-- Django 4.2 + Django Rest Framework : `django` `djangorestframework`
-- Django Channels 4 : `channels`- handling websockets backend
+- Django 5.x + Django Rest Framework 3.15.x: `django` `djangorestframework`
+- Django Channels 4.x : `channels`- websockets backend
 - `django-extensions` - django utilities
 - `django-cors-headers` - handling cross-origin requests
 - `django-filter` - filter backend for drf views
@@ -38,9 +38,10 @@ This setup has been tested with Python 3.10 and Node 16.
 - `django-sesame` - websockets token authentication
 - `openpyxl` - excel reports generation
 - `drf-spectacular` - OpenAPI schema generation
+- `drf-standardized-errors` - standardized API error responses
 - `coverage` - for code coverage reports and running unit tests
-- `mypy` + `djangorestframework-stubs` - for better typing experience
-- `psycopg2` - needed to use Postgres (in Docker container)
+- `mypy`, `djangorestframework-stubs` - for better typing experience
+- `psycopg3` - needed to use Postgres (in Docker container)
 - `channels_redis`, `redis` - connection to Redis database service
 - `whitenoise` - collecting and serving static files (if not using AWS S3)
 - `boto3`, `django-storages` - storing static and media files on AWS S3
@@ -97,7 +98,7 @@ python manage.py migrate
 Create superuser
 
 ```shell script
-python manage.py createsuper user
+python manage.py createsuperuser
 ```
 
 ### Frontend
@@ -230,7 +231,7 @@ docker compose down
 To run commands in active container:
 
 ```shell script
-docker exec -it CONTAINER_NAME bash
+docker compose exec SERVICE_NAME COMMAND
 ```
 
 Rebuilding individual containers instead of all of them
