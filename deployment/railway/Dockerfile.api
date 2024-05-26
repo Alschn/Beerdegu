@@ -40,7 +40,7 @@ COPY --from=compile-image /app/backend/.venv /app/backend/.venv
 COPY backend /app/backend/
 
 RUN \
-    apk add bash postgresql-libs && \
+    apk add bash postgresql-libs gettext && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /app

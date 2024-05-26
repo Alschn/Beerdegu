@@ -35,7 +35,7 @@ ENV PATH="/.venv/bin:$PATH"
 RUN  \
     apk update && \
     apk upgrade && \
-    apk add bash postgresql-libs && \
+    apk add bash postgresql-libs gettext && \
     rm -rf /var/cache/apk/*
 
 COPY . /app/backend
