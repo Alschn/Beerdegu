@@ -68,7 +68,9 @@ INSTALLED_APPS = [
     # social auth
     'allauth.socialaccount.providers.google',
     # open api schema
+    'drf_spectacular_websocket',
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     # standardized errors
     'drf_standardized_errors',
     # apps
@@ -332,6 +334,11 @@ SPECTACULAR_SETTINGS = {
         'ErrorCode429Enum': 'drf_standardized_errors.openapi_serializers.ErrorCode429Enum.choices',
         'ErrorCode500Enum': 'drf_standardized_errors.openapi_serializers.ErrorCode500Enum.choices',
     },
+
+    'SWAGGER_UI_SETTINGS': {
+        # https://github.com/Friskes/drf-spectacular-websocket?tab=readme-ov-file#configure-settings
+        'connectSocket': False,
+    }
 }
 
 # Static files (CSS, JavaScript, Images)
