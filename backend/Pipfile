@@ -4,11 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==5.0.4"
-djangorestframework = "==3.15.1"
-django-cors-headers = "==4.3.1"
-django-stubs-ext = "==4.2.7"
-djangorestframework-stubs = "==3.14.5"
+django = "==5.1.1"
+djangorestframework = "==3.15.2"
+django-cors-headers = "==4.4.0"
+django-stubs-ext = "==5.0.4"
+djangorestframework-stubs = "==3.15.0"
 django-extensions = "==3.2.3"
 drf-extra-fields = "==3.7.0"
 django-filter = "==24.2"
@@ -31,11 +31,11 @@ daphne = "==4.1.2"
 gunicorn = "==22.0.0"
 openpyxl = "==3.1.2"
 drf-spectacular = { extras = ["sidecar"], version = "==0.27.2" }
-django-storages = "==1.14.2"
+django-storages = {version = "==1.14.4", extras = ["s3"]}
 boto3 = "==1.34.93"
 django-countries = "==7.6.1"
 drf-standardized-errors = "==0.13.0"
-drf-spectacular-websocket = "==1.2.7"
+drf-spectacular-websocket = "==1.2.8"
 
 [dev-packages]
 coverage = "==7.5.0"
