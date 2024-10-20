@@ -1,4 +1,0 @@
-[lint]
-ignore = ["F401", "F403"]
-
-[format]

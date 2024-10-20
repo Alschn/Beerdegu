@@ -1,0 +1,72 @@
+[tool.poetry]
+name = "beerdegu"
+version = "1.0.0"
+description = "Beerdegu Backend"
+authors = []
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.2"
+djangorestframework = "^3.15.2"
+django-cors-headers = "^4.5.0"
+django-extensions = "^3.2.3"
+drf-extra-fields = "^3.7.0"
+django-filter = "^24.3"
+django-ordered-model = "^3.7.4"
+django-sesame = "^3.2.2"
+pillow = "^11.0.0"
+dj-rest-auth = "4.0.1"
+django-allauth = "0.54.0"
+djangorestframework-simplejwt = "^5.3.1"
+django-import-export = "^4.1.1"
+channels = "^4.1.0"
+channels-redis = "^4.2.0"
+redis = "^5.1.1"
+django-q2 = "^1.7.3"
+python-dotenv = "^1.0.1"
+psycopg = {extras = ["binary"], version = "^3.2.3"}
+openpyxl = "^3.1.5"
+drf-spectacular = {extras = ["sidecar"], version = "^0.27.2"}
+drf-spectacular-websocket = "^1.2.9"
+drf-standardized-errors = "^0.14.1"
+django-storages = "^1.14.4"
+boto3 = "^1.35.44"
+django-countries = "^7.6.1"
+dj-database-url = "^2.2.0"
+whitenoise = "^6.7.0"
+daphne = "^4.1.2"
+gunicorn = "^23.0.0"
+sentry-sdk = "^2.17.0"
+
+
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.6.3"
+freezegun = "^1.5.1"
+factory-boy = "^3.3.1"
+ruff = "^0.7.0"
+ipython = "^8.28.0"
+django-stubs = {extras = ["compatible-mypy"], version = "^5.1.0"}
+djangorestframework-stubs = {extras = ["compatible-mypy"], version = "^3.15.1"}
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+omit = [
+    "*/migrations/*",
+    "*/tests/*"
+]
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "core.settings.base"
+
+[tool.ruff.lint]
+ignore = ["F401", "F403"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
