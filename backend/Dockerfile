@@ -1,30 +1,30 @@
-ARG PYTHON_VERSION=3.10.5-alpine
+ARG PYTHON_VERSION=3.12.7-alpine
 
-# BASE-IMAGE - get base python image with pipenv
+# BASE-IMAGE - get base python image with poetry
 FROM python:${PYTHON_VERSION} as base-image
 
 RUN \
     apk update && \
     apk upgrade && \
-    pip install --upgrade pip && \
-    pip install pipenv
+    python3 -m pip install --upgrade pip && \
+    pip install poetry==1.8.3
 
 # BUILD-IMAGE - install backend dependencies, setup virtual environment
 FROM base-image as build-image
 
 ENV PYTHONUNBUFFERED=1
-ENV PIPENV_VENV_IN_PROJECT=1
 
-COPY Pipfile ./
+COPY pyproject.toml poetry.lock ./
 
 RUN  \
     apk update && \
     apk upgrade && \
-    apk add --virtual .build-deps gcc musl-dev postgresql-libs postgresql-dev libressl-dev libffi-dev cargo && \
-    pipenv install --dev --python 3.10 --skip-lock && \
+    apk add --virtual .build-deps gcc musl-dev postgresql-dev openssl-dev libffi-dev cargo && \
+    mkdir .venv && \
+    poetry install --verbose && \
     apk --purge del .build-deps
 
-# RUNTIME - copy environment, collect staticfiles, install packages required at runtime
+# RUNTIME - copy environment, install packages required at runtime
 FROM base-image as runtime
 
 ENV PYTHONUNBUFFERED=1
