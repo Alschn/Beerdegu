@@ -32,20 +32,21 @@ This setup has been tested with Python 3.10, 3.11 and Node 16, 18.
 - `django-extensions` - django utilities
 - `django-cors-headers` - handling cross-origin requests
 - `django-filter` - filter backend for drf views
-- `django-q` - async task queue
+- `django-q` - async tasks queue and scheduler
 - `django-import-export` - data import/export in admin panel
 - `django-allauth`, `dj-rest-auth`, `djangorestframework-simplejwt` - authentication (jwt, google)
-- `django-sesame` - websockets token authentication
+- `django-sesame` - token authentication for websockets
 - `openpyxl` - excel reports generation
-- `drf-spectacular` - OpenAPI schema generation
+- `drf-spectacular` - OpenAPI schema generation and interface
 - `drf-standardized-errors` - standardized API error responses
-- `coverage` - for code coverage reports and running unit tests
-- `mypy`, `djangorestframework-stubs` - for better typing experience
-- `psycopg3` - needed to use Postgres (in Docker container)
+- `psycopg3` - needed to use Postgres
 - `channels_redis`, `redis` - connection to Redis database service
 - `whitenoise` - collecting and serving static files (if not using AWS S3)
 - `boto3`, `django-storages` - storing static and media files on AWS S3
 - `daphne` - production asgi server
+- `coverage` - for code coverage reports and running unit tests
+- `mypy`, `django-stus`, `djangorestframework-stubs` - for better typing experience
+- `ruff` - linting and formatting
 
 ### Frontend (deprecated)
 
@@ -76,9 +77,7 @@ cd backend
 
 python -m pip install --upgrade pip
 
-pipenv install
-
-pipenv shell
+poetry install
 ```
 
 Run django application from cmd (or add new Django configuration if using Pycharm)
@@ -328,6 +327,12 @@ Set `REDIS_URL` by coping REDIS_URL from redis service variables.
 Set `EMAIL_HOST`, `EMAIL_PASSWORD`, `EMAIL_PORT`, `EMAIL_USER` variables.
 
 Variables can also be referenced between services by using `${SERVICE_NAME.ENV_VAR_NAME}` syntax.
+
+### Automated database backups (cron service)
+
+To enable automatic database backups follow this tutorial:
+https://blog.railway.app/p/automated-postgresql-backups
+
 
 ---
 
