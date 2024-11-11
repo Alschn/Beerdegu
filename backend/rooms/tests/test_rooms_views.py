@@ -38,10 +38,10 @@ class RoomsAPIViewsTests(TestCase):
             host=cls.user3
         )
         beers = Beer.objects.bulk_create([
-            Beer(id=50, name='Atak Chmielu', percentage=6.1, volume_ml=500),
-            Beer(id=51, name='Maniac', percentage=8, volume_ml=500),
-            Beer(id=52, name='Triple NEIPA', percentage=9.2, volume_ml=500),
-            Beer(id=53, name='Diablo Verde', percentage=7.6, volume_ml=500),
+            Beer(id=50, name='Atak Chmielu', percentage=6.1),
+            Beer(id=51, name='Maniac', percentage=8),
+            Beer(id=52, name='Triple NEIPA', percentage=9.2),
+            Beer(id=53, name='Diablo Verde', percentage=7.6),
         ])
         cls.room_with_pass.beers.add(*beers)
 

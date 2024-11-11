@@ -33,23 +33,23 @@ class BeersAPIViewsTest(APITestCase):
         Beer.objects.bulk_create([
             Beer(
                 name='Jungle IPA', brewery=cls.brewery_inne_beczki,
-                percentage=6.0, volume_ml=500, style=cls.style_ipa
+                percentage=6.0, style=cls.style_ipa
             ),
             Beer(
                 name='Zissou APA', brewery=cls.brewery_inne_beczki,
-                percentage=5, volume_ml=500
+                percentage=5,
             ),
             Beer(
                 name='Hoppy Crew: Who Snaps First', brewery=cls.brewery_pinta,
-                percentage=8, volume_ml=500
+                percentage=8,
             )
         ])
         cls.beer_to_update = Beer.objects.create(
-            name='PanIIPAni', percentage=6.7, volume_ml=500,
+            name='PanIIPAni', percentage=6.7,
             style=cls.style_ipa, brewery=cls.brewery_pinta
         )
         cls.beer_to_delete = Beer.objects.create(
-            name='A Ja Pale Ale', percentage=5, volume_ml=500,
+            name='A Ja Pale Ale', percentage=5,
             style=cls.style_apa, brewery=cls.brewery_pinta
         )
 
@@ -69,7 +69,6 @@ class BeersAPIViewsTest(APITestCase):
         payload = {
             'name': "a'la Grodziskie",
             'percentage': 5,
-            'volume_ml': 500,
         }
         self._require_login_and_auth()
         response = self.client.post(self.list_url, payload)
@@ -83,7 +82,6 @@ class BeersAPIViewsTest(APITestCase):
     def test_create_beer_missing_data(self):
         payload = {
             'name': "Random name",
-            'volume_ml': 750,
         }
         self._require_login_and_auth()
         response = self.client.post(self.list_url, payload)
@@ -97,7 +95,6 @@ class BeersAPIViewsTest(APITestCase):
         payload = {
             'name': "Negative",
             'percentage': -1,
-            'volume_ml': 500,
         }
         self._require_login_and_auth()
         response = self.client.post(self.list_url, payload)
@@ -110,7 +107,7 @@ class BeersAPIViewsTest(APITestCase):
     # todo: more create beer tests (including base64 image upload)
 
     def test_retrieve_beer(self):
-        beer = Beer.objects.create(name='Kwas Theta', percentage=10.2, volume_ml=500)
+        beer = Beer.objects.create(name='Kwas Theta', percentage=10.2)
         response = self.client.get(
             reverse_lazy('beers-detail', args=(beer.id,))
         )
@@ -216,18 +213,6 @@ class BeersAPIViewsTest(APITestCase):
         pass
 
     def test_list_beers_filter_percentage_invalid_range(self):
-        pass
-
-    def test_list_beers_filter_volume_ml_gte(self):
-        pass
-
-    def test_list_beers_filter_volume_ml_lte(self):
-        pass
-
-    def test_list_beers_filter_volume_ml_range(self):
-        pass
-
-    def test_list_beers_filter_volume_ml_invalid_range(self):
         pass
 
     def test_list_beers_filter_hop_rate_gte(self):

@@ -35,7 +35,7 @@ class RoomsModelsTests(TestCase):
         self.assertEqual(str(self.room1), "'TestRoom' 1/4 - waiting")
 
     def test_rating_to_string(self):
-        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1")
         rating = Rating.objects.create(added_by=self.user, beer=beer, room=self.room1, note=10)
         self.assertEqual(
             str(rating),
@@ -43,7 +43,7 @@ class RoomsModelsTests(TestCase):
         )
 
     def test_rating_without_note_to_string(self):
-        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1")
         rating = Rating.objects.create(added_by=self.user, beer=beer, room=self.room1)
         self.assertEqual(
             str(rating),
@@ -51,7 +51,7 @@ class RoomsModelsTests(TestCase):
         )
 
     def test_rating_without_room_to_string(self):
-        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1")
         rating = Rating.objects.create(added_by=self.user, beer=beer, note=9)
         self.assertEqual(
             str(rating),
@@ -60,7 +60,7 @@ class RoomsModelsTests(TestCase):
 
     def test_beer_in_room_to_string(self):
         user = User.objects.create_user(username="test2", password="test2")
-        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1", volume_ml=500)
+        beer = Beer.objects.create(name="Atak Chmielu", percentage="6.1")
         room = Room.objects.create(name="testroom", slots=4, host=user, state=Room.State.STARTING)
         beer_in_room = BeerInRoom.objects.create(beer=beer, room=room)
         self.assertEqual(str(beer_in_room), f'{room.name} - #{beer_in_room.order} - {beer}')

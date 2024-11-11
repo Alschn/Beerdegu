@@ -5,7 +5,7 @@ from .models import Beer, BeerStyle, Brewery, Hop
 
 
 class BeerAdmin(ImportExportActionModelAdmin):
-    list_display = ('id', 'name', 'brewery', 'style', 'percentage', 'volume_ml')
+    list_display = ('id', 'name', 'brewery', 'style', 'percentage')
     list_select_related = ('brewery', 'style')
     search_fields = ('name', 'brewery__name', 'style__name')
 
