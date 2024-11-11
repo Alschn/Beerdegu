@@ -83,7 +83,6 @@ class BeerFactory(factory.django.DjangoModelFactory):
     brewery = factory.SubFactory(BreweryFactory)
     style = factory.SubFactory(BeerStyleFactory)
     percentage = factory.Faker('random_int', min=1, max=12)
-    volume_ml = 500
     hop_rate = None
     extract = None
     IBU = None

@@ -23,7 +23,6 @@ class BeerFilterSet(filters.FilterSet):
             'style': ['in'],
             'style__name': ['icontains'],
             'percentage': ['gte', 'lte', 'exact', 'range'],
-            'volume_ml': ['gte', 'lte', 'exact', 'range'],
             'hop_rate': ['gte', 'lte', 'exact', 'range'],
             'extract': ['gte', 'lte', 'exact', 'range'],
             'IBU': ['gte', 'lte', 'exact', 'range'],

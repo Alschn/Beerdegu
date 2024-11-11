@@ -33,9 +33,6 @@ class Beer(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))]
     )
-    volume_ml = models.PositiveIntegerField(
-        help_text="Volume of the beer in milliliters [mL]"
-    )
     hop_rate = models.PositiveIntegerField(
         null=True, blank=True,
         help_text="Grams of hops per liter [g/L]"
@@ -66,7 +63,7 @@ class Beer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        to_str = f"{self.name} {self.percentage}% {self.volume_ml}ml"
+        to_str = f"{self.name} {self.percentage}%"
         if self.brewery:
             to_str += f", {self.brewery}"
         return to_str
