@@ -54,7 +54,7 @@ class BeerPurchaseAdmin(admin.ModelAdmin):
         form_field = super().formfield_for_foreignkey(db_field, request, **kwargs)
 
         if db_field.name == 'beer':
-            form_field.queryset = form_field.queryset.order_by('name')
+            form_field.queryset = form_field.queryset.select_related('brewery').order_by('name')
 
         elif db_field.name == 'sold_to':
             form_field.queryset = form_field.queryset.order_by('username')
