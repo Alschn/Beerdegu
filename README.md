@@ -23,28 +23,30 @@ with an option to deploy to Railway.app, Fly.io or Heroku.com.
 
 ### Tools, libraries, frameworks:
 
-This setup has been tested with Python 3.10 and Node 16.
+This setup has been tested with Python 3.10, 3.11 and Node 16, 18.
 
 ### Backend
 
-- Django 4.2 + Django Rest Framework : `django` `djangorestframework`
-- Django Channels 4 : `channels`- handling websockets backend
+- Django 5.x + Django Rest Framework 3.15.x: `django` `djangorestframework`
+- Django Channels 4.x : `channels`- websockets backend
 - `django-extensions` - django utilities
 - `django-cors-headers` - handling cross-origin requests
 - `django-filter` - filter backend for drf views
-- `django-q` - async task queue
+- `django-q` - async tasks queue and scheduler
 - `django-import-export` - data import/export in admin panel
 - `django-allauth`, `dj-rest-auth`, `djangorestframework-simplejwt` - authentication (jwt, google)
-- `django-sesame` - websockets token authentication
+- `django-sesame` - token authentication for websockets
 - `openpyxl` - excel reports generation
-- `drf-spectacular` - OpenAPI schema generation
-- `coverage` - for code coverage reports and running unit tests
-- `mypy` + `djangorestframework-stubs` - for better typing experience
-- `psycopg2` - needed to use Postgres (in Docker container)
+- `drf-spectacular` - OpenAPI schema generation and interface
+- `drf-standardized-errors` - standardized API error responses
+- `psycopg3` - needed to use Postgres
 - `channels_redis`, `redis` - connection to Redis database service
 - `whitenoise` - collecting and serving static files (if not using AWS S3)
 - `boto3`, `django-storages` - storing static and media files on AWS S3
 - `daphne` - production asgi server
+- `coverage` - for code coverage reports and running unit tests
+- `mypy`, `django-stus`, `djangorestframework-stubs` - for better typing experience
+- `ruff` - linting and formatting
 
 ### Frontend (deprecated)
 
@@ -75,9 +77,7 @@ cd backend
 
 python -m pip install --upgrade pip
 
-pipenv install
-
-pipenv shell
+poetry install
 ```
 
 Run django application from cmd (or add new Django configuration if using Pycharm)
@@ -97,7 +97,7 @@ python manage.py migrate
 Create superuser
 
 ```shell script
-python manage.py createsuper user
+python manage.py createsuperuser
 ```
 
 ### Frontend
@@ -210,7 +210,7 @@ While in **root directory**, build docker images and run them with docker-compos
 Rebuilding image is crucial after installing new packages via pip or npm.
 
 ```shell script
-docker-compose up --build
+docker compose up --build
 ```
 
 Application should be up and running: backend `127.0.0.1:8000`, frontend `127.0.0.1:3000`.
@@ -218,31 +218,31 @@ Application should be up and running: backend `127.0.0.1:8000`, frontend `127.0.
 If images had been installed and **no additional packages have been installed**, just run to start containers:
 
 ```shell script
-docker-compose up
+docker compose up
 ```
 
 Bringing down containers with **optional** -v flag removes **all** attached volumes and invalidates caches.
 
 ```shell script
-docker-compose down
+docker compose down
 ```
 
 To run commands in active container:
 
 ```shell script
-docker exec -it CONTAINER_ID bash
+docker compose exec SERVICE_NAME COMMAND
 ```
 
 Rebuilding individual containers instead of all of them
 
 ```shell
-docker-compose build CONTAINER_NAME
+docker compose build SERVICE_NAME
 ```
 
 If there are problems caused by caching, then you can use optional flag to build container without Docker's cache
 
 ```shell
-docker-compose build CONTAINER_NAME --no-cache
+docker compose build SERVICE_NAME --no-cache
 ```
 
 ## Accessing backend from mobile app (BeerdeguMobile):
@@ -256,7 +256,7 @@ ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "YOUR_IP_ADDRESS"]
 
 # Production Deployment
 
-## Railway.app (preferred)
+## Railway.app
 
 Go to https://railway.app/dashboard and create a new project with `Deploy from GitHub repo`.
 
@@ -272,7 +272,7 @@ Set `RAILWAY_DOCKERFILE_PATH` variable to `Dockerfile.api` (or `Dockerfile.fly` 
 
 ```dotenv
 RAILWAY_DOCKERFILE_PATH=Dockerfile.api
-PRODUCTION_HOST=<appname>.up.railway.app
+ALLOWED_HOSTS=<railway_app_name>.up.railway.app,<other_domain>
 DJANGO_SETTINGS_MODULE=core.settings.prod
 FRONTEND_SITE_NAME=Beerdegu
 PORT=8000
@@ -298,7 +298,7 @@ Set `Start command` in Deploy settings section to `daphne -b 0.0.0.0 -p 8000 cor
 
 Set `RAILWAY_DOCKERFILE_PATH` to `Dockerfile.api`.
 
-Add `PRODUCTION_HOST`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME` variables.
+Add `ALLOWED_HOSTS`, `SECRET_KEY`, `DJANGO_SETTINGS_MODULE`, `FRONTEND_SITE_NAME` variables.
 
 Set `Start command` in Deploy settings section to `python manage.py qcluster`.
 
@@ -328,6 +328,12 @@ Set `EMAIL_HOST`, `EMAIL_PASSWORD`, `EMAIL_PORT`, `EMAIL_USER` variables.
 
 Variables can also be referenced between services by using `${SERVICE_NAME.ENV_VAR_NAME}` syntax.
 
+### Automated database backups (cron service)
+
+To enable automatic database backups follow this tutorial:
+https://blog.railway.app/p/automated-postgresql-backups
+
+
 ---
 
 ## Fly.io (alternative)
@@ -338,7 +344,7 @@ Launch a new app
 fly launch
 ```
 
-Set secrets: `PRODUCTION_HOST`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
+Set secrets: `ALLOWED_HOSTS`, `SECRET_KEY`, `REDIS_URL`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CLIENT_REDIRECT_URI`, `FRONTEND_SITE_NAME`
 
 ```shell
@@ -387,7 +393,7 @@ fly ssh console
    ```
    Or in the Heroku dashboard, go to Settings > Config Vars and add the variables there.  
    Variables to set: `DJANGO_SETTINGS_MODULE=core.settings.prod` `DJANGO_SUPERUSER_EMAIL`,
-   `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `PRODUCTION_HOST=<app name>.herokuapp.com`,
+   `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `ALLOWED_HOSTS=<app_name>.herokuapp.com`,
    `SECRET_KEY`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`
 5) Run: `heroku stack:set container` so Heroku knows this is a containerized application
 6) Run: `heroku addons:create heroku-postgresql:hobby-dev` which creates the postgres add-on for Heroku

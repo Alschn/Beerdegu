@@ -1,13 +1,48 @@
 from django.contrib import admin
 from import_export.admin import ImportExportActionModelAdmin
 
+from purchases.models import BeerPurchase
 from .models import Beer, BeerStyle, Brewery, Hop
 
 
+class BeerPurchaseInline(admin.StackedInline):
+    model = BeerPurchase
+    extra = 0
+    fk_name = 'beer'
+    fields = (
+        'sold_to',
+        'packaging',
+        'price',
+        'volume_ml',
+        'purchased_at',
+        'image'
+    )
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return False
+
+
 class BeerAdmin(ImportExportActionModelAdmin):
-    list_display = ('id', 'name', 'brewery', 'style', 'percentage', 'volume_ml')
+    list_display = ('id', 'name', 'brewery', 'style', 'percentage')
     list_select_related = ('brewery', 'style')
     search_fields = ('name', 'brewery__name', 'style__name')
+    inlines = [BeerPurchaseInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+        if db_field.name in ('brewery', 'style'):
+            form_field.queryset = form_field.queryset.order_by('name')
+
+        return form_field
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_manytomany(db_field, request, **kwargs)
+
+        if db_field.name == 'hops':
+            form_field.queryset = form_field.queryset.order_by('name')
+
+        return form_field
 
 
 class BreweryAdmin(ImportExportActionModelAdmin):

@@ -48,4 +48,4 @@ class Brewery(models.Model):
         verbose_name_plural = _('Breweries')
 
     def __str__(self) -> str:
-        return f"Browar {self.name}"
+        return self.name

@@ -23,7 +23,24 @@ class BrewerySerializer(serializers.ModelSerializer):
         )
 
 
-class EmbeddedBrewerySerializer(serializers.ModelSerializer):
+class BrewerySimplifiedSerializer(serializers.ModelSerializer):
+    country = CountryField()
+
     class Meta:
         model = Brewery
-        fields = ('id', 'name')
+        fields = (
+            'id',
+            'name',
+            'city',
+            'country',
+            'image'
+        )
+
+
+class BreweryEmbeddedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brewery
+        fields = (
+            'id',
+            'name'
+        )

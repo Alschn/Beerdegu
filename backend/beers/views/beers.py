@@ -9,7 +9,7 @@ from beers.models import Beer
 from beers.serializers import (
     BeerSerializer,
     BeerCreateSerializer,
-    DetailedBeerSerializer,
+    BeerDetailedSerializer,
 )
 from core.shared.pagination import page_number_pagination_factory
 
@@ -45,7 +45,7 @@ class BeersViewSet(
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
-            return DetailedBeerSerializer
+            return BeerDetailedSerializer
 
         if self.action == 'create':
             return BeerCreateSerializer

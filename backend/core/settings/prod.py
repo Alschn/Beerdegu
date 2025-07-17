@@ -9,10 +9,8 @@ ROOT_DIR = BASE_DIR.parent
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-PRODUCTION_HOST = os.environ['PRODUCTION_HOST']
-
 ALLOWED_HOSTS = [
-    PRODUCTION_HOST,
+    h for h in os.environ['ALLOWED_HOSTS'].split(',') if h
 ]
 
 DEBUG = False
@@ -198,5 +196,21 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CSRF_TRUSTED_ORIGINS = [
-    f'https://{PRODUCTION_HOST}'
+    f'https://{host}' for host in ALLOWED_HOSTS
 ]
+
+# Sentry config
+# https://docs.sentry.io/platforms/python/guides/django/
+
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=float(os.getenv('SENTRY_TRACES_SAMPLE_RATE', 0)),
+        profiles_sample_rate=float(os.getenv('SENTRY_PROFILES_SAMPLE_RATE', 0)),
+        integrations=[DjangoIntegration()]
+    )

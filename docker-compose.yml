@@ -1,6 +1,6 @@
 services:
   backend:
-    container_name: backend
+    container_name: beerdegu_backend
     build: ./backend
     stdin_open: true
     tty: true
@@ -14,7 +14,7 @@ services:
       - "8000:8000"
 
   frontend:
-    container_name: frontend
+    container_name: beerdegu_frontend
     build: ./frontend
     volumes:
       - ./frontend:/app/frontend
@@ -25,7 +25,7 @@ services:
       - "3000:3000"
 
   postgres_db:
-    container_name: postgres_db
+    container_name: beerdegu_postgres_db
     image: postgres:14.0-alpine
     env_file:
       - env/postgres.env
@@ -35,7 +35,7 @@ services:
       - "5432:5432"
 
   redis_db:
-    container_name: redis_db
+    container_name: beerdegu_redis_db
     image: redis:alpine
     env_file:
       - env/redis.env
@@ -45,7 +45,7 @@ services:
       - "6379:6379"
 
   django_q:
-    container_name: django_q
+    container_name: beerdegu_django_q
     build: ./backend
     env_file:
       - env/backend.env

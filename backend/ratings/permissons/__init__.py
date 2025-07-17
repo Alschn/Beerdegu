@@ -1,1 +1,1 @@
-from .rating import CanDeleteRatingPermission
+from .rating import CanEditRatingPermission

@@ -1,30 +1,30 @@
-ARG PYTHON_VERSION=3.10.4-alpine
+ARG PYTHON_VERSION=3.12.7-alpine
 ARG NODE_VERSION=16.16.0-alpine
 
-# BASE-IMAGE - get base python image with pipenv
+# BASE-IMAGE - get base python image with poetry
 FROM python:${PYTHON_VERSION} as base-image
 
 RUN \
     apk update && \
     apk upgrade && \
-    pip install --upgrade pip && \
-    pip install pipenv
+    python3 -m pip install --upgrade pip && \
+    pip install poetry
 
 # COMPILE-IMAGE - install backend dependencies, setup virtual environment
 FROM base-image as compile-image
 
 ENV PYTHONUNBUFFERED 1
-ENV PIPENV_VENV_IN_PROJECT 1
 
 WORKDIR /app/backend
 
-COPY backend/Pipfile backend/Pipfile.lock /app/backend/
+COPY backend/pyproject.toml backend/poetry.lock /app/backend/
 
 RUN \
     apk update && \
     apk upgrade && \
     apk add --virtual .build-deps gcc musl-dev postgresql-dev && \
-    pipenv install --python 3.10 --skip-lock && \
+    mkdir .venv && \
+    poetry install --verbose && \
     apk --purge del .build-deps
 
 # NODE-IMAGE - install frontend dependencies, build frontend files

@@ -11,9 +11,9 @@ from rest_framework import serializers
 from rest_framework.relations import StringRelatedField
 
 from beers.models import Beer, Hop
-from beers.serializers.beer_style import EmbeddedBeerStyleSerializer
-from beers.serializers.brewery import EmbeddedBrewerySerializer
-from beers.serializers.hop import EmbeddedHopsSerializer
+from beers.serializers.beer_style import BeerStyleEmbeddedSerializer
+from beers.serializers.brewery import BreweryEmbeddedSerializer
+from beers.serializers.hop import HopEmbeddedSerializer
 from rooms.models import BeerInRoom
 
 
@@ -21,34 +21,37 @@ class BeerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Beer
         fields = (
-            'id', 'name', 'brewery', 'style',
-            'percentage', 'volume_ml', 'hop_rate',
-            'extract', 'IBU', 'image', 'description',
-            'hops'
+            'id',
+            'name',
+            'description',
+            'brewery',
+            'style',
+            'hops',
+            'image',
+            'percentage',
+            'hop_rate',
+            'extract',
+            'IBU',
         )
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Beer) -> dict:
         representation = super().to_representation(instance)
         representation['image'] = build_file_url(representation['image'], self.context.get('request'))
         return representation
 
 
-class SimplifiedBeerSerializer(serializers.ModelSerializer):
+class BeerSimplifiedSerializer(serializers.ModelSerializer):
     brewery = StringRelatedField(read_only=True)
     style = StringRelatedField(read_only=True)
 
     class Meta:
         model = Beer
-        fields = ('id', 'image', 'name', 'brewery', 'style')
-
-
-class BeerRepresentationalSerializer(SimplifiedBeerSerializer):
-    class Meta:
-        model = Beer
         fields = (
-            'id', 'name', 'brewery', 'style', 'percentage',
-            'hop_rate', 'extract', 'IBU',
-            'image', 'description'
+            'id',
+            'name',
+            'brewery',
+            'style',
+            'image',
         )
 
     def to_representation(self, instance):
@@ -57,24 +60,39 @@ class BeerRepresentationalSerializer(SimplifiedBeerSerializer):
         return representation
 
 
-class BeerWithResultsSerializer(serializers.ModelSerializer):
-    beer = SimplifiedBeerSerializer()
-    average_rating = serializers.DecimalField(
-        max_digits=4, decimal_places=2,
-        min_value=Decimal(0), max_value=Decimal(10),
-    )
-
+class BeerRepresentationalSerializer(BeerSimplifiedSerializer):
     class Meta:
-        model = BeerInRoom
-        fields = ('order', 'beer', 'average_rating')
+        model = Beer
+        fields = (
+            'id',
+            'name',
+            'brewery',
+            'style',
+            'percentage',
+            'hop_rate',
+            'extract',
+            'IBU',
+            'image',
+            'description'
+        )
 
 
-class DetailedBeerSerializer(BeerSerializer):
-    """BeerSerializer with serialized relationships fields.
-    Used when handling GET method (list/retrieve action)."""
-    hops = EmbeddedHopsSerializer(many=True, read_only=True)
-    style = EmbeddedBeerStyleSerializer(read_only=True)
-    brewery = EmbeddedBrewerySerializer(read_only=True)
+class BeerDetailedSerializer(BeerSerializer):
+    """
+    BeerSerializer with serialized relationships fields.
+    Used when handling GET method (list/retrieve action).
+    """
+    hops = HopEmbeddedSerializer(many=True, read_only=True)
+    style = BeerStyleEmbeddedSerializer(read_only=True)
+    brewery = BreweryEmbeddedSerializer(read_only=True)
+
+
+class BeerEmbeddedSerializer(BeerSerializer):
+    """
+    BeerSerializer with serialized brewery and style related fields.
+    """
+    style = BeerStyleEmbeddedSerializer(read_only=True)
+    brewery = BreweryEmbeddedSerializer(read_only=True)
 
 
 class BeerCreateSerializer(serializers.ModelSerializer):
@@ -88,7 +106,6 @@ class BeerCreateSerializer(serializers.ModelSerializer):
             'brewery',
             'style',
             'percentage',
-            'volume_ml',
             'hop_rate',
             'extract',
             'IBU',
@@ -98,16 +115,28 @@ class BeerCreateSerializer(serializers.ModelSerializer):
         )
 
     @transaction.atomic
-    def create(self, validated_data) -> Beer:
+    def create(self, validated_data: dict) -> Beer:
         hops: list[Hop] = validated_data.pop('hops')
         instance = super().create(validated_data)
         instance.hops.set(hops)
         return instance
 
 
-class BeerInRatingSerializer(SimplifiedBeerSerializer):
-    # todo: separate serializer for beer embedded in rating
-    pass
+class BeerWithResultsSerializer(serializers.ModelSerializer):
+    beer = BeerSimplifiedSerializer()
+    average_rating = serializers.DecimalField(
+        max_digits=4, decimal_places=2,
+        min_value=Decimal(0), max_value=Decimal(10),
+    )
+
+    class Meta:
+        model = BeerInRoom
+        fields = (
+            'id',
+            'order',
+            'beer',
+            'average_rating'
+        )
 
 
 def build_file_url(url: str | None, request: WSGIRequest) -> str | None:

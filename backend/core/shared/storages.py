@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from storages.backends.s3boto3 import S3ManifestStaticStorage
+from storages.backends.s3boto3 import S3ManifestStaticStorage, S3StaticStorage
 
 if not settings.USE_AWS_S3:
     raise ImproperlyConfigured('You need to set `USE_AWS_S3 = True` in settings to use storages from this file.')
@@ -11,7 +11,7 @@ class StaticStorage(S3ManifestStaticStorage):
     default_acl = 'public-read'
 
 
-class PublicMediaStorage(S3ManifestStaticStorage):
+class PublicMediaStorage(S3StaticStorage):
     location = 'uploads'
     default_acl = 'public-read'
     file_overwrite = False

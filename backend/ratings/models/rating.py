@@ -16,6 +16,13 @@ class Rating(models.Model):
         related_name='ratings',
         on_delete=models.CASCADE,
     )
+    beer_purchase = models.ForeignKey(
+        'purchases.BeerPurchase',
+        related_name='ratings',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     room = models.ForeignKey(
         'rooms.Room',
         related_name='ratings',

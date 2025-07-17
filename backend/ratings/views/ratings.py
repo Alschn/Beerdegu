@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from core.shared.pagination import page_number_pagination_factory
 from ratings.filters import RatingsFilterSet
 from ratings.models import Rating
-from ratings.permissons import CanDeleteRatingPermission
+from ratings.permissons import CanEditRatingPermission
 from ratings.serializers import (
     RatingListSerializer,
     RatingDetailSerializer,
@@ -37,7 +37,7 @@ class RatingsViewSet(
 
     DELETE  /api/ratings/<int:id>/            - delete rating
     """
-    permission_classes = [IsAuthenticated, CanDeleteRatingPermission]
+    permission_classes = [IsAuthenticated, CanEditRatingPermission]
     pagination_class = RatingsPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RatingsFilterSet
@@ -53,22 +53,29 @@ class RatingsViewSet(
         if not self.request.user.is_authenticated:
             return Rating.objects.none()
 
+        queryset = Rating.objects.filter(
+            added_by=self.request.user
+        ).order_by('-created_at')
+
         if self.action == 'list':
-            return Rating.objects.filter(
-                added_by=self.request.user
-            ).select_related('added_by', 'beer').order_by('-created_at')
+            return queryset.select_related(
+                'added_by',
+                'beer', 'beer__brewery', 'beer__style',
+                'room', 'room__host',
+                'beer_purchase',
+            )
 
         if self.action == 'retrieve':
-            return Rating.objects.filter(
-                added_by=self.request.user
-            ).select_related(
-                'added_by', 'beer', 'room', 'room__host',
-                'beer__brewery', 'beer__style'
+            return queryset.select_related(
+                'added_by',
+                'beer', 'beer__brewery', 'beer__style',
+                'room', 'room__host',
+                'beer_purchase',
             ).prefetch_related(
                 'beer__hops'
-            ).order_by('-created_at')
+            )
 
-        return Rating.objects.filter(added_by=self.request.user).order_by('-created_at')
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'list':

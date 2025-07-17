@@ -4,6 +4,7 @@ from typing import Any
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
 from django.utils import timezone
+from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from rooms.async_db import (
     async_get_users_in_room, async_get_beers_in_room,
@@ -165,6 +166,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
     - invalid_command
     """
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_new_message(self, event: dict):
         """
         Receive message => Broadcast it to others and update client
@@ -183,6 +187,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_users(self, event: dict):
         """
         Receive get_users command => Broadcast list of users and update client
@@ -196,6 +203,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_beers(self, event: dict):
         beers = await async_get_beers_in_room(room_name=self.room_name)
         await self.send_json(
@@ -205,11 +215,17 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def load_beers(self, event: dict):
         """Alias for `get_beers` command handler."""
 
         await self.get_beers(event)
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_form_data(self, event: dict):
         beer_id = event.get('data')
         form_data = await async_get_user_form_data(
@@ -225,6 +241,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def user_active(self, event: dict):
         """
         Client reports that they are active by sending command 'user_active'
@@ -236,6 +255,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             user=user
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def user_form_save(self, event: dict):
         user = self.scope['user']
         received_data = event.get('data')
@@ -247,6 +269,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             data=received_data
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_room_state(self, event: dict):
         room = await async_get_current_room(room_name=self.room_name)
         await self.send_json(
@@ -256,6 +281,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def change_room_state(self, event: dict):
         state = event.get('data')
         updated_room = await async_change_room_state_to(state=state, room_name=self.room_name)
@@ -266,6 +294,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_final_ratings(self, event: dict):
         final = await async_get_final_beers_ratings(room_name=self.room_name)
         await self.send_json(
@@ -275,6 +306,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def get_user_ratings(self, event: dict):
         user = self.scope['user']
         final = await async_get_final_user_beer_ratings(room_name=self.room_name, user=user)
@@ -285,6 +319,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def user_join(self, event: dict):
         """Server action to notify others that new user joined"""
 
@@ -300,6 +337,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def user_leave(self, event: dict):
         user = self.scope['user']
         username = event.get('data')
@@ -313,6 +353,9 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    @extend_ws_schema(
+        type='send',
+    )
     async def user_disconnect(self, event: dict):
         user = self.scope['user']
         username = event.get('data')
@@ -328,4 +371,4 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
 
     async def invalid_command(self, *args, **kwargs):
         if settings.DEBUG:
-            print(f'Received an invalid command!\n')
+            print('Received an invalid command!\n')

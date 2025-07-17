@@ -52,7 +52,10 @@ class TokenObtainPairSerializer(BaseTokenObtainPairSerializer):
         # try to send verification email
         if request and not has_verified_email(user):
             send_email_confirmation(request=request, user=user)
-            raise serializers.ValidationError({'email': _('E-mail is not verified.')})
+            raise serializers.ValidationError(
+                {'email': _('E-mail is not verified.')},
+                code='email_not_verified'
+            )
 
     def validate(self, attrs: dict) -> dict:
         data = super().validate(attrs)
